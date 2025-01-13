@@ -1,0 +1,72 @@
+import Foundation
+import RxSwift
+
+// MARK: - TakePillUseCaseProtocol
+
+protocol TakePillUseCaseProtocol {
+    func execute(cycle: Cycle, settings: UserSettings, takenAt: Date) -> Observable<Cycle>
+}
+
+// MARK: - 약을 복용했을 때, 복용 시간과 설정값(UserSettings)을 기준으로 복용 상태(PillStatus)를 계산하고 cycle 업데이트
+
+final class TakePillUseCase: TakePillUseCaseProtocol {
+    private let cycleRepository: CycleRepositoryProtocol
+    private let timeProvider: TimeProvider
+    
+    init(
+        cycleRepository: CycleRepositoryProtocol,
+        timeProvider: TimeProvider
+    ) {
+        self.cycleRepository = cycleRepository
+        self.timeProvider = timeProvider
+    }
+    
+    func execute(cycle: Cycle, settings: UserSettings, takenAt: Date) -> Observable<Cycle> {
+        let now = takenAt
+        
+        guard let todayIndex = cycle.records.firstIndex(where: {
+            timeProvider.isDate($0.scheduledDateTime, inSameDayAs: now)
+        }) else {
+            return .just(cycle)
+        }
+        
+        var updatedCycle = cycle
+        let record = updatedCycle.records[todayIndex]
+        
+        guard !record.status.isTaken else {
+            return .just(cycle)
+        }
+        
+        let timeDiff = now.timeIntervalSince(record.scheduledDateTime) // 실제 - 예정 (음수면 빠름, 양수면 늦음)
+        let twoHours: TimeInterval = 2 * 60 * 60
+        
+        let isTooEarly = (-timeDiff) >= twoHours // 예정보다 2시간 이상 빠름
+        let isWithinWindow = abs(timeDiff) <= Double(settings.delayThresholdMinutes * 60)
+        
+        let newStatus: PillStatus = {
+            if isTooEarly {
+                return .todayTakenTooEarly
+            } else if isWithinWindow {
+                return .todayTaken
+            } else {
+                return .todayTakenDelayed
+            }
+        }()
+        
+        let updatedRecord = DayRecord(
+            id: record.id,
+            cycleDay: record.cycleDay,
+            status: newStatus,
+            scheduledDateTime: record.scheduledDateTime,
+            takenAt: takenAt,
+            memo: record.memo,
+            createdAt: record.createdAt,
+            updatedAt: now
+        )
+        
+        updatedCycle.records[todayIndex] = updatedRecord
+        
+        return cycleRepository.updateRecord(updatedRecord, in: cycle.id)
+            .map { updatedCycle }
+    }
+}
