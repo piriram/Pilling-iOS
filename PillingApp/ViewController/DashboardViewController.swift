@@ -5,6 +5,7 @@
 //  Created by 잠만보김쥬디 on 10/12/25.
 //
 import UIKit
+import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
@@ -526,186 +527,44 @@ final class DashboardViewController: UIViewController {
     }
     
     private func presentInfoFloatingView() {
-        let dimmedBackgroundView = UIView()
-        dimmedBackgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        dimmedBackgroundView.alpha = 0
-        
-        let floatingCardView = UIView()
-        floatingCardView.backgroundColor = .systemBackground
-        floatingCardView.layer.cornerRadius = 30
-        floatingCardView.layer.masksToBounds = true
-        
-        let titleLabel = UILabel()
-        titleLabel.text = "필링 가이드"
-        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
-        titleLabel.textColor = AppColor.text
-        
-        let subtitleLabel = UILabel()
-        subtitleLabel.text = "피임약 복용 상태를 잔디로 알려드려요!"
-        subtitleLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        subtitleLabel.textColor = AppColor.subtext
-        
-        let guideStackView = UIStackView()
-        guideStackView.axis = .vertical
-        guideStackView.spacing = 16
-        guideStackView.alignment = .leading
-        
-        let guideItem1 = makeGuideItem(
-            iconColor: AppColor.pillGreen800,
-            iconType: .solid,
-            text: "피임약 복용"
-        )
-        
-        let guideItem2 = makeGuideItem(
-            iconColor: AppColor.bg,
-            iconType: .doubleCapsule,
-            text: "피임약 2알 복용"
-        )
-        
-        let guideItem3 = makeGuideItem(
-            iconColor: AppColor.pillBrown,
-            iconType: .solid,
-            text: "미복용"
-        )
-        
-        let guideItem4 = makeGuideItem(
-            iconColor: AppColor.pillWhite,
-            iconType: .border,
-            text: "휴약"
-        )
-        
-        guideStackView.addArrangedSubview(guideItem1)
-        guideStackView.addArrangedSubview(guideItem2)
-        guideStackView.addArrangedSubview(guideItem3)
-        guideStackView.addArrangedSubview(guideItem4)
-        
-        let confirmButton = UIButton(type: .system)
-        confirmButton.setTitle("확인", for: .normal)
-        confirmButton.setTitleColor(.label, for: .normal)
-        confirmButton.backgroundColor = AppColor.notYetGray
-        confirmButton.layer.cornerRadius = 12
-        confirmButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
-        
-        view.addSubview(dimmedBackgroundView)
-        view.addSubview(floatingCardView)
-        floatingCardView.addSubview(titleLabel)
-        floatingCardView.addSubview(subtitleLabel)
-        floatingCardView.addSubview(guideStackView)
-        floatingCardView.addSubview(confirmButton)
-        
-        dimmedBackgroundView.snp.makeConstraints { $0.edges.equalToSuperview() }
-        floatingCardView.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-            make.width.equalTo(316)
-            make.height.equalTo(390)
+        let infoView = InfoFloatingView()
+        infoView.onConfirm = { [weak infoView] in
+            infoView?.dismiss()
         }
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(32)
-            make.leading.equalToSuperview().offset(32)
-        }
-        subtitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(8)
-            make.leading.equalToSuperview().offset(32)
-        }
-        guideStackView.snp.makeConstraints { make in
-            make.top.equalTo(subtitleLabel.snp.bottom).offset(32)
-            make.leading.trailing.equalToSuperview().inset(32)
-        }
-        confirmButton.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(24)
-            make.bottom.equalToSuperview().inset(24)
-            make.height.equalTo(52)
-        }
-        
-        UIView.animate(withDuration: 0.3) {
-            dimmedBackgroundView.alpha = 1
-        }
-        
-        let dismissAction = { [weak self] in
-            UIView.animate(withDuration: 0.3, animations: {
-                dimmedBackgroundView.alpha = 0
-            }) { _ in
-                dimmedBackgroundView.removeFromSuperview()
-                floatingCardView.removeFromSuperview()
-            }
-        }
-        
-        confirmButton.rx.tap
-            .bind { dismissAction() }
-            .disposed(by: disposeBag)
-        
-        let tapGesture = UITapGestureRecognizer()
-        dimmedBackgroundView.addGestureRecognizer(tapGesture)
-        tapGesture.rx.event
-            .bind { _ in dismissAction() }
-            .disposed(by: disposeBag)
+        infoView.show(in: self.view)
     }
     
-    private enum GuideIconType {
-        case solid
-        case doubleCapsule
-        case border
-    }
-    
-    private func makeGuideItem(iconColor: UIColor, iconType: GuideIconType, text: String) -> UIView {
+    private func makeGuideItemWithCalendarCell(status: PillStatus, text: String) -> UIView {
         let containerView = UIView()
         
-        let iconView = UIView()
-        iconView.backgroundColor = iconColor
-        iconView.layer.cornerRadius = 8
-        
-        switch iconType {
-        case .solid:
-            break
-        case .doubleCapsule:
-            let capsule1 = UIView()
-            let capsule2 = UIView()
-            capsule1.backgroundColor = AppColor.pillGreen800
-            capsule2.backgroundColor = AppColor.pillGreen800
-            capsule1.layer.cornerRadius = 4
-            capsule2.layer.cornerRadius = 4
-            
-            iconView.addSubview(capsule1)
-            iconView.addSubview(capsule2)
-            
-            capsule1.snp.makeConstraints { make in
-                make.leading.equalToSuperview()
-                make.centerY.equalToSuperview()
-                make.width.equalTo(21)
-                make.height.equalTo(45)
-            }
-            capsule2.snp.makeConstraints { make in
-                make.leading.equalTo(capsule1.snp.trailing).offset(4)
-                make.centerY.equalToSuperview()
-                make.width.equalTo(21)
-                make.height.equalTo(45)
-            }
-        case .border:
-            iconView.layer.borderWidth = 1
-            iconView.layer.borderColor = AppColor.notYetGray.cgColor
-        }
+        let calendarCell = CalendarCell()
         
         let textLabel = UILabel()
         textLabel.text = text
         textLabel.font = .systemFont(ofSize: 16, weight: .regular)
         textLabel.textColor = AppColor.text
         
-        containerView.addSubview(iconView)
+        containerView.addSubview(calendarCell)
         containerView.addSubview(textLabel)
         
-        iconView.snp.makeConstraints { make in
+        calendarCell.snp.makeConstraints { make in
             make.leading.equalToSuperview()
             make.centerY.equalToSuperview()
             make.width.height.equalTo(40)
         }
         textLabel.snp.makeConstraints { make in
-            make.leading.equalTo(iconView.snp.trailing).offset(16)
+            make.leading.equalTo(calendarCell.snp.trailing).offset(16)
             make.trailing.equalToSuperview()
             make.centerY.equalToSuperview()
         }
         containerView.snp.makeConstraints { make in
             make.height.equalTo(40)
         }
+        
+        containerView.layoutIfNeeded()
+        
+        let dummyItem = DayItem(cycleDay: 1, date: Date(), status: status)
+        calendarCell.configure(with: dummyItem)
         
         return containerView
     }
@@ -724,7 +583,6 @@ final class DashboardViewController: UIViewController {
         var bestCellSize: CGFloat = minCellSize
         var bestHorizontalSpacing: CGFloat = minHorizontalSpacing
         
-        // 가로 여백을 순회하면서 최적의 조합 찾기
         for horizontalSpacing in stride(from: minHorizontalSpacing, through: maxHorizontalSpacing, by: 1) {
             let totalHorizontalSpacing = horizontalSpacing * (columns - 1)
             let cellSize = (availableWidth - totalHorizontalSpacing) / columns
@@ -735,7 +593,6 @@ final class DashboardViewController: UIViewController {
             }
         }
         
-        // 세로 여백 계산 - 남는 공간에 따라 조정
         let verticalSpacing: CGFloat = {
             if bestCellSize < 45 {
                 return minVerticalSpacing
@@ -783,3 +640,4 @@ final class DashboardViewController: UIViewController {
         return UICollectionViewCompositionalLayout(section: section)
     }
 }
+
