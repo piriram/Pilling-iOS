@@ -4,20 +4,24 @@ import RxSwift
 import RxCocoa
 
 final class InfoFloatingView: UIView {
+    // MARK: - Constants
+    private let commonHorizontalInset: CGFloat = 30
+    
     // Public
     var onConfirm: (() -> Void)?
-
+    
     // MARK: - UI
     private let dimmedBackgroundView = UIView()
     private let floatingCardView = UIView()
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
     private let guideStackView = UIStackView()
+    private let separatorView = UIView()
     private let confirmButton = UIButton(type: .system)
-
+    
     // MARK: - Rx
     private let disposeBag = DisposeBag()
-
+    
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -25,25 +29,25 @@ final class InfoFloatingView: UIView {
         setupConstraints()
         setupActions()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // MARK: - Public API
     func show(in container: UIView) {
         // occupy full screen of container
         container.addSubview(self)
         self.snp.makeConstraints { $0.edges.equalToSuperview() }
         layoutIfNeeded()
-
+        
         // animate dim
         dimmedBackgroundView.alpha = 0
         UIView.animate(withDuration: 0.3) {
             self.dimmedBackgroundView.alpha = 1
         }
     }
-
+    
     func dismiss() {
         UIView.animate(withDuration: 0.3, animations: {
             self.dimmedBackgroundView.alpha = 0
@@ -51,77 +55,85 @@ final class InfoFloatingView: UIView {
             self.removeFromSuperview()
         }
     }
-
+    
     // MARK: - Setup
     private func setupViews() {
         backgroundColor = .clear
-
+        
         dimmedBackgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-
+        
         floatingCardView.backgroundColor = .systemBackground
         floatingCardView.layer.cornerRadius = 30
         floatingCardView.layer.masksToBounds = true
-
+        
         titleLabel.text = "필링 가이드"
-        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.font = Typography.body1(.bold)
         titleLabel.textColor = AppColor.text
-
+        
         subtitleLabel.text = "피임약 복용 상태를 잔디로 알려드려요!"
-        subtitleLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        subtitleLabel.textColor = AppColor.subtext
-
+        subtitleLabel.font = Typography.body2(.regular)
+        subtitleLabel.textColor = AppColor.secondary
+        
         guideStackView.axis = .vertical
         guideStackView.spacing = 16
         guideStackView.alignment = .leading
-
+        
         // Guide items
         let guideItem1 = makeGuideItemWithCalendarCell(status: .taken, text: "피임약 복용")
         let guideItem2 = makeGuideItemWithCalendarCell(status: .takenDouble, text: "피임약 2알 복용")
         let guideItem3 = makeGuideItemWithCalendarCell(status: .missed, text: "미복용")
-        let guideItem4 = makeGuideItemWithCalendarCell(status: .rest, text: "휴약")
-
+        let guideItem4 = makeGuideItemWithCalendarCell(status: .todayNotTaken, text: "현재")
+        
         [guideItem1, guideItem2, guideItem3, guideItem4].forEach { guideStackView.addArrangedSubview($0) }
-
+        
         confirmButton.setTitle("확인", for: .normal)
-        confirmButton.setTitleColor(.label, for: .normal)
-        confirmButton.backgroundColor = AppColor.notYetGray
+        confirmButton.setTitleColor(AppColor.secondary, for: .normal)
+        confirmButton.backgroundColor = .clear
         confirmButton.layer.cornerRadius = 12
-        confirmButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
-
+        confirmButton.titleLabel?.font = Typography.body2(.regular)
+        
+        separatorView.backgroundColor = AppColor.borderGray
+        
         addSubview(dimmedBackgroundView)
         addSubview(floatingCardView)
         floatingCardView.addSubview(titleLabel)
         floatingCardView.addSubview(subtitleLabel)
         floatingCardView.addSubview(guideStackView)
+        floatingCardView.addSubview(separatorView)
         floatingCardView.addSubview(confirmButton)
     }
-
+    
     private func setupConstraints() {
         dimmedBackgroundView.snp.makeConstraints { $0.edges.equalToSuperview() }
         floatingCardView.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.equalTo(316)
-            make.height.equalTo(390)
+            make.height.equalTo(dimmedBackgroundView.snp.width).multipliedBy(1.1)
+            make.width.equalToSuperview().inset(18)
         }
         titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(32)
-            make.leading.equalToSuperview().offset(32)
+            make.top.equalToSuperview().offset(28)
+            make.leading.equalToSuperview().inset(commonHorizontalInset)
         }
         subtitleLabel.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
-            make.leading.equalToSuperview().offset(32)
+            make.leading.equalToSuperview().inset(commonHorizontalInset)
         }
         guideStackView.snp.makeConstraints { make in
-            make.top.equalTo(subtitleLabel.snp.bottom).offset(32)
-            make.leading.trailing.equalToSuperview().inset(32)
+            make.top.equalTo(subtitleLabel.snp.bottom).offset(22)
+            make.leading.trailing.equalToSuperview().inset(commonHorizontalInset)
+        }
+        separatorView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview().inset(commonHorizontalInset)
+            make.bottom.equalTo(confirmButton.snp.top).offset(-24)
+            make.height.equalTo(1)
         }
         confirmButton.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(24)
             make.bottom.equalToSuperview().inset(24)
-            make.height.equalTo(52)
+            make.height.equalTo(20)
         }
     }
-
+    
     private func setupActions() {
         // Confirm button
         confirmButton.rx.tap
@@ -129,7 +141,7 @@ final class InfoFloatingView: UIView {
                 self?.onConfirm?()
             }
             .disposed(by: disposeBag)
-
+        
         // Tap to dismiss on dimmed area
         let tapGesture = UITapGestureRecognizer()
         dimmedBackgroundView.addGestureRecognizer(tapGesture)
@@ -139,21 +151,21 @@ final class InfoFloatingView: UIView {
             }
             .disposed(by: disposeBag)
     }
-
+    
     // MARK: - Helpers
     private func makeGuideItemWithCalendarCell(status: PillStatus, text: String) -> UIView {
         let containerView = UIView()
-
+        
         let calendarCell = CalendarCell()
-
+        
         let textLabel = UILabel()
         textLabel.text = text
-        textLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        textLabel.font = Typography.body2(.regular)
         textLabel.textColor = AppColor.text
-
+        
         containerView.addSubview(calendarCell)
         containerView.addSubview(textLabel)
-
+        
         calendarCell.snp.makeConstraints { make in
             make.leading.equalToSuperview()
             make.centerY.equalToSuperview()
@@ -167,12 +179,12 @@ final class InfoFloatingView: UIView {
         containerView.snp.makeConstraints { make in
             make.height.equalTo(40)
         }
-
+        
         containerView.layoutIfNeeded()
-
+        
         let dummyItem = DayItem(cycleDay: 1, date: Date(), status: status)
         calendarCell.configure(with: dummyItem)
-
+        
         return containerView
     }
 }

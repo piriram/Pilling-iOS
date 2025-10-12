@@ -88,9 +88,9 @@ final class DashboardViewController: UIViewController {
     
     private func setupHeaderViews() {
         infoButton.setImage(DashboardUI.Icon.info, for: .normal)
-        infoButton.tintColor = AppColor.subtext
+        infoButton.tintColor = AppColor.secondary
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
-        gearButton.tintColor = AppColor.subtext
+        gearButton.tintColor = AppColor.secondary
         
         characterImageView.contentMode = .scaleAspectFit
         

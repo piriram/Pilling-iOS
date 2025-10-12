@@ -18,7 +18,7 @@ public enum AppColor {
     public static let pillWhite = UIColor.white
     public static let pillBorder = UIColor(hexString: "7EDD1C")
     public static let text = UIColor(hexString: "222222")
-    public static let subtext = UIColor.secondaryLabel
+//    public static let subtext = UIColor.secondaryLabel
     public static let secondary = UIColor(hexString: "3C3C43").withAlphaComponent(0.6)
     public static let weekdayText = UIColor(hexString: "3C3C43").withAlphaComponent(0.3)
     public static let borderGray = UIColor(hexString: "D9D9D9")
