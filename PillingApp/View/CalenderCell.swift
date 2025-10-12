@@ -1,9 +1,3 @@
-//
-//  CalenderCell.swift
-//  PillingApp
-//
-//  Created by 잠만보김쥬디 on 10/12/25.
-//
 import UIKit
 import SnapKit
 
@@ -13,6 +7,7 @@ final class CalendarCell: UICollectionViewCell {
     static let identifier = "CalendarCell"
     
     private let backgroundShapeView = UIView()
+    private let innerBorderView = UIView() // inner shadow 대체용
     private let capsuleContainer = UIView()
     private let capsule1 = UIView()
     private let capsule2 = UIView()
@@ -30,10 +25,10 @@ final class CalendarCell: UICollectionViewCell {
         super.layoutSubviews()
         let defaultCornerRadius = min(bounds.width, bounds.height) * 0.3
         let capsuleCornerRadius = min(bounds.width, bounds.height) * 0.25
-        print("capsuleCornerRadius: \(capsuleCornerRadius)")
         
         if backgroundShapeView.layer.cornerRadius != 0 {
             backgroundShapeView.layer.cornerRadius = defaultCornerRadius
+            innerBorderView.layer.cornerRadius = defaultCornerRadius - 3
         }
         
         capsule1.layer.cornerRadius = capsuleCornerRadius
@@ -42,12 +37,21 @@ final class CalendarCell: UICollectionViewCell {
     
     private func setupViews() {
         contentView.addSubview(backgroundShapeView)
+        backgroundShapeView.addSubview(innerBorderView)
         backgroundShapeView.addSubview(capsuleContainer)
         capsuleContainer.addSubview(capsule1)
         capsuleContainer.addSubview(capsule2)
         
         backgroundShapeView.layer.masksToBounds = true
         backgroundShapeView.snp.makeConstraints { $0.edges.equalToSuperview() }
+        
+        // inner shadow 효과를 내는 border view
+        innerBorderView.isUserInteractionEnabled = false
+        innerBorderView.backgroundColor = .clear
+        innerBorderView.layer.borderWidth = 3
+        innerBorderView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(3)
+        }
         
         capsuleContainer.snp.makeConstraints { make in
             make.center.equalToSuperview()
@@ -72,27 +76,35 @@ final class CalendarCell: UICollectionViewCell {
         capsule2.backgroundColor = AppColor.pillGreen800
         
         capsuleContainer.isHidden = true
+        innerBorderView.isHidden = true
         contentView.backgroundColor = .clear
     }
     
     func configure(with item: DayItem) {
         backgroundShapeView.layer.borderWidth = 0
         backgroundShapeView.layer.borderColor = UIColor.clear.cgColor
+        innerBorderView.isHidden = true
+        innerBorderView.layer.borderColor = UIColor.clear.cgColor
         capsuleContainer.isHidden = true
         
         backgroundShapeView.backgroundColor = item.status.backgroundColor
         
-        // Corner radius: no rounding when takenDouble
         if case .takenDouble = item.status {
             backgroundShapeView.layer.cornerRadius = 0
+            innerBorderView.layer.cornerRadius = 0
         } else {
             let defaultCornerRadius = min(bounds.width, bounds.height) * 0.3
             backgroundShapeView.layer.cornerRadius = defaultCornerRadius
+            innerBorderView.layer.cornerRadius = defaultCornerRadius - 3
         }
         
         if item.status.isToday {
-            backgroundShapeView.layer.borderWidth = 2
+            backgroundShapeView.layer.borderWidth = 3
             backgroundShapeView.layer.borderColor = AppColor.pillBorder.cgColor
+            
+            // inner shadow 대체: 안쪽에 반투명 녹색 border
+            innerBorderView.isHidden = false
+            innerBorderView.layer.borderColor = AppColor.pillGreen800.withAlphaComponent(0.3).cgColor
         }
         
         if case .rest = item.status {
