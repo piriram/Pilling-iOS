@@ -4,9 +4,9 @@
 //
 //  Created by 잠만보김쥬디 on 10/12/25.
 //
-
 import UIKit
 import SnapKit
+
 // MARK: - Presentation/Dashboard/Views/CalendarCell.swift
 
 final class CalendarCell: UICollectionViewCell {
@@ -28,8 +28,10 @@ final class CalendarCell: UICollectionViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        let cornerRadius = min(bounds.width, bounds.height) * 0.25
-        backgroundShapeView.layer.cornerRadius = cornerRadius
+        let defaultCornerRadius = min(bounds.width, bounds.height) * 0.3
+        if backgroundShapeView.layer.cornerRadius != 0 {
+            backgroundShapeView.layer.cornerRadius = defaultCornerRadius
+        }
     }
     
     private func setupViews() {
@@ -44,17 +46,18 @@ final class CalendarCell: UICollectionViewCell {
         capsuleContainer.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.height.equalToSuperview()
+            make.width.equalTo(backgroundShapeView.snp.width)
         }
         
         capsule1.snp.makeConstraints { make in
-            make.leading.equalToSuperview()
+            make.leading.equalToSuperview().inset(0.5)
             make.top.bottom.equalToSuperview()
-            make.width.equalTo(capsule1.snp.height).multipliedBy(0.4)
+            make.width.equalTo(capsuleContainer.snp.width).multipliedBy(0.5).offset(-1.5)
         }
         
         capsule2.snp.makeConstraints { make in
             make.leading.equalTo(capsule1.snp.trailing).offset(2)
-            make.trailing.equalToSuperview()
+            make.trailing.equalToSuperview().inset(0.5)
             make.top.bottom.equalToSuperview()
             make.width.equalTo(capsule1)
         }
@@ -74,6 +77,14 @@ final class CalendarCell: UICollectionViewCell {
         capsuleContainer.isHidden = true
         
         backgroundShapeView.backgroundColor = item.status.backgroundColor
+        
+        // Corner radius: no rounding when takenDouble
+        if case .takenDouble = item.status {
+            backgroundShapeView.layer.cornerRadius = 0
+        } else {
+            let defaultCornerRadius = min(bounds.width, bounds.height) * 0.3
+            backgroundShapeView.layer.cornerRadius = defaultCornerRadius
+        }
         
         if item.status.isToday {
             backgroundShapeView.layer.borderWidth = 2

@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - Presentation/Common/Constants/AppColor.swift
 public enum AppColor {
-    public static let bg = UIColor(hexString: "F5F5F5")
+    public static let bg = UIColor(hexString: "FFFFFF")
     public static let card = UIColor.secondarySystemBackground
     public static let pillGreen800 = UIColor(hexString: "7EDD1C")
     public static let pillGreen200 = UIColor(hexString: "AFF466")

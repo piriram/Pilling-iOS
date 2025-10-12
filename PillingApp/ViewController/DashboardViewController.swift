@@ -267,7 +267,7 @@ final class DashboardViewController: UIViewController {
         }
         
         weekdayStackView.snp.makeConstraints { make in
-            make.top.lessThanOrEqualTo(messageCardView.snp.bottom).offset(32)
+            make.top.lessThanOrEqualTo(messageCardView.snp.bottom).offset(40)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(20)
         }
@@ -557,7 +557,7 @@ final class DashboardViewController: UIViewController {
         )
         
         let guideItem2 = makeGuideItem(
-            iconColor: AppColor.pillWhite,
+            iconColor: AppColor.bg,
             iconType: .doubleCapsule,
             text: "피임약 2알 복용"
         )
@@ -669,16 +669,16 @@ final class DashboardViewController: UIViewController {
             iconView.addSubview(capsule2)
             
             capsule1.snp.makeConstraints { make in
-                make.leading.equalToSuperview().offset(6)
+                make.leading.equalToSuperview()
                 make.centerY.equalToSuperview()
-                make.width.equalTo(10)
-                make.height.equalTo(24)
+                make.width.equalTo(21)
+                make.height.equalTo(45)
             }
             capsule2.snp.makeConstraints { make in
-                make.leading.equalTo(capsule1.snp.trailing).offset(2)
+                make.leading.equalTo(capsule1.snp.trailing).offset(4)
                 make.centerY.equalToSuperview()
-                make.width.equalTo(10)
-                make.height.equalTo(24)
+                make.width.equalTo(21)
+                make.height.equalTo(45)
             }
         case .border:
             iconView.layer.borderWidth = 1
@@ -716,9 +716,9 @@ final class DashboardViewController: UIViewController {
         let availableWidth = view.bounds.width - 40
         let columns: CGFloat = 7
         let minCellSize: CGFloat = 40
-        let minHorizontalSpacing: CGFloat = 4
+        let minHorizontalSpacing: CGFloat = 2
         let maxHorizontalSpacing: CGFloat = 16
-        let minVerticalSpacing: CGFloat = 16
+        let minVerticalSpacing: CGFloat = 12
         let maxVerticalSpacing: CGFloat = 24
         
         var bestCellSize: CGFloat = minCellSize
