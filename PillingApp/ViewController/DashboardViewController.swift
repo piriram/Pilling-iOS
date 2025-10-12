@@ -24,6 +24,8 @@ final class DashboardViewController: UIViewController {
     private let progressLabel = UILabel()
     private let totalLabel = UILabel()
     private let dateInfoStackView = UIStackView()
+    private let progressRowStackView = UIStackView()
+    private let headerInfoStackView = UIStackView()
     private let dateIconImageView = UIImageView(image: DashboardUI.Icon.date)
     private let dateLabel = UILabel()
     private let timeIconImageView = UIImageView(image: DashboardUI.Icon.time)
@@ -91,17 +93,17 @@ final class DashboardViewController: UIViewController {
         
         characterImageView.contentMode = .scaleAspectFit
         
-        progressLabel.font = .systemFont(ofSize: 32, weight: .bold)
-        progressLabel.textColor = AppColor.text
-        totalLabel.font = .systemFont(ofSize: 18, weight: .regular)
-        totalLabel.textColor = AppColor.subtext
+        progressLabel.font = Typography.headline1()
+        progressLabel.textColor = .black
+        totalLabel.font = Typography.headline5()
+        totalLabel.textColor = AppColor.secondary
         
-        dateLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        dateLabel.textColor = AppColor.subtext
-        timeLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        timeLabel.textColor = AppColor.subtext
-        dateIconImageView.tintColor = AppColor.subtext
-        timeIconImageView.tintColor = AppColor.subtext
+        dateLabel.font = Typography.body1(.medium)
+        dateLabel.textColor = AppColor.secondary
+        timeLabel.font = Typography.body1(.medium)
+        timeLabel.textColor = AppColor.secondary
+        dateIconImageView.tintColor = AppColor.secondary
+        timeIconImageView.tintColor = AppColor.secondary
         
         dateInfoStackView.axis = .vertical
         dateInfoStackView.alignment = .leading
@@ -109,31 +111,43 @@ final class DashboardViewController: UIViewController {
         
         let dateLine = UIStackView(arrangedSubviews: [dateIconImageView, dateLabel])
         dateLine.axis = .horizontal
-        dateLine.spacing = 4
+        dateLine.spacing = 8
         dateLine.alignment = .center
         
         let timeLine = UIStackView(arrangedSubviews: [timeIconImageView, timeLabel])
         timeLine.axis = .horizontal
-        timeLine.spacing = 4
+        timeLine.spacing = 8
         timeLine.alignment = .center
         
-        dateIconImageView.snp.makeConstraints { $0.width.height.equalTo(14) }
-        timeIconImageView.snp.makeConstraints { $0.width.height.equalTo(14) }
+        dateIconImageView.snp.makeConstraints { $0.width.height.equalTo(20) }
+        timeIconImageView.snp.makeConstraints { $0.width.height.equalTo(20) }
         
         dateInfoStackView.addArrangedSubview(dateLine)
         dateInfoStackView.addArrangedSubview(timeLine)
+        
+        progressRowStackView.axis = .horizontal
+        progressRowStackView.alignment = .firstBaseline
+        progressRowStackView.spacing = 2
+        progressRowStackView.addArrangedSubview(progressLabel)
+        progressRowStackView.addArrangedSubview(totalLabel)
+        
+        headerInfoStackView.axis = .vertical
+        headerInfoStackView.alignment = .leading
+        headerInfoStackView.spacing = 6
+        headerInfoStackView.addArrangedSubview(progressRowStackView)
+        headerInfoStackView.addArrangedSubview(dateInfoStackView)
     }
     
     private func setupMessageCardView() {
-        messageCardView.backgroundColor = .systemBackground
-        messageCardView.layer.cornerRadius = 12
+        messageCardView.backgroundColor = AppColor.bg
+        messageCardView.layer.cornerRadius = 20
         messageCardView.layer.borderWidth = 1
-        messageCardView.layer.borderColor = UIColor.systemGray5.cgColor
+        messageCardView.layer.borderColor = AppColor.borderGray.cgColor
         
         messageIconImageView.tintColor = AppColor.pillGreen800
         messageIconImageView.contentMode = .scaleAspectFit
         
-        messageLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        messageLabel.font = Typography.body2(.medium)
         messageLabel.textColor = AppColor.text
         messageLabel.numberOfLines = 1
     }
@@ -194,9 +208,7 @@ final class DashboardViewController: UIViewController {
         view.addSubview(infoButton)
         view.addSubview(gearButton)
         view.addSubview(characterImageView)
-        view.addSubview(progressLabel)
-        view.addSubview(totalLabel)
-        view.addSubview(dateInfoStackView)
+        view.addSubview(headerInfoStackView)
         
         view.addSubview(messageCardView)
         messageCardView.addSubview(messageIconImageView)
@@ -214,23 +226,31 @@ final class DashboardViewController: UIViewController {
         infoButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(12)
             make.trailing.equalTo(gearButton.snp.leading).offset(-12)
-            make.width.height.equalTo(24)
+            make.width.height.equalTo(30)
         }
         
         gearButton.snp.makeConstraints { make in
             make.centerY.equalTo(infoButton)
             make.trailing.equalToSuperview().inset(contentInset)
-            make.width.height.equalTo(24)
+            make.width.height.equalTo(30)
         }
         
         characterImageView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(4)
             make.leading.equalToSuperview().inset(contentInset)
-            make.width.height.equalTo(100)
+            make.width.lessThanOrEqualTo(180)
+            make.height.equalTo(180)
         }
         
+        headerInfoStackView.snp.makeConstraints { make in
+            make.centerY.equalTo(characterImageView.snp.centerY)
+            make.leading.equalTo(characterImageView.snp.trailing).offset(12)
+            make.trailing.lessThanOrEqualTo(gearButton.snp.leading).offset(-8)
+        }
+        
+        /*
         progressLabel.snp.makeConstraints { make in
-            make.top.equalTo(characterImageView.snp.top).offset(12)
+            make.top.equalTo(gearButton.snp.bottom).offset(50)
             make.leading.equalTo(characterImageView.snp.trailing).offset(12)
         }
         
@@ -244,9 +264,10 @@ final class DashboardViewController: UIViewController {
             make.top.equalTo(progressLabel.snp.bottom).offset(6)
             make.trailing.lessThanOrEqualTo(gearButton.snp.leading).offset(-8)
         }
+        */
         
         messageCardView.snp.makeConstraints { make in
-            make.top.equalTo(characterImageView.snp.bottom).offset(20)
+            make.top.equalTo(characterImageView.snp.bottom).offset(1)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(56)
         }
@@ -284,8 +305,8 @@ final class DashboardViewController: UIViewController {
         takePillButton.snp.makeConstraints { make in
             make.top.equalTo(pageControl.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(contentInset)
-            make.height.equalTo(56)
-            make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).inset(16)
+            make.height.equalTo(80)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
     }
     
@@ -363,6 +384,7 @@ final class DashboardViewController: UIViewController {
         let currentDay = daysSinceStart + 1
         
         progressLabel.text = "\(currentDay)일차"
+        progressLabel.textColor = AppColor.text
         totalLabel.text = "/\(cycle.totalDays)"
         
         dateLabel.text = "\(cycle.activeDays)/\(cycle.breakDays)"

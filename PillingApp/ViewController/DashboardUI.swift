@@ -11,7 +11,7 @@ enum DashboardUI {
         static let info = UIImage(systemName: "info.circle.fill")
         static let gear = UIImage(systemName: "gearshape")
         static let date = UIImage(systemName: "calendar")
-        static let time = UIImage(systemName: "clock")
+        static let time = UIImage(systemName: "clock.fill")
         static let leaf = UIImage(systemName: "leaf.fill")
     }
     
