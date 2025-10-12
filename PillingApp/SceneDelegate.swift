@@ -17,27 +17,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         // Window 생성
         let window = UIWindow(windowScene: windowScene)
-        //        
-        //        // DIContainer를 통해 ViewModel 생성
-        //        let viewModel = DIContainer.shared.makeDashboardViewModel()
-        //        
-        //        // ViewController 생성 (ViewModel 주입)
-        //        let dashboardViewController = DashboardViewController(viewModel: viewModel)
-        //        
-        //        // NavigationController로 감싸기 (옵션)
-        //        let navigationController = UINavigationController(
-        //            rootViewController: dashboardViewController
-        //        )
-        //        navigationController.navigationBar.isHidden = true
-        //        
-        //        // Window 설정
-        //        window.rootViewController = navigationController
+        
         let viewModel = PillSettingViewModel()
         let pillSettingViewController = PillSettingViewController(viewModel: viewModel)
-        
-        window.rootViewController = pillSettingViewController
+
+        // Wrap with a navigation controller
+        let navigationController = UINavigationController(rootViewController: pillSettingViewController)
+        navigationController.navigationBar.isHidden = false // set to true if you want to hide the bar
+
+        window.rootViewController = navigationController
         window.makeKeyAndVisible()
-        
+
         self.window = window
     }
     

@@ -354,8 +354,32 @@ final class PillTypeBottomSheetViewController: UIViewController {
                 )
             }
             .subscribe(onNext: { [weak self] pillInfo in
-                self?.selectedPillInfo.onNext(pillInfo)
-                self?.dismissBottomSheet()
+                guard let self = self else { return }
+                // Emit selected pill info
+                self.selectedPillInfo.onNext(pillInfo)
+                
+                // Prepare the next screen with DI
+                let timeVC = DIContainer.shared.makeTimeSettingViewController()
+                
+                // Dismiss the bottom sheet first, then navigate to the next screen
+                self.dismissBottomSheet()
+                
+                // Attempt to push if embedded in a navigation controller; otherwise present modally
+                if let nav = self.presentingViewController as? UINavigationController {
+                    // Ensure navigation happens after dismissal animation completes
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        nav.pushViewController(timeVC, animated: true)
+                    }
+                } else if let presenter = self.presentingViewController {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        presenter.present(timeVC, animated: true)
+                    }
+                } else if let nav = self.navigationController {
+                    // Fallback: if somehow within a nav stack
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        nav.pushViewController(timeVC, animated: true)
+                    }
+                }
             })
             .disposed(by: disposeBag)
     }

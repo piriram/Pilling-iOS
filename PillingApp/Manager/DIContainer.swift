@@ -61,3 +61,17 @@ final class DIContainer {
         )
     }
 }
+
+extension DIContainer {
+    
+    func makeTimeSettingViewModel() -> TimeSettingViewModel {
+        return TimeSettingViewModel(
+            settingsRepository: makeUserSettingsRepository()
+        )
+    }
+    
+    func makeTimeSettingViewController() -> TimeSettingViewController {
+        let viewModel = makeTimeSettingViewModel()
+        return TimeSettingViewController(viewModel: viewModel)
+    }
+}

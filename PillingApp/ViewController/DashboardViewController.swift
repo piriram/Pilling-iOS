@@ -71,6 +71,19 @@ final class DashboardViewController: UIViewController {
         updateCalendarHeight(for: viewModel.items.value.count)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        // If you also want content under status bar, allow extended layout
+        self.extendedLayoutIncludesOpaqueBars = true
+        self.edgesForExtendedLayout = [.top, .left, .right, .bottom]
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+    
     // MARK: - Setup
     
     private func setupViews() {
