@@ -4,11 +4,11 @@
 //
 //  Created by 잠만보김쥬디 on 10/12/25.
 //
-
 import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
+
 // MARK: - Presentation/Dashboard/Views/DashboardViewController.swift
 
 final class DashboardViewController: UIViewController {
@@ -40,6 +40,7 @@ final class DashboardViewController: UIViewController {
         collectionViewLayout: makeCompositionalLayout()
     )
     
+    private let pageControl = UIPageControl()
     private let takePillButton = UIButton(type: .system)
     
     // MARK: - Initialization
@@ -76,6 +77,7 @@ final class DashboardViewController: UIViewController {
         setupMessageCardView()
         setupWeekdayStackView()
         setupCalendarCollectionView()
+        setupPageControl()
         setupTakePillButton()
         
         addSubviews()
@@ -83,42 +85,57 @@ final class DashboardViewController: UIViewController {
     
     private func setupHeaderViews() {
         infoButton.setImage(DashboardUI.Icon.info, for: .normal)
+        infoButton.tintColor = AppColor.subtext
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
+        gearButton.tintColor = AppColor.subtext
         
         characterImageView.contentMode = .scaleAspectFit
         
-        progressLabel.font = .systemFont(ofSize: 28, weight: .bold)
-        totalLabel.font = .systemFont(ofSize: 20, weight: .regular)
+        progressLabel.font = .systemFont(ofSize: 32, weight: .bold)
+        progressLabel.textColor = AppColor.text
+        totalLabel.font = .systemFont(ofSize: 18, weight: .regular)
         totalLabel.textColor = AppColor.subtext
         
+        dateLabel.font = .systemFont(ofSize: 13, weight: .regular)
         dateLabel.textColor = AppColor.subtext
+        timeLabel.font = .systemFont(ofSize: 13, weight: .regular)
         timeLabel.textColor = AppColor.subtext
         dateIconImageView.tintColor = AppColor.subtext
         timeIconImageView.tintColor = AppColor.subtext
         
         dateInfoStackView.axis = .vertical
         dateInfoStackView.alignment = .leading
-        dateInfoStackView.spacing = 4
+        dateInfoStackView.spacing = 6
         
         let dateLine = UIStackView(arrangedSubviews: [dateIconImageView, dateLabel])
         dateLine.axis = .horizontal
-        dateLine.spacing = 6
+        dateLine.spacing = 4
+        dateLine.alignment = .center
         
         let timeLine = UIStackView(arrangedSubviews: [timeIconImageView, timeLabel])
         timeLine.axis = .horizontal
-        timeLine.spacing = 6
+        timeLine.spacing = 4
+        timeLine.alignment = .center
+        
+        dateIconImageView.snp.makeConstraints { $0.width.height.equalTo(14) }
+        timeIconImageView.snp.makeConstraints { $0.width.height.equalTo(14) }
         
         dateInfoStackView.addArrangedSubview(dateLine)
         dateInfoStackView.addArrangedSubview(timeLine)
     }
     
     private func setupMessageCardView() {
-        messageCardView.backgroundColor = .clear
-        messageCardView.layer.cornerRadius = DashboardUI.Metric.cornerRadius
+        messageCardView.backgroundColor = .systemBackground
+        messageCardView.layer.cornerRadius = 12
         messageCardView.layer.borderWidth = 1
-        messageCardView.layer.borderColor = UIColor.gray.cgColor
+        messageCardView.layer.borderColor = UIColor.systemGray5.cgColor
+        
         messageIconImageView.tintColor = AppColor.pillGreen800
-        messageLabel.textColor = .black
+        messageIconImageView.contentMode = .scaleAspectFit
+        
+        messageLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        messageLabel.textColor = AppColor.text
+        messageLabel.numberOfLines = 1
     }
     
     private func setupWeekdayStackView() {
@@ -133,7 +150,7 @@ final class DashboardViewController: UIViewController {
             label.text = weekdayText
             label.textAlignment = .center
             label.textColor = AppColor.subtext
-            label.font = .systemFont(ofSize: 13, weight: .medium)
+            label.font = .systemFont(ofSize: 12, weight: .medium)
             containerView.addSubview(label)
             label.snp.makeConstraints { make in
                 make.center.equalToSuperview()
@@ -147,6 +164,8 @@ final class DashboardViewController: UIViewController {
         calendarCollectionView.backgroundColor = .clear
         calendarCollectionView.contentInset = .zero
         calendarCollectionView.isScrollEnabled = false
+        calendarCollectionView.showsVerticalScrollIndicator = false
+        calendarCollectionView.showsHorizontalScrollIndicator = false
         calendarCollectionView.register(
             CalendarCell.self,
             forCellWithReuseIdentifier: CalendarCell.identifier
@@ -154,11 +173,21 @@ final class DashboardViewController: UIViewController {
         calendarCollectionView.setCollectionViewLayout(makeCompositionalLayout(), animated: false)
     }
     
+    private func setupPageControl() {
+        pageControl.numberOfPages = 2
+        pageControl.currentPage = 0
+        pageControl.currentPageIndicatorTintColor = AppColor.pillGreen800
+        pageControl.pageIndicatorTintColor = AppColor.notYetGray
+        pageControl.isUserInteractionEnabled = false
+        pageControl.hidesForSinglePage = true
+    }
+    
     private func setupTakePillButton() {
         takePillButton.setTitle("잔디 심기", for: .normal)
         takePillButton.setTitleColor(.label, for: .normal)
-        takePillButton.backgroundColor = AppColor.pillGreen800.withAlphaComponent(0.4)
-        takePillButton.layer.cornerRadius = DashboardUI.Metric.cornerRadius
+        takePillButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        takePillButton.backgroundColor = AppColor.pillGreen200
+        takePillButton.layer.cornerRadius = 12
     }
     
     private func addSubviews() {
@@ -175,79 +204,88 @@ final class DashboardViewController: UIViewController {
         
         view.addSubview(weekdayStackView)
         view.addSubview(calendarCollectionView)
+        view.addSubview(pageControl)
         view.addSubview(takePillButton)
     }
     
     private func setupConstraints() {
+        let contentInset: CGFloat = 20
+        
         infoButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.trailing.equalToSuperview().inset(DashboardUI.Metric.contentInset + 44)
-            make.width.height.equalTo(28)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(12)
+            make.trailing.equalTo(gearButton.snp.leading).offset(-12)
+            make.width.height.equalTo(24)
         }
         
         gearButton.snp.makeConstraints { make in
             make.centerY.equalTo(infoButton)
-            make.trailing.equalToSuperview().inset(DashboardUI.Metric.contentInset)
-            make.width.height.equalTo(28)
+            make.trailing.equalToSuperview().inset(contentInset)
+            make.width.height.equalTo(24)
         }
         
         characterImageView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.leading.equalToSuperview().inset(DashboardUI.Metric.contentInset)
-            make.width.height.equalTo(DashboardUI.Metric.headerImageSide)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(4)
+            make.leading.equalToSuperview().inset(contentInset)
+            make.width.height.equalTo(100)
         }
         
         progressLabel.snp.makeConstraints { make in
-            make.top.equalTo(characterImageView.snp.top).offset(8)
-            make.leading.equalTo(characterImageView.snp.trailing).offset(16)
+            make.top.equalTo(characterImageView.snp.top).offset(12)
+            make.leading.equalTo(characterImageView.snp.trailing).offset(12)
         }
         
         totalLabel.snp.makeConstraints { make in
-            make.leading.equalTo(progressLabel.snp.trailing).offset(4)
+            make.leading.equalTo(progressLabel.snp.trailing).offset(2)
             make.lastBaseline.equalTo(progressLabel)
         }
         
         dateInfoStackView.snp.makeConstraints { make in
             make.leading.equalTo(progressLabel)
-            make.top.equalTo(progressLabel.snp.bottom).offset(8)
+            make.top.equalTo(progressLabel.snp.bottom).offset(6)
             make.trailing.lessThanOrEqualTo(gearButton.snp.leading).offset(-8)
         }
         
         messageCardView.snp.makeConstraints { make in
-            make.top.equalTo(characterImageView.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(DashboardUI.Metric.contentInset)
-            make.height.equalTo(53)
+            make.top.equalTo(characterImageView.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(contentInset)
+            make.height.equalTo(56)
         }
         
         messageIconImageView.snp.makeConstraints { make in
-            make.leading.equalToSuperview().inset(14)
+            make.leading.equalToSuperview().inset(16)
             make.centerY.equalToSuperview()
-            make.width.height.equalTo(18)
+            make.width.height.equalTo(20)
         }
         
         messageLabel.snp.makeConstraints { make in
-            make.leading.equalTo(messageIconImageView.snp.trailing).offset(8)
-            make.trailing.equalToSuperview().inset(14)
+            make.leading.equalTo(messageIconImageView.snp.trailing).offset(10)
+            make.trailing.equalToSuperview().inset(16)
             make.centerY.equalToSuperview()
         }
         
         weekdayStackView.snp.makeConstraints { make in
-            make.top.equalTo(messageCardView.snp.bottom).offset(12)
-            make.leading.trailing.equalToSuperview().inset(DashboardUI.Metric.contentInset)
-            make.height.equalTo(18)
+            make.top.equalTo(messageCardView.snp.bottom).offset(16)
+            make.leading.trailing.equalToSuperview().inset(contentInset)
+            make.height.equalTo(20)
         }
         
         calendarCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(weekdayStackView.snp.bottom).offset(8)
-            make.leading.trailing.equalToSuperview().inset(DashboardUI.Metric.contentInset)
-            make.height.equalTo(200)
+            make.top.equalTo(weekdayStackView.snp.bottom).offset(4)
+            make.leading.trailing.equalToSuperview().inset(contentInset)
+            make.height.equalTo(280)
+        }
+        
+        pageControl.snp.makeConstraints { make in
+            make.top.equalTo(calendarCollectionView.snp.bottom).offset(16)
+            make.centerX.equalToSuperview()
+            make.height.equalTo(8)
         }
         
         takePillButton.snp.makeConstraints { make in
-            make.top.greaterThanOrEqualTo(calendarCollectionView.snp.bottom).offset(24)
-            make.leading.trailing.equalToSuperview().inset(DashboardUI.Metric.contentInset)
-            make.height.equalTo(DashboardUI.Metric.actionHeight)
-            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
+            make.top.equalTo(pageControl.snp.bottom).offset(16)
+            make.leading.trailing.equalToSuperview().inset(contentInset)
+            make.height.equalTo(56)
+            make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).inset(16)
         }
     }
     
@@ -327,10 +365,7 @@ final class DashboardViewController: UIViewController {
         progressLabel.text = "\(currentDay)일차"
         totalLabel.text = "/\(cycle.totalDays)"
         
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy.MM.dd"
-        let startDateString = dateFormatter.string(from: cycle.startDate)
-        dateLabel.text = "시작일 \(startDateString) · \(cycle.activeDays)/\(cycle.breakDays)"
+        dateLabel.text = "\(cycle.activeDays)/\(cycle.breakDays)"
         
         timeLabel.text = cycle.scheduledTime
         
@@ -409,16 +444,15 @@ final class DashboardViewController: UIViewController {
     }
     
     private func updateCalendarHeight(for itemCount: Int) {
-        let width = view.bounds.width - (DashboardUI.Metric.contentInset * 2)
+        let width = view.bounds.width - 40
         guard width > 0 else { return }
         
-        let columns = Int(DashboardUI.Metric.columns)
-        let rows = ceil(CGFloat(itemCount) / DashboardUI.Metric.columns)
-        let insets = DashboardUI.Metric.gridInsets
-        let spacing = DashboardUI.Metric.calculateGridSpacing(for: width)
-        let totalSpacing = spacing * (DashboardUI.Metric.columns - 1)
-        let itemSide = (width - totalSpacing) / DashboardUI.Metric.columns
-        let height = insets.top + insets.bottom + rows * itemSide + (rows - 1) * spacing
+        let columns: CGFloat = 7
+        let spacing: CGFloat = 6
+        let rows = ceil(CGFloat(itemCount) / columns)
+        let totalSpacing = spacing * (columns - 1)
+        let itemSide = (width - totalSpacing) / columns
+        let height = rows * itemSide + (rows - 1) * spacing
         
         calendarCollectionView.snp.updateConstraints { $0.height.equalTo(height) }
         calendarCollectionView.setCollectionViewLayout(makeCompositionalLayout(), animated: false)
@@ -675,14 +709,13 @@ final class DashboardViewController: UIViewController {
     // MARK: - CollectionView Layout
     
     private func makeCompositionalLayout() -> UICollectionViewCompositionalLayout {
-        let width = view.bounds.width - (DashboardUI.Metric.contentInset * 2)
-        let columns = Int(DashboardUI.Metric.columns)
-        let spacing = DashboardUI.Metric.calculateGridSpacing(for: width)
-        let insets = DashboardUI.Metric.gridInsets
+        let width = view.bounds.width - 40
+        let columns: CGFloat = 7
+        let spacing: CGFloat = 6
         
         let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0 / CGFloat(columns)),
-            heightDimension: .fractionalWidth(1.0 / CGFloat(columns))
+            widthDimension: .fractionalWidth(1.0 / columns),
+            heightDimension: .fractionalWidth(1.0 / columns)
         )
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         item.contentInsets = NSDirectionalEdgeInsets(
@@ -692,7 +725,7 @@ final class DashboardViewController: UIViewController {
             trailing: spacing / 2
         )
         
-        let groupHeight = NSCollectionLayoutDimension.fractionalWidth(1.0 / CGFloat(columns))
+        let groupHeight = NSCollectionLayoutDimension.fractionalWidth(1.0 / columns)
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: groupHeight
@@ -700,14 +733,14 @@ final class DashboardViewController: UIViewController {
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
             subitem: item,
-            count: columns
+            count: Int(columns)
         )
         
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = NSDirectionalEdgeInsets(
-            top: insets.top,
+            top: 0,
             leading: 0,
-            bottom: insets.bottom,
+            bottom: 0,
             trailing: 0
         )
         
