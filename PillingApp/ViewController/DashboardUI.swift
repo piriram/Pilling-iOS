@@ -38,11 +38,10 @@ enum DashboardUI {
     }
     
     enum CharacterImage: String {
-        case happy = "character_happy"
-        case proud = "character_proud"
-        case warning = "character_warning"
-        case reminder = "character_reminder"
-        case calm = "character_calm"
-        case worried = "character_worried"
+        case todayAfter = "Property 1=TakingAfter"
+        case takingBeforeTwo = "Property 1=TakingBeforeTwo"
+        case takingBefore = "Property 1=TakingBefore"
+        case warning = "Property 1=NoTaking"
+        case rest = "Property 1=Rest"
     }
 }

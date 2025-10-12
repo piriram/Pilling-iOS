@@ -318,7 +318,7 @@ final class DashboardViewController: UIViewController {
         
         viewModel.dashboardMessage
             .compactMap { $0 }
-            .asDriver(onErrorJustReturn: DashboardMessage(text: "", imageName: .calm))
+            .asDriver(onErrorJustReturn: DashboardMessage(text: "", imageName: .rest))
             .drive(onNext: { [weak self] message in
                 self?.updateMessageUI(message: message)
             })

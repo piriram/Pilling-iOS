@@ -17,7 +17,7 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
     
     func execute(cycle: PillCycle?, items: [DayItem]) -> DashboardMessage {
         guard !items.isEmpty else {
-            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .calm)
+            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest)
         }
         
         let calendar = Calendar.current
@@ -26,13 +26,33 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         guard let todayItem = items.first(where: {
             calendar.isDate($0.date, inSameDayAs: now)
         }) else {
-            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .calm)
+            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest)
         }
         
         let consecutiveMissed = calculateConsecutiveMissedDays(cycle: cycle)
         
         if consecutiveMissed >= 2 {
             return DashboardMessage(text: "저를 잊으셨나요 ㅠㅠ", imageName: .warning)
+        }
+        
+        // 자동 감지: 실제로 오늘 2번 복용 버튼을 누른 경우
+        if let cycle = cycle {
+            let todaysTakenCount = cycle.records.filter { record in
+                calendar.isDate(record.scheduledDateTime, inSameDayAs: now)
+            }.filter { record in
+                switch record.status {
+                case .todayTaken, .todayTakenDelayed:
+                    return true
+                default:
+                    return false
+                }
+            }.count
+            if todaysTakenCount >= 2 {
+                return DashboardMessage(
+                    text: "오늘 2알 복용 완료! 보정까지 잘하셨어요",
+                    imageName: .todayAfter
+                )
+            }
         }
         
         if let yesterdayItem = items.first(where: {
@@ -49,23 +69,28 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         
         switch todayItem.status {
         case .todayTaken:
-            return DashboardMessage(text: "잔디가 잘 자라고 있어요", imageName: .happy)
+            return DashboardMessage(text: "잔디가 잘 자라고 있어요", imageName: .todayAfter)
         case .todayTakenDelayed:
             return DashboardMessage(
-                text: "규칙적인 시간에 복용해주세요 내일도 화이팅!",
-                imageName: .reminder
+                text: "todayTakenDelayed",
+                imageName: .todayAfter
             )
         case .todayDelayed:
             return DashboardMessage(
-                text: "규칙적인 시간에 복용해주세요 내일도 화이팅!",
-                imageName: .worried
+                text: "todayDelayed",
+                imageName: .todayAfter
+            )
+        case .takenDouble:
+            return DashboardMessage(
+                text: "오늘 2알 복용 완료! 보정까지 잘하셨어요",
+                imageName: .takingBeforeTwo
             )
         case .todayNotTaken:
-            return DashboardMessage(text: "오늘의 약을 빠르게 먹어주세요", imageName: .reminder)
+            return DashboardMessage(text: "오늘의 약을 빠르게 먹어주세요", imageName: .takingBefore)
         case .rest:
-            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .calm)
+            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest)
         default:
-            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .calm)
+            return DashboardMessage(text: "default", imageName: .rest)
         }
     }
     
