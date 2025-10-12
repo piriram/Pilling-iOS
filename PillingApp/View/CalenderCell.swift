@@ -29,9 +29,15 @@ final class CalendarCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         let defaultCornerRadius = min(bounds.width, bounds.height) * 0.3
+        let capsuleCornerRadius = min(bounds.width, bounds.height) * 0.25
+        print("capsuleCornerRadius: \(capsuleCornerRadius)")
+        
         if backgroundShapeView.layer.cornerRadius != 0 {
             backgroundShapeView.layer.cornerRadius = defaultCornerRadius
         }
+        
+        capsule1.layer.cornerRadius = capsuleCornerRadius
+        capsule2.layer.cornerRadius = capsuleCornerRadius
     }
     
     private func setupViews() {
@@ -62,8 +68,6 @@ final class CalendarCell: UICollectionViewCell {
             make.width.equalTo(capsule1)
         }
         
-        capsule1.layer.cornerRadius = 10
-        capsule2.layer.cornerRadius = 10
         capsule1.backgroundColor = AppColor.pillGreen800
         capsule2.backgroundColor = AppColor.pillGreen800
         
