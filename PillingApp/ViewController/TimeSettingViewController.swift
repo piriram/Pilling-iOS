@@ -25,7 +25,7 @@ final class TimeSettingViewController: UIViewController {
     private let backButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        button.tintColor = .label
+        button.tintColor = AppColor.cheveronGray
         return button
     }()
     
@@ -136,13 +136,9 @@ final class TimeSettingViewController: UIViewController {
         return label
     }()
     
-    private let completeButton: UIButton = {
-        let button = UIButton()
+    private let completeButton: PrimaryActionButton = {
+        let button = PrimaryActionButton()
         button.setTitle("설정완료!", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .bold)
-        button.backgroundColor = AppColor.pillGreen200
-        button.layer.cornerRadius = 12
         return button
     }()
     
@@ -247,8 +243,8 @@ final class TimeSettingViewController: UIViewController {
         completeButton.snp.makeConstraints {
             $0.top.equalTo(healthDescriptionLabel.snp.bottom).offset(60)
             $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(56)
-            $0.bottom.equalToSuperview().offset(-40)
+            $0.height.equalTo(70)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
         }
     }
     
@@ -325,3 +321,4 @@ final class TimeSettingViewController: UIViewController {
         }
     }
 }
+
