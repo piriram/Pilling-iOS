@@ -23,13 +23,13 @@ enum PillStatus {
     var backgroundColor: UIColor {
         switch self {
         case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed:
-            return AppColor.pillGreen
+            return AppColor.pillGreen800
         case .takenDouble:
             return AppColor.pillWhite
         case .missed:
             return AppColor.pillBrown
         case .scheduled, .todayNotTaken, .todayDelayed:
-            return AppColor.pillGray
+            return AppColor.notYetGray
         case .rest:
             return AppColor.pillWhite
         }

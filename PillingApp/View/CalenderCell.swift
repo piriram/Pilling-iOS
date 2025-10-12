@@ -61,8 +61,8 @@ final class CalendarCell: UICollectionViewCell {
         
         capsule1.layer.cornerRadius = 10
         capsule2.layer.cornerRadius = 10
-        capsule1.backgroundColor = AppColor.pillGreen
-        capsule2.backgroundColor = AppColor.pillGreen
+        capsule1.backgroundColor = AppColor.pillGreen800
+        capsule2.backgroundColor = AppColor.pillGreen800
         
         capsuleContainer.isHidden = true
         contentView.backgroundColor = .clear
@@ -81,8 +81,8 @@ final class CalendarCell: UICollectionViewCell {
         }
         
         if case .rest = item.status {
-            backgroundShapeView.layer.borderWidth = 0.5
-            backgroundShapeView.layer.borderColor = AppColor.pillGray.cgColor
+            backgroundShapeView.layer.borderWidth = 1
+            backgroundShapeView.layer.borderColor = AppColor.notYetGray.cgColor
         }
         
         if case .takenDouble = item.status {

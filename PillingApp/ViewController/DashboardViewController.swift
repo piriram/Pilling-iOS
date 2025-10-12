@@ -113,10 +113,12 @@ final class DashboardViewController: UIViewController {
     }
     
     private func setupMessageCardView() {
-        messageCardView.backgroundColor = AppColor.card
+        messageCardView.backgroundColor = .clear
         messageCardView.layer.cornerRadius = DashboardUI.Metric.cornerRadius
-        messageIconImageView.tintColor = AppColor.pillGreen
-        messageLabel.textColor = AppColor.subtext
+        messageCardView.layer.borderWidth = 1
+        messageCardView.layer.borderColor = UIColor.gray.cgColor
+        messageIconImageView.tintColor = AppColor.pillGreen800
+        messageLabel.textColor = .black
     }
     
     private func setupWeekdayStackView() {
@@ -155,7 +157,7 @@ final class DashboardViewController: UIViewController {
     private func setupTakePillButton() {
         takePillButton.setTitle("잔디 심기", for: .normal)
         takePillButton.setTitleColor(.label, for: .normal)
-        takePillButton.backgroundColor = AppColor.pillGreen.withAlphaComponent(0.4)
+        takePillButton.backgroundColor = AppColor.pillGreen800.withAlphaComponent(0.4)
         takePillButton.layer.cornerRadius = DashboardUI.Metric.cornerRadius
     }
     
@@ -214,7 +216,7 @@ final class DashboardViewController: UIViewController {
         messageCardView.snp.makeConstraints { make in
             make.top.equalTo(characterImageView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(DashboardUI.Metric.contentInset)
-            make.height.equalTo(52)
+            make.height.equalTo(53)
         }
         
         messageIconImageView.snp.makeConstraints { make in
@@ -363,16 +365,16 @@ final class DashboardViewController: UIViewController {
             takePillButton.isEnabled = false
         } else if todayRecord.status.isTaken {
             takePillButton.setTitle("심기 완료!", for: .normal)
-            takePillButton.backgroundColor = AppColor.pillGray
+            takePillButton.backgroundColor = AppColor.notYetGray
             takePillButton.isEnabled = false
         } else if canTake {
             takePillButton.setTitle("잔디 심기", for: .normal)
-            takePillButton.backgroundColor = AppColor.pillGreen.withAlphaComponent(0.4)
+            takePillButton.backgroundColor = AppColor.pillGreen200
             takePillButton.isEnabled = true
         } else {
             takePillButton.setTitle("잔디 심기", for: .normal)
-            takePillButton.backgroundColor = AppColor.pillGray
-            takePillButton.isEnabled = false
+            takePillButton.backgroundColor = AppColor.pillGreen200
+            takePillButton.isEnabled = true
         }
     }
     
@@ -511,7 +513,7 @@ final class DashboardViewController: UIViewController {
         guideStackView.alignment = .leading
         
         let guideItem1 = makeGuideItem(
-            iconColor: AppColor.pillGreen,
+            iconColor: AppColor.pillGreen800,
             iconType: .solid,
             text: "피임약 복용"
         )
@@ -542,7 +544,7 @@ final class DashboardViewController: UIViewController {
         let confirmButton = UIButton(type: .system)
         confirmButton.setTitle("확인", for: .normal)
         confirmButton.setTitleColor(.label, for: .normal)
-        confirmButton.backgroundColor = AppColor.pillGray
+        confirmButton.backgroundColor = AppColor.notYetGray
         confirmButton.layer.cornerRadius = 12
         confirmButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
         
@@ -620,8 +622,8 @@ final class DashboardViewController: UIViewController {
         case .doubleCapsule:
             let capsule1 = UIView()
             let capsule2 = UIView()
-            capsule1.backgroundColor = AppColor.pillGreen
-            capsule2.backgroundColor = AppColor.pillGreen
+            capsule1.backgroundColor = AppColor.pillGreen800
+            capsule2.backgroundColor = AppColor.pillGreen800
             capsule1.layer.cornerRadius = 4
             capsule2.layer.cornerRadius = 4
             
@@ -642,7 +644,7 @@ final class DashboardViewController: UIViewController {
             }
         case .border:
             iconView.layer.borderWidth = 1
-            iconView.layer.borderColor = AppColor.pillGray.cgColor
+            iconView.layer.borderColor = AppColor.notYetGray.cgColor
         }
         
         let textLabel = UILabel()
@@ -712,3 +714,4 @@ final class DashboardViewController: UIViewController {
         return UICollectionViewCompositionalLayout(section: section)
     }
 }
+
