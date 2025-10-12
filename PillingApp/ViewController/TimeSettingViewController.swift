@@ -16,18 +16,12 @@ final class TimeSettingViewController: UIViewController {
     
     private let viewModel: TimeSettingViewModel
     private let disposeBag = DisposeBag()
+    private let contentInset: CGFloat = 16
     
     // MARK: - UI Components
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
-    
-    private let backButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        button.tintColor = AppColor.cheveronGray
-        return button
-    }()
     
     private let clockImageView: UIImageView = {
         let imageView = UIImageView()
@@ -40,18 +34,18 @@ final class TimeSettingViewController: UIViewController {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "알람 받을 시간을 설정해주세요!"
-        label.font = .systemFont(ofSize: 22, weight: .bold)
-        label.textColor = .label
-        label.textAlignment = .center
+        label.font = Typography.headline3(.bold)
+        label.textColor = AppColor.textBlack
+        label.textAlignment = .left
         return label
     }()
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.text = "설정은 추후에 변경가능합니다."
-        label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .systemGray
-        label.textAlignment = .center
+        label.font = Typography.body2(.regular)
+        label.textColor = .gray
+        label.textAlignment = .left
         return label
     }()
     
@@ -61,14 +55,14 @@ final class TimeSettingViewController: UIViewController {
         button.layer.cornerRadius = 12
         button.contentHorizontalAlignment = .left
         
-        let iconImageView = UIImageView(image: UIImage(systemName: "clock"))
-        iconImageView.tintColor = .systemGray
+        let iconImageView = UIImageView(image: UIImage(systemName: "clock.fill"))
+        iconImageView.tintColor = AppColor.textGray
         iconImageView.contentMode = .scaleAspectFit
         
         let titleLabel = UILabel()
         titleLabel.text = "복용 시간"
-        titleLabel.font = .systemFont(ofSize: 16, weight: .medium)
-        titleLabel.textColor = .label
+        titleLabel.font = Typography.body2(.medium)
+        titleLabel.textColor = AppColor.textGray
         
         let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
         chevronImageView.tintColor = .systemGray3
@@ -81,11 +75,11 @@ final class TimeSettingViewController: UIViewController {
         iconImageView.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(16)
             $0.centerY.equalToSuperview()
-            $0.size.equalTo(24)
+            $0.size.equalTo(20)
         }
         
         titleLabel.snp.makeConstraints {
-            $0.leading.equalTo(iconImageView.snp.trailing).offset(12)
+            $0.leading.equalTo(iconImageView.snp.trailing).offset(10)
             $0.centerY.equalToSuperview()
         }
         
@@ -161,16 +155,24 @@ final class TimeSettingViewController: UIViewController {
         bindViewModel()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.tintColor = .black
+    }
+    
     // MARK: - Setup
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        navigationController?.setNavigationBarHidden(true, animated: false)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationItem.title = "시간 설정"
+        navigationItem.hidesBackButton = false
+        navigationItem.backButtonDisplayMode = .default
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [backButton, clockImageView, titleLabel, subtitleLabel,
+        [clockImageView, titleLabel, subtitleLabel,
          timeSettingButton, alarmTitleLabel, alarmToggle,
          healthTitleLabel, healthToggle, healthDescriptionLabel,
          completeButton].forEach {
@@ -186,63 +188,57 @@ final class TimeSettingViewController: UIViewController {
             $0.width.equalToSuperview()
         }
         
-        backButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(16)
-            $0.leading.equalToSuperview().offset(20)
-            $0.size.equalTo(44)
-        }
-        
         clockImageView.snp.makeConstraints {
-            $0.top.equalTo(backButton.snp.bottom).offset(20)
+            $0.top.equalToSuperview().offset(28)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(180)
-            $0.height.equalTo(180)
+            $0.horizontalEdges.equalToSuperview().inset(contentInset)
+            $0.height.equalTo(200)
         }
         
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(clockImageView.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
         }
         
         subtitleLabel.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
         }
         
         timeSettingButton.snp.makeConstraints {
             $0.top.equalTo(subtitleLabel.snp.bottom).offset(40)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
             $0.height.equalTo(60)
         }
         
         alarmTitleLabel.snp.makeConstraints {
             $0.top.equalTo(timeSettingButton.snp.bottom).offset(32)
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview().offset(contentInset)
         }
         
         alarmToggle.snp.makeConstraints {
             $0.centerY.equalTo(alarmTitleLabel)
-            $0.trailing.equalToSuperview().offset(-20)
+            $0.trailing.equalToSuperview().offset(-contentInset)
         }
         
         healthTitleLabel.snp.makeConstraints {
             $0.top.equalTo(alarmTitleLabel.snp.bottom).offset(24)
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview().offset(contentInset)
         }
         
         healthToggle.snp.makeConstraints {
             $0.centerY.equalTo(healthTitleLabel)
-            $0.trailing.equalToSuperview().offset(-20)
+            $0.trailing.equalToSuperview().offset(-contentInset)
         }
         
         healthDescriptionLabel.snp.makeConstraints {
             $0.top.equalTo(healthTitleLabel.snp.bottom).offset(8)
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalToSuperview().offset(contentInset)
         }
         
         completeButton.snp.makeConstraints {
             $0.top.equalTo(healthDescriptionLabel.snp.bottom).offset(60)
-            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
             $0.height.equalTo(70)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
         }
@@ -252,7 +248,7 @@ final class TimeSettingViewController: UIViewController {
     
     private func bindViewModel() {
         let input = TimeSettingViewModel.Input(
-            backButtonTapped: backButton.rx.tap.asObservable(),
+            backButtonTapped: Observable<Void>.empty(),
             timeSettingButtonTapped: timeSettingButton.rx.tap.asObservable(),
             alarmToggleChanged: alarmToggle.rx.isOn.changed.asObservable(),
             healthToggleChanged: healthToggle.rx.isOn.changed.asObservable(),
@@ -270,12 +266,6 @@ final class TimeSettingViewController: UIViewController {
         output.navigateToDashboard
             .drive(onNext: { [weak self] in
                 self?.navigateToDashboard()
-            })
-            .disposed(by: disposeBag)
-        
-        output.dismissView
-            .drive(onNext: { [weak self] in
-                self?.navigationController?.popViewController(animated: true)
             })
             .disposed(by: disposeBag)
     }

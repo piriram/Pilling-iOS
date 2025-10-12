@@ -39,7 +39,7 @@ final class PillSettingViewController: UIViewController {
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "설정을 추후에 변경가능합니다."
+        label.text = "설정은 추후에 변경가능합니다."
         label.font = Typography.body2(.regular)
         label.textColor = .gray
         label.textAlignment = .left
@@ -104,6 +104,7 @@ final class PillSettingViewController: UIViewController {
             $0.top.equalTo(view.safeAreaLayoutGuide).inset(-20)
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.height.equalTo(200)
         }
         
         mainTitleLabel.snp.makeConstraints {
@@ -136,15 +137,10 @@ final class PillSettingViewController: UIViewController {
     }
     
     private func configureNavigationBar() {
-        // Empty title
-        navigationItem.title = ""
-        
-        // Back button appearance (iOS 13+)
-        navigationController?.navigationBar.tintColor = AppColor.cheveronGray
-        
-        // Ensure back button shows without text
-        let backItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem = backItem
+        // Use default navigation bar appearance
+        navigationItem.title = "약 설정"
+        navigationItem.hidesBackButton = false
+        navigationItem.backButtonDisplayMode = .default
     }
     
     private func bind() {
