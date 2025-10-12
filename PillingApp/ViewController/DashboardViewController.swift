@@ -248,24 +248,6 @@ final class DashboardViewController: UIViewController {
             make.trailing.lessThanOrEqualTo(gearButton.snp.leading).offset(-8)
         }
         
-        /*
-        progressLabel.snp.makeConstraints { make in
-            make.top.equalTo(gearButton.snp.bottom).offset(50)
-            make.leading.equalTo(characterImageView.snp.trailing).offset(12)
-        }
-        
-        totalLabel.snp.makeConstraints { make in
-            make.leading.equalTo(progressLabel.snp.trailing).offset(2)
-            make.lastBaseline.equalTo(progressLabel)
-        }
-        
-        dateInfoStackView.snp.makeConstraints { make in
-            make.leading.equalTo(progressLabel)
-            make.top.equalTo(progressLabel.snp.bottom).offset(6)
-            make.trailing.lessThanOrEqualTo(gearButton.snp.leading).offset(-8)
-        }
-        */
-        
         messageCardView.snp.makeConstraints { make in
             make.top.equalTo(characterImageView.snp.bottom).offset(1)
             make.leading.trailing.equalToSuperview().inset(contentInset)
@@ -730,35 +712,67 @@ final class DashboardViewController: UIViewController {
     
     // MARK: - CollectionView Layout
     
-    private func makeCompositionalLayout() -> UICollectionViewCompositionalLayout {
-        let width = view.bounds.width - 40
+    private func calculateOptimalLayout() -> (cellSize: CGFloat, horizontalSpacing: CGFloat, verticalSpacing: CGFloat) {
+        let availableWidth = view.bounds.width - 40
         let columns: CGFloat = 7
-        let spacing: CGFloat = 6
+        let minCellSize: CGFloat = 40
+        let minHorizontalSpacing: CGFloat = 4
+        let maxHorizontalSpacing: CGFloat = 16
+        let minVerticalSpacing: CGFloat = 16
+        let maxVerticalSpacing: CGFloat = 24
         
+        var bestCellSize: CGFloat = minCellSize
+        var bestHorizontalSpacing: CGFloat = minHorizontalSpacing
+        
+        // 가로 여백을 순회하면서 최적의 조합 찾기
+        for horizontalSpacing in stride(from: minHorizontalSpacing, through: maxHorizontalSpacing, by: 1) {
+            let totalHorizontalSpacing = horizontalSpacing * (columns - 1)
+            let cellSize = (availableWidth - totalHorizontalSpacing) / columns
+            
+            if cellSize >= minCellSize {
+                bestCellSize = cellSize
+                bestHorizontalSpacing = horizontalSpacing
+            }
+        }
+        
+        // 세로 여백 계산 - 남는 공간에 따라 조정
+        let verticalSpacing: CGFloat = {
+            if bestCellSize < 45 {
+                return minVerticalSpacing
+            } else if bestCellSize < 50 {
+                return 18
+            } else if bestCellSize < 55 {
+                return 20
+            } else if bestCellSize < 60 {
+                return 22
+            } else {
+                return maxVerticalSpacing
+            }
+        }()
+        
+        return (bestCellSize, bestHorizontalSpacing, verticalSpacing)
+    }
+    
+    private func makeCompositionalLayout() -> UICollectionViewCompositionalLayout {
+        let layout = calculateOptimalLayout()
         let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0 / columns),
-            heightDimension: .fractionalWidth(1.0 / columns)
+            widthDimension: .absolute(layout.cellSize),
+            heightDimension: .absolute(layout.cellSize)
         )
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(
-            top: spacing / 2,
-            leading: spacing / 2,
-            bottom: spacing / 2,
-            trailing: spacing / 2
-        )
         
-        let groupHeight = NSCollectionLayoutDimension.fractionalWidth(1.0 / columns)
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: groupHeight
+            heightDimension: .absolute(layout.cellSize)
         )
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
-            subitem: item,
-            count: Int(columns)
+            subitems: [item]
         )
+        group.interItemSpacing = .fixed(layout.horizontalSpacing)
         
         let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = layout.verticalSpacing
         section.contentInsets = NSDirectionalEdgeInsets(
             top: 0,
             leading: 0,
@@ -769,4 +783,3 @@ final class DashboardViewController: UIViewController {
         return UICollectionViewCompositionalLayout(section: section)
     }
 }
-
