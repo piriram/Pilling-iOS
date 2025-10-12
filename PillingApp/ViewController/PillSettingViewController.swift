@@ -58,15 +58,10 @@ final class PillSettingViewController: UIViewController {
         return button
     }()
     
-    private let nextButton: UIButton = {
-        let button = UIButton()
+    private let nextButton: PrimaryActionButton = {
+        let button = PrimaryActionButton()
         button.setTitle("다음으로", for: .normal)
-        button.setTitleColor(AppColor.textBlack, for: .normal)
-        button.titleLabel?.font = Typography.headline5(.bold)
-        button.backgroundColor = AppColor.pillGreen600.withAlphaComponent(0.7)
-        button.layer.cornerRadius = 16
         button.isEnabled = false
-        button.alpha = 0.8
         return button
     }()
     
@@ -87,6 +82,7 @@ final class PillSettingViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupConstraints()
+        configureNavigationBar()
         bind()
     }
     
@@ -139,6 +135,18 @@ final class PillSettingViewController: UIViewController {
         }
     }
     
+    private func configureNavigationBar() {
+        // Empty title
+        navigationItem.title = ""
+        
+        // Back button appearance (iOS 13+)
+        navigationController?.navigationBar.tintColor = AppColor.cheveronGray
+        
+        // Ensure back button shows without text
+        let backItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backItem
+    }
+    
     private func bind() {
         // Input
         pillTypeButton.rx.tap
@@ -168,20 +176,6 @@ final class PillSettingViewController: UIViewController {
         
         viewModel.output.isNextButtonEnabled
             .drive(nextButton.rx.isEnabled)
-            .disposed(by: disposeBag)
-        
-        viewModel.output.isNextButtonEnabled
-            .drive(onNext: { [weak self] isEnabled in
-                self?.nextButton.alpha = isEnabled ? 1.0 : 0.5
-            })
-            .disposed(by: disposeBag)
-        
-        viewModel.output.isNextButtonEnabled
-            .drive(onNext: { [weak self] isEnabled in
-                let enabledColor = AppColor.pillGreen600
-                let disabledColor = AppColor.pillGreen600.withAlphaComponent(0.5)
-                self?.nextButton.backgroundColor = isEnabled ? enabledColor : disabledColor
-            })
             .disposed(by: disposeBag)
         
         viewModel.output.presentDatePicker
@@ -396,9 +390,7 @@ final class PillSettingViewModel {
         let selectedStartDateText = selectedStartDateRelay
             .map { date -> String? in
                 guard let date = date else { return nil }
-                let dateText = PillSettingViewModel.dateFormatter.string(from: date)
-                let days = PillSettingViewModel.calculateDaysSinceStart(from: date)
-                return "\(dateText) (\(days)일째)"
+                return PillSettingViewModel.formatDateWithDayInfo(date: date)
             }
         
         let proceed = nextButtonTappedSubject
@@ -454,6 +446,27 @@ final class PillSettingViewModel {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day], from: startDate, to: Date())
         return (components.day ?? 0) + 1 // 1일차부터 시작
+    }
+    
+    private static func formatDateWithDayInfo(date: Date) -> String {
+        let dateText = dateFormatter.string(from: date)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let selectedDay = calendar.startOfDay(for: date)
+        
+        if selectedDay < today {
+            // 과거: N일째
+            let days = calculateDaysSinceStart(from: date)
+            return "\(dateText) (\(days)일째)"
+        } else if selectedDay == today {
+            // 오늘
+            return "\(dateText) (오늘)"
+        } else {
+            // 미래: N일 남음
+            let components = calendar.dateComponents([.day], from: today, to: selectedDay)
+            let daysRemaining = components.day ?? 0
+            return "\(dateText) (\(daysRemaining)일 남음)"
+        }
     }
 }
 

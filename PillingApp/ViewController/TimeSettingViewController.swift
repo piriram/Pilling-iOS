@@ -31,8 +31,9 @@ final class TimeSettingViewController: UIViewController {
     
     private let clockImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "clock_image") // 에셋 이미지
+        imageView.image = UIImage(named: "clock_image")
         imageView.contentMode = .scaleAspectFit
+        imageView.image = UIImage(named: "timeSetting")
         return imageView
     }()
     
