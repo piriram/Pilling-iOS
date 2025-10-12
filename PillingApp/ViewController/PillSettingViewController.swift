@@ -198,7 +198,14 @@ final class PillSettingViewController: UIViewController {
         
         viewModel.output.proceed
             .emit(onNext: { [weak self] in
-                // TODO: 다음 화면으로 이동 처리 (예: pushViewController)
+                guard let self = self else { return }
+                let vm = DIContainer.shared.makeTimeSettingViewModel()
+                let nextVC = TimeSettingViewController(viewModel: vm)
+                if let nav = self.navigationController {
+                    nav.pushViewController(nextVC, animated: true)
+                } else {
+                    self.present(nextVC, animated: true)
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -209,7 +216,6 @@ final class PillSettingViewController: UIViewController {
         let datePickerVC = DatePickerBottomSheetViewController()
         
         datePickerVC.selectedDate
-            .take(1)
             .bind(to: viewModel.input.dateSelected)
             .disposed(by: disposeBag)
         
@@ -220,7 +226,6 @@ final class PillSettingViewController: UIViewController {
         let pillTypeVC = PillTypeBottomSheetViewController()
         
         pillTypeVC.pillInfoSelected
-            .take(1)
             .bind(to: viewModel.input.pillInfoSelected)
             .disposed(by: disposeBag)
         
@@ -363,7 +368,7 @@ final class PillSettingViewModel {
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "yyyy년 MM월 dd일"
+        formatter.dateFormat = "MM월 dd일"
         return formatter
     }()
     
@@ -451,3 +456,4 @@ final class PillSettingViewModel {
         return (components.day ?? 0) + 1 // 1일차부터 시작
     }
 }
+
