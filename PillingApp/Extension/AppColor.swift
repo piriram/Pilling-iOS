@@ -12,16 +12,21 @@ public enum AppColor {
     public static let bg = UIColor(hexString: "FFFFFF")
     public static let card = UIColor.secondarySystemBackground
     public static let pillGreen800 = UIColor(hexString: "7EDD1C")
+    public static let pillGreen600 = UIColor(hexString: "AFF466")
     public static let pillGreen200 = UIColor(hexString: "AFF466")
     public static let pillBrown = UIColor(hexString: "B8A07D")
     public static let notYetGray = UIColor(hexString: "3C3C43").withAlphaComponent(0.18)
     public static let pillWhite = UIColor.white
     public static let pillBorder = UIColor(hexString: "7EDD1C")
-    public static let text = UIColor(hexString: "222222")
-//    public static let subtext = UIColor.secondaryLabel
+    public static let textBlack = UIColor(hexString: "222222")
+    //    public static let subtext = UIColor.secondaryLabel
     public static let secondary = UIColor(hexString: "3C3C43").withAlphaComponent(0.6)
     public static let weekdayText = UIColor(hexString: "3C3C43").withAlphaComponent(0.3)
     public static let borderGray = UIColor(hexString: "D9D9D9")
+    public static let textGray = UIColor(hexString: "606060")
+    public static let cheveronGray = UIColor(hexString: "A3A3A3")
+    public static let grayBackground = UIColor(hexString: "F7F7F7")
+    
 }
 
 

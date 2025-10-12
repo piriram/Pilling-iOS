@@ -162,7 +162,7 @@ final class DashboardViewController: UIViewController {
         messageIconImageView.contentMode = .scaleAspectFit
         
         messageLabel.font = Typography.body2(.medium)
-        messageLabel.textColor = AppColor.text
+        messageLabel.textColor = AppColor.textBlack
         messageLabel.numberOfLines = 1
     }
     
@@ -380,7 +380,7 @@ final class DashboardViewController: UIViewController {
         let currentDay = daysSinceStart + 1
         
         progressLabel.text = "\(currentDay)일차"
-        progressLabel.textColor = AppColor.text
+        progressLabel.textColor = AppColor.textBlack
         totalLabel.text = "/\(cycle.totalDays)"
         
         dateLabel.text = "\(cycle.activeDays)/\(cycle.breakDays)"
@@ -555,7 +555,7 @@ final class DashboardViewController: UIViewController {
         let textLabel = UILabel()
         textLabel.text = text
         textLabel.font = .systemFont(ofSize: 16, weight: .regular)
-        textLabel.textColor = AppColor.text
+        textLabel.textColor = AppColor.textBlack
         
         containerView.addSubview(calendarCell)
         containerView.addSubview(textLabel)

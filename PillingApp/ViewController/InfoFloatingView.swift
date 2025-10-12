@@ -68,7 +68,7 @@ final class InfoFloatingView: UIView {
         
         titleLabel.text = "필링 가이드"
         titleLabel.font = Typography.body1(.bold)
-        titleLabel.textColor = AppColor.text
+        titleLabel.textColor = AppColor.textBlack
         
         subtitleLabel.text = "피임약 복용 상태를 잔디로 알려드려요!"
         subtitleLabel.font = Typography.body2(.regular)
@@ -161,7 +161,7 @@ final class InfoFloatingView: UIView {
         let textLabel = UILabel()
         textLabel.text = text
         textLabel.font = Typography.body2(.regular)
-        textLabel.textColor = AppColor.text
+        textLabel.textColor = AppColor.textBlack
         
         containerView.addSubview(calendarCell)
         containerView.addSubview(textLabel)

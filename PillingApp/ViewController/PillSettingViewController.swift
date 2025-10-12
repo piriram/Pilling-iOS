@@ -24,47 +24,49 @@ final class PillSettingViewController: UIViewController {
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        // TODO: 실제 이미지 에셋 설정 필요
+        imageView.image = UIImage(named: "PillSetting")
         return imageView
     }()
     
     private let mainTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "복용하고 계신 약을 알려주세요!"
-        label.font = .systemFont(ofSize: 24, weight: .bold)
-        label.textColor = .black
-        label.textAlignment = .center
+        label.font = Typography.headline3(.bold)
+        label.textColor = AppColor.textBlack
+        label.textAlignment = .left
         return label
     }()
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "설정을 추후에 변경하실수니다."
-        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.text = "설정을 추후에 변경가능합니다."
+        label.font = Typography.body2(.regular)
         label.textColor = .gray
-        label.textAlignment = .center
+        label.textAlignment = .left
         return label
     }()
     
     private let pillTypeButton: SettingItemButton = {
         let button = SettingItemButton()
-        button.configure(title: "약 종류")
+        button.configure(title: "약 종류", iconSystemName: "pills")
         return button
     }()
     
     private let currentDaysButton: SettingItemButton = {
         let button = SettingItemButton()
-        button.configure(title: "복용 시작 날짜")
+        button.configure(title: "복용 시작 날짜", iconSystemName: "calendar")
         return button
     }()
     
     private let nextButton: UIButton = {
         let button = UIButton()
         button.setTitle("다음으로", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
-        button.backgroundColor = UIColor(red: 0.75, green: 0.95, blue: 0.45, alpha: 1.0)
-        button.layer.cornerRadius = 12
+        button.setTitleColor(AppColor.textBlack, for: .normal)
+        button.titleLabel?.font = Typography.headline5(.bold)
+        button.backgroundColor = AppColor.pillGreen600.withAlphaComponent(0.7)
+        button.layer.cornerRadius = 16
+        button.isEnabled = false
+        button.alpha = 0.8
         return button
     }()
     
@@ -103,37 +105,37 @@ final class PillSettingViewController: UIViewController {
     
     private func setupConstraints() {
         iconImageView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(60)
+            $0.top.equalTo(view.safeAreaLayoutGuide).inset(-20)
             $0.centerX.equalToSuperview()
-            $0.width.height.equalTo(200)
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
         
         mainTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(iconImageView.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.top.equalTo(iconImageView.snp.bottom).offset(20)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         
         subtitleLabel.snp.makeConstraints {
             $0.top.equalTo(mainTitleLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.leading.trailing.equalToSuperview().inset(16)
         }
         
         pillTypeButton.snp.makeConstraints {
             $0.top.equalTo(subtitleLabel.snp.bottom).offset(40)
-            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(60)
         }
         
         currentDaysButton.snp.makeConstraints {
-            $0.top.equalTo(pillTypeButton.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.top.equalTo(pillTypeButton.snp.bottom).offset(16)
+            $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(60)
         }
         
         nextButton.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.leading.trailing.equalToSuperview().inset(16)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            $0.height.equalTo(56)
+            $0.height.equalTo(70)
         }
     }
     
@@ -174,6 +176,14 @@ final class PillSettingViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        viewModel.output.isNextButtonEnabled
+            .drive(onNext: { [weak self] isEnabled in
+                let enabledColor = AppColor.pillGreen600
+                let disabledColor = AppColor.pillGreen600.withAlphaComponent(0.5)
+                self?.nextButton.backgroundColor = isEnabled ? enabledColor : disabledColor
+            })
+            .disposed(by: disposeBag)
+        
         viewModel.output.presentDatePicker
             .emit(onNext: { [weak self] in
                 self?.presentDatePickerBottomSheet()
@@ -183,6 +193,12 @@ final class PillSettingViewController: UIViewController {
         viewModel.output.presentPillTypePicker
             .emit(onNext: { [weak self] in
                 self?.presentPillTypeBottomSheet()
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.output.proceed
+            .emit(onNext: { [weak self] in
+                // TODO: 다음 화면으로 이동 처리 (예: pushViewController)
             })
             .disposed(by: disposeBag)
     }
@@ -216,17 +232,26 @@ final class PillSettingViewController: UIViewController {
 
 final class SettingItemButton: UIButton {
     
+    private let leadingIconImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = AppColor.cheveronGray
+        imageView.setContentHuggingPriority(.required, for: .horizontal)
+        imageView.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return imageView
+    }()
+    
     private let itemTitleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .black
+        label.font = Typography.body2(.medium)
+        label.textColor = AppColor.textGray
         return label
     }()
     
     private let valueLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .regular)
-        label.textColor = .lightGray
+        label.font = Typography.body2(.regular)
+        label.textColor = AppColor.textGray
         label.textAlignment = .right
         return label
     }()
@@ -234,7 +259,7 @@ final class SettingItemButton: UIButton {
     private let arrowImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "chevron.right")
-        imageView.tintColor = .lightGray
+        imageView.tintColor = AppColor.cheveronGray
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -250,24 +275,31 @@ final class SettingItemButton: UIButton {
     }
     
     private func setupUI() {
-        backgroundColor = UIColor(white: 0.97, alpha: 1.0)
+        backgroundColor = AppColor.grayBackground
         layer.cornerRadius = 12
         
+        addSubview(leadingIconImageView)
         addSubview(itemTitleLabel)
         addSubview(valueLabel)
         addSubview(arrowImageView)
     }
     
     private func setupConstraints() {
+        leadingIconImageView.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(16)
+            $0.centerY.equalToSuperview()
+            $0.width.height.equalTo(20)
+        }
+        
         itemTitleLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(20)
+            $0.leading.equalTo(leadingIconImageView.snp.trailing).offset(10)
             $0.centerY.equalToSuperview()
         }
         
         arrowImageView.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-20)
+            $0.trailing.equalToSuperview().offset(-14)
             $0.centerY.equalToSuperview()
-            $0.width.height.equalTo(16)
+            $0.width.height.equalTo(20)
         }
         
         valueLabel.snp.makeConstraints {
@@ -277,8 +309,15 @@ final class SettingItemButton: UIButton {
         }
     }
     
-    func configure(title: String) {
+    func configure(title: String, iconSystemName: String? = nil) {
         itemTitleLabel.text = title
+        if let name = iconSystemName {
+            leadingIconImageView.image = UIImage(systemName: name)
+            leadingIconImageView.isHidden = false
+        } else {
+            leadingIconImageView.image = nil
+            leadingIconImageView.isHidden = true
+        }
     }
     
     func setValue(_ value: String?) {
@@ -304,6 +343,7 @@ final class PillSettingViewModel {
         let isNextButtonEnabled: Driver<Bool>
         let presentDatePicker: Signal<Void>
         let presentPillTypePicker: Signal<Void>
+        let proceed: Signal<Void>
     }
     
     // MARK: - Properties
@@ -356,6 +396,12 @@ final class PillSettingViewModel {
                 return "\(dateText) (\(days)일째)"
             }
         
+        let proceed = nextButtonTappedSubject
+            .withLatestFrom(isNextButtonEnabled)
+            .filter { $0 }
+            .map { _ in () }
+            .asSignal(onErrorSignalWith: .empty())
+        
         // Input 초기화
         self.input = Input(
             pillTypeButtonTapped: pillTypeButtonTappedSubject.asObserver(),
@@ -371,7 +417,8 @@ final class PillSettingViewModel {
             selectedStartDateText: selectedStartDateText.asDriver(onErrorJustReturn: nil),
             isNextButtonEnabled: isNextButtonEnabled.asDriver(onErrorJustReturn: false),
             presentDatePicker: startDateButtonTappedSubject.asSignal(onErrorSignalWith: .empty()),
-            presentPillTypePicker: pillTypeButtonTappedSubject.asSignal(onErrorSignalWith: .empty())
+            presentPillTypePicker: pillTypeButtonTappedSubject.asSignal(onErrorSignalWith: .empty()),
+            proceed: proceed
         )
         
         // 바인딩
@@ -393,11 +440,7 @@ final class PillSettingViewModel {
             })
             .disposed(by: disposeBag)
         
-        nextButtonTappedSubject
-            .subscribe(onNext: {
-                // TODO: 다음 화면으로 이동
-            })
-            .disposed(by: disposeBag)
+        // Removed nextButtonTappedSubject subscription with TODO comment
     }
     
     // MARK: - Private Methods
