@@ -163,8 +163,8 @@ final class DashboardViewController: UIViewController {
             let label = UILabel()
             label.text = weekdayText
             label.textAlignment = .center
-            label.textColor = AppColor.subtext
-            label.font = .systemFont(ofSize: 12, weight: .medium)
+            label.textColor = AppColor.weekdayText
+            label.font = Typography.caption(.medium)
             containerView.addSubview(label)
             label.snp.makeConstraints { make in
                 make.center.equalToSuperview()
@@ -221,11 +221,11 @@ final class DashboardViewController: UIViewController {
     }
     
     private func setupConstraints() {
-        let contentInset: CGFloat = 20
+        let contentInset: CGFloat = 16
         
         infoButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(12)
-            make.trailing.equalTo(gearButton.snp.leading).offset(-12)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(14)
+            make.trailing.equalTo(gearButton.snp.leading).offset(-8)
             make.width.height.equalTo(30)
         }
         
@@ -236,7 +236,7 @@ final class DashboardViewController: UIViewController {
         }
         
         characterImageView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(4)
+            make.top.equalTo(infoButton.snp.bottom)
             make.leading.equalToSuperview().inset(contentInset)
             make.width.lessThanOrEqualTo(180)
             make.height.equalTo(180)
@@ -245,35 +245,35 @@ final class DashboardViewController: UIViewController {
         headerInfoStackView.snp.makeConstraints { make in
             make.centerY.equalTo(characterImageView.snp.centerY)
             make.leading.equalTo(characterImageView.snp.trailing).offset(12)
-            make.trailing.lessThanOrEqualTo(gearButton.snp.leading).offset(-8)
+            make.trailing.equalTo(view.safeAreaLayoutGuide)
         }
         
         messageCardView.snp.makeConstraints { make in
-            make.top.equalTo(characterImageView.snp.bottom).offset(1)
+            make.top.lessThanOrEqualTo(characterImageView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(contentInset)
-            make.height.equalTo(56)
+            make.height.equalTo(52)
         }
         
         messageIconImageView.snp.makeConstraints { make in
-            make.leading.equalToSuperview().inset(16)
+            make.leading.equalToSuperview().inset(24)
             make.centerY.equalToSuperview()
             make.width.height.equalTo(20)
         }
         
         messageLabel.snp.makeConstraints { make in
-            make.leading.equalTo(messageIconImageView.snp.trailing).offset(10)
+            make.leading.equalTo(messageIconImageView.snp.trailing).offset(16)
             make.trailing.equalToSuperview().inset(16)
             make.centerY.equalToSuperview()
         }
         
         weekdayStackView.snp.makeConstraints { make in
-            make.top.equalTo(messageCardView.snp.bottom).offset(16)
+            make.top.lessThanOrEqualTo(messageCardView.snp.bottom).offset(32)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(20)
         }
         
         calendarCollectionView.snp.makeConstraints { make in
-            make.top.equalTo(weekdayStackView.snp.bottom).offset(4)
+            make.top.lessThanOrEqualTo(weekdayStackView.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(280)
         }
@@ -281,13 +281,13 @@ final class DashboardViewController: UIViewController {
         pageControl.snp.makeConstraints { make in
             make.top.equalTo(calendarCollectionView.snp.bottom).offset(16)
             make.centerX.equalToSuperview()
-            make.height.equalTo(8)
+            make.height.equalTo(12)
         }
         
         takePillButton.snp.makeConstraints { make in
-            make.top.equalTo(pageControl.snp.bottom).offset(16)
+            make.top.equalTo(pageControl.snp.bottom).offset(28)
             make.leading.trailing.equalToSuperview().inset(contentInset)
-            make.height.equalTo(80)
+            make.height.equalTo(70)
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
     }
