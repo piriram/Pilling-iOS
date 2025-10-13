@@ -4,7 +4,7 @@
 //
 //  Created by 잠만보김쥬디 on 10/12/25.
 //
-import UIKit
+
 import UIKit
 import RxSwift
 import RxCocoa
@@ -78,9 +78,8 @@ final class DashboardViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: false)
-        // If you also want content under status bar, allow extended layout
-        self.extendedLayoutIncludesOpaqueBars = true
-        self.edgesForExtendedLayout = [.top, .left, .right, .bottom]
+        extendedLayoutIncludesOpaqueBars = true
+        edgesForExtendedLayout = [.top, .left, .right, .bottom]
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -98,8 +97,6 @@ final class DashboardViewController: UIViewController {
         backgroundImageView.snp.makeConstraints { make in
             make.top.equalTo(view.snp.top)
             make.leading.trailing.equalToSuperview()
-            // Let the image be tall enough to cover the header area; extend down to message card top
-            // Use greaterThanOrEqual to avoid layout conflicts on small screens
             make.bottom.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.top).offset(220)
         }
     }
@@ -343,9 +340,26 @@ final class DashboardViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        viewModel.pillInfo
+            .compactMap { $0 }
+            .asDriver(onErrorJustReturn: PillInfo(name: "", takingDays: 0, breakDays: 0))
+            .drive(onNext: { [weak self] pillInfo in
+                self?.dateLabel.text = "\(pillInfo.takingDays)/\(pillInfo.breakDays)"
+            })
+            .disposed(by: disposeBag)
+        
         viewModel.currentCycle
             .compactMap { $0 }
-            .asDriver(onErrorJustReturn: viewModel.currentCycle.value!)
+            .asDriver(onErrorJustReturn: PillCycle(
+                id: UUID(),
+                cycleNumber: 1,
+                startDate: Date(),
+                activeDays: 21,
+                breakDays: 7,
+                scheduledTime: "09:00",
+                records: [],
+                createdAt: Date()
+            ))
             .drive(onNext: { [weak self] cycle in
                 self?.updateCycleUI(cycle: cycle)
                 self?.updateBackgroundForToday()
@@ -411,8 +425,6 @@ final class DashboardViewController: UIViewController {
         progressLabel.textColor = AppColor.textBlack
         totalLabel.text = "/\(cycle.totalDays)"
         
-        dateLabel.text = "\(cycle.activeDays)/\(cycle.breakDays)"
-        
         timeLabel.text = cycle.scheduledTime
         
         updateWeekdayStart(from: cycle.startDate)
@@ -433,7 +445,6 @@ final class DashboardViewController: UIViewController {
         let calendar = Calendar.current
         let now = Date()
         guard let todayRecord = cycle.records.first(where: { calendar.isDate($0.scheduledDateTime, inSameDayAs: now) }) else {
-            // Default background when no record found
             backgroundImageView.image = UIImage(named: "background")
             return
         }
@@ -698,4 +709,3 @@ final class DashboardViewController: UIViewController {
         return UICollectionViewCompositionalLayout(section: section)
     }
 }
-

@@ -59,6 +59,10 @@ final class DIContainer {
         return CalculateDashboardMessageUseCase()
     }
     
+    func makeCreatePillCycleUseCase() -> CreatePillCycleUseCaseProtocol {
+        return CreatePillCycleUseCase(cycleRepository: makePillCycleRepository())
+    }
+    
     // MARK: - ViewModels
     
     func makeDashboardViewModel() -> DashboardViewModel {
@@ -66,7 +70,8 @@ final class DIContainer {
             fetchDashboardDataUseCase: makeFetchDashboardDataUseCase(),
             takePillUseCase: makeTakePillUseCase(),
             updatePillStatusUseCase: makeUpdatePillStatusUseCase(),
-            calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase()
+            calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase(),
+            userDefaultsManager: makeUserDefaultsManager()
         )
     }
     
@@ -77,7 +82,9 @@ final class DIContainer {
     func makeTimeSettingViewModel() -> TimeSettingViewModel {
         return TimeSettingViewModel(
             settingsRepository: makeUserSettingsRepository(),
-            notificationManager: makeNotificationManager()
+            notificationManager: makeNotificationManager(),
+            userDefaultsManager: makeUserDefaultsManager(),
+            createPillCycleUseCase: makeCreatePillCycleUseCase()
         )
     }
     

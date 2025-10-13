@@ -60,7 +60,16 @@ final class PillSettingViewModel {
     init(userDefaultsManager: UserDefaultsManagerProtocol) {
         self.userDefaultsManager = userDefaultsManager
         
-        // Output에 필요한 Observable 먼저 생성
+        // Input 초기화
+        self.input = Input(
+            pillTypeButtonTapped: pillTypeButtonTappedSubject.asObserver(),
+            startDateButtonTapped: startDateButtonTappedSubject.asObserver(),
+            dateSelected: dateSelectedSubject.asObserver(),
+            pillInfoSelected: pillInfoSelectedSubject.asObserver(),
+            nextButtonTapped: nextButtonTappedSubject.asObserver()
+        )
+        
+        // Output에 필요한 Observable 생성
         let isNextButtonEnabled = Observable
             .combineLatest(
                 selectedPillInfoRelay.asObservable(),
@@ -82,12 +91,7 @@ final class PillSettingViewModel {
                 return PillSettingViewModel.formatDateWithDayInfo(date: date)
             }
         
-        // Avoid capturing self before initialization by using a local handler
-        let saveHandler: (PillInfo, Date) -> Void = { [userDefaultsManager] pillInfo, startDate in
-            // Call a static helper to persist without touching self
-            PillSettingViewModel.savePillSettings(pillInfo: pillInfo, startDate: startDate, using: userDefaultsManager)
-        }
-        
+        // userDefaultsManager를 캡처하여 사용
         let proceed = nextButtonTappedSubject
             .withLatestFrom(
                 Observable.combineLatest(
@@ -101,20 +105,12 @@ final class PillSettingViewModel {
                 }
                 return (pillInfo, startDate)
             }
-            .do(onNext: { pillInfo, startDate in
-                saveHandler(pillInfo, startDate)
+            .do(onNext: { [userDefaultsManager] pillInfo, startDate in
+                userDefaultsManager.savePillInfo(pillInfo)
+                userDefaultsManager.savePillStartDate(startDate)
             })
             .map { _ in () }
             .asSignal(onErrorSignalWith: .empty())
-        
-        // Input 초기화
-        self.input = Input(
-            pillTypeButtonTapped: pillTypeButtonTappedSubject.asObserver(),
-            startDateButtonTapped: startDateButtonTappedSubject.asObserver(),
-            dateSelected: dateSelectedSubject.asObserver(),
-            pillInfoSelected: pillInfoSelectedSubject.asObserver(),
-            nextButtonTapped: nextButtonTappedSubject.asObserver()
-        )
         
         // Output 초기화
         self.output = Output(
@@ -148,16 +144,6 @@ final class PillSettingViewModel {
     
     // MARK: - Private Methods
     
-    private static func savePillSettings(pillInfo: PillInfo, startDate: Date, using manager: UserDefaultsManagerProtocol) {
-        manager.savePillInfo(pillInfo)
-        manager.savePillStartDate(startDate)
-    }
-    
-    private func savePillSettings(pillInfo: PillInfo, startDate: Date) {
-        userDefaultsManager.savePillInfo(pillInfo)
-        userDefaultsManager.savePillStartDate(startDate)
-    }
-    
     private static func calculateDaysSinceStart(from startDate: Date) -> Int {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day], from: startDate, to: Date())
@@ -181,4 +167,3 @@ final class PillSettingViewModel {
         }
     }
 }
-

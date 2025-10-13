@@ -32,6 +32,8 @@ final class TimeSettingViewModel {
     
     private let settingsRepository: UserSettingsRepositoryProtocol
     private let notificationManager: NotificationManagerProtocol
+    private let userDefaultsManager: UserDefaultsManagerProtocol
+    private let createPillCycleUseCase: CreatePillCycleUseCaseProtocol
     private let disposeBag = DisposeBag()
     
     private let selectedTime = BehaviorRelay<Date>(value: Date())
@@ -42,10 +44,14 @@ final class TimeSettingViewModel {
     
     init(
         settingsRepository: UserSettingsRepositoryProtocol,
-        notificationManager: NotificationManagerProtocol
+        notificationManager: NotificationManagerProtocol,
+        userDefaultsManager: UserDefaultsManagerProtocol,
+        createPillCycleUseCase: CreatePillCycleUseCaseProtocol
     ) {
         self.settingsRepository = settingsRepository
         self.notificationManager = notificationManager
+        self.userDefaultsManager = userDefaultsManager
+        self.createPillCycleUseCase = createPillCycleUseCase
     }
     
     // MARK: - Transform
@@ -67,7 +73,7 @@ final class TimeSettingViewModel {
         let showSettingComplete = input.completeButtonTapped
             .flatMapLatest { [weak self] _ -> Observable<Void> in
                 guard let self = self else { return .empty() }
-                return self.setupNotificationAndSaveSettings()
+                return self.completeSetup()
                     .catch { error in
                         let errorMessage = self.handleError(error)
                         errorTracker.onNext(errorMessage)
@@ -97,6 +103,31 @@ final class TimeSettingViewModel {
     }
     
     // MARK: - Private Methods
+    
+    private func completeSetup() -> Observable<Void> {
+        // 1. UserDefaults에서 약 정보 로드
+        guard let pillInfo = userDefaultsManager.loadPillInfo(),
+              let startDate = userDefaultsManager.loadPillStartDate() else {
+            return .error(SetupError.missingPillInfo)
+        }
+        
+        // 2. 시간을 "HH:mm" 형식 문자열로 변환
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm"
+        let scheduledTimeString = timeFormatter.string(from: selectedTime.value)
+        
+        // 3. PillCycle 생성 및 CoreData 저장
+        return createPillCycleUseCase.execute(
+            pillInfo: pillInfo,
+            startDate: startDate,
+            scheduledTime: scheduledTimeString
+        )
+        .flatMap { [weak self] _ -> Observable<Void> in
+            guard let self = self else { return .empty() }
+            // 4. 알림 설정 및 UserSettings 저장
+            return self.setupNotificationAndSaveSettings()
+        }
+    }
     
     private func setupNotificationAndSaveSettings() -> Observable<Void> {
         // 1. 알림 권한 요청
@@ -151,6 +182,20 @@ final class TimeSettingViewModel {
                 return "유효하지 않은 시간입니다."
             }
         }
+        
+        if let setupError = error as? SetupError {
+            switch setupError {
+            case .missingPillInfo:
+                return "약 정보를 찾을 수 없습니다.\n처음부터 다시 설정해주세요."
+            }
+        }
+        
         return "오류가 발생했습니다.\n다시 시도해주세요."
     }
+}
+
+// MARK: - SetupError
+
+enum SetupError: Error {
+    case missingPillInfo
 }

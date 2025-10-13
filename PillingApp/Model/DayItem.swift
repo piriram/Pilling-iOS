@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 // MARK: - Domain/Entities/DayItem.swift
 
 struct DayItem {
@@ -14,17 +15,17 @@ struct DayItem {
     let status: PillStatus
 }
 
-enum PillStatus {
-    case taken
-    case takenDelayed
-    case takenDouble
-    case missed
-    case todayNotTaken
-    case todayTaken
-    case todayTakenDelayed
-    case todayDelayed
-    case scheduled
-    case rest
+enum PillStatus: Int {
+    case taken = 0
+    case takenDelayed = 1
+    case takenDouble = 2
+    case missed = 3
+    case todayNotTaken = 4
+    case todayTaken = 5
+    case todayTakenDelayed = 6
+    case todayDelayed = 7
+    case scheduled = 8
+    case rest = 9
     
     var backgroundColor: UIColor {
         switch self {

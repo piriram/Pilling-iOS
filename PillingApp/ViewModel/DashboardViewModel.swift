@@ -8,6 +8,7 @@
 import Foundation
 import RxSwift
 import RxCocoa
+
 // MARK: - Presentation/Dashboard/ViewModels/DashboardViewModel.swift
 
 final class DashboardViewModel {
@@ -16,6 +17,7 @@ final class DashboardViewModel {
     private let takePillUseCase: TakePillUseCaseProtocol
     private let updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol
     private let calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
+    private let userDefaultsManager: UserDefaultsManagerProtocol
     
     private let disposeBag = DisposeBag()
     
@@ -26,6 +28,7 @@ final class DashboardViewModel {
     let items = BehaviorRelay<[DayItem]>(value: [])
     let dashboardMessage = BehaviorRelay<DashboardMessage?>(value: nil)
     let canTakePill = BehaviorRelay<Bool>(value: false)
+    let pillInfo = BehaviorRelay<PillInfo?>(value: nil)
     
     // MARK: - Initialization
     
@@ -33,17 +36,26 @@ final class DashboardViewModel {
         fetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol,
         takePillUseCase: TakePillUseCaseProtocol,
         updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol,
-        calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
+        calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,
+        userDefaultsManager: UserDefaultsManagerProtocol
     ) {
         self.fetchDashboardDataUseCase = fetchDashboardDataUseCase
         self.takePillUseCase = takePillUseCase
         self.updatePillStatusUseCase = updatePillStatusUseCase
         self.calculateDashboardMessageUseCase = calculateDashboardMessageUseCase
+        self.userDefaultsManager = userDefaultsManager
         
+        loadPillInfo()
         loadDashboardData()
     }
     
     // MARK: - Private Methods
+    
+    private func loadPillInfo() {
+        if let info = userDefaultsManager.loadPillInfo() {
+            pillInfo.accept(info)
+        }
+    }
     
     private func loadDashboardData() {
         fetchDashboardDataUseCase.execute()
