@@ -54,13 +54,9 @@ final class TimePickerBottomSheet: UIViewController {
         return picker
     }()
     
-    private let confirmButton: UIButton = {
-        let button = UIButton()
+    private let confirmButton: PrimaryActionButton = {
+        let button = PrimaryActionButton()
         button.setTitle("확인", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = Typography.body1(.bold)
-        button.backgroundColor = AppColor.pillGreen200
-        button.layer.cornerRadius = 12
         return button
     }()
     
@@ -128,7 +124,6 @@ final class TimePickerBottomSheet: UIViewController {
         confirmButton.snp.makeConstraints {
             $0.top.equalTo(datePicker.snp.bottom).offset(24)
             $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(56)
             $0.bottom.lessThanOrEqualToSuperview().offset(-20)
         }
     }
@@ -205,3 +200,4 @@ final class TimePickerBottomSheet: UIViewController {
         }
     }
 }
+

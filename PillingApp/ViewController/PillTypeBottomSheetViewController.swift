@@ -63,7 +63,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "피임약 정보 입력"
+        label.text = "복용 정보 입력"
         label.font = .systemFont(ofSize: 20, weight: .bold)
         label.textColor = .black
         return label
@@ -71,7 +71,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let pillNameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "피임약 이름"
+        textField.placeholder = "약 이름"
         textField.font = .systemFont(ofSize: 16, weight: .regular)
         textField.borderStyle = .none
         textField.backgroundColor = UIColor(white: 0.97, alpha: 1.0)
@@ -141,15 +141,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
         return picker
     }()
     
-    private let confirmButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("확인", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
-        button.backgroundColor = UIColor(red: 0.75, green: 0.95, blue: 0.45, alpha: 1.0)
-        button.layer.cornerRadius = 12
-        return button
-    }()
+    private let confirmButton = PrimaryActionButton()
     
     private var containerViewBottomConstraint: Constraint?
     private var currentPickerType: PickerType = .takingDays
@@ -203,6 +195,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
         containerView.addSubview(breakDaysLabel)
         containerView.addSubview(breakDaysButton)
         containerView.addSubview(confirmButton)
+        confirmButton.setTitle("설정완료", for: .normal)
         
         view.addSubview(pickerContainerView)
         pickerContainerView.addSubview(pickerToolbar)
@@ -315,18 +308,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     }
     
     private func bind() {
-        let isFormValid = pillNameTextField.rx.text.orEmpty
-            .map { !$0.isEmpty }
-        
-        isFormValid
-            .bind(to: confirmButton.rx.isEnabled)
-            .disposed(by: disposeBag)
-        
-        isFormValid
-            .bind(onNext: { [weak self] isEnabled in
-                self?.confirmButton.alpha = isEnabled ? 1.0 : 0.5
-            })
-            .disposed(by: disposeBag)
+        confirmButton.isEnabled = true
         
         takingDaysButton.rx.tap
             .subscribe(onNext: { [weak self] in
@@ -342,7 +324,6 @@ final class PillTypeBottomSheetViewController: UIViewController {
         
         confirmButton.rx.tap
             .withLatestFrom(pillNameTextField.rx.text.orEmpty)
-            .filter { !$0.isEmpty }
             .map { [weak self] name -> PillInfo in
                 guard let self = self else {
                     return PillInfo(name: name, takingDays: 24, breakDays: 4)
@@ -511,3 +492,4 @@ extension PillTypeBottomSheetViewController: UIPickerViewDelegate, UIPickerViewD
         }
     }
 }
+

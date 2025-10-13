@@ -36,7 +36,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func configureIQKeyboardManager() {
         IQKeyboardManager.shared.isEnabled = true
         IQKeyboardManager.shared.resignOnTouchOutside = true
-        IQKeyboardManager.shared.keyboardDistance = 32
+        IQKeyboardManager.shared.keyboardDistance = 40
         IQKeyboardManager.shared.resignOnTouchOutside = true
     }
     

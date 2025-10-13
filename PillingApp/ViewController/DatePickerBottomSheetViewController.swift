@@ -50,15 +50,6 @@ final class DatePickerBottomSheetViewController: UIViewController {
         return view
     }()
     
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "복용 시작 날짜"
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
-        label.textColor = .black
-        label.textAlignment = .center
-        return label
-    }()
-    
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.text = "날짜를 선택하면 자동으로 저장됩니다"
@@ -122,7 +113,6 @@ final class DatePickerBottomSheetViewController: UIViewController {
         view.addSubview(containerView)
         
         containerView.addSubview(handleBar)
-        containerView.addSubview(titleLabel)
         containerView.addSubview(subtitleLabel)
         containerView.addSubview(datePicker)
     }
@@ -144,13 +134,8 @@ final class DatePickerBottomSheetViewController: UIViewController {
             $0.height.equalTo(5)
         }
         
-        titleLabel.snp.makeConstraints {
-            $0.top.equalTo(handleBar.snp.bottom).offset(20)
-            $0.leading.trailing.equalToSuperview().inset(24)
-        }
-        
         subtitleLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(8)
+            $0.top.equalTo(handleBar.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(24)
         }
         
@@ -269,3 +254,4 @@ final class DatePickerBottomSheetViewController: UIViewController {
         }
     }
 }
+

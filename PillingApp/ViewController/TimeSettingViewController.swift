@@ -49,46 +49,10 @@ final class TimeSettingViewController: UIViewController {
         return label
     }()
     
-    private let timeSettingButton: UIButton = {
-        let button = UIButton()
-        button.backgroundColor = .systemGray6
-        button.layer.cornerRadius = 12
-        button.contentHorizontalAlignment = .left
-        
-        let iconImageView = UIImageView(image: UIImage(systemName: "clock.fill"))
-        iconImageView.tintColor = AppColor.textGray
-        iconImageView.contentMode = .scaleAspectFit
-        
-        let titleLabel = UILabel()
-        titleLabel.text = "복용 시간"
-        titleLabel.font = Typography.body2(.medium)
-        titleLabel.textColor = AppColor.textGray
-        
-        let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
-        chevronImageView.tintColor = .systemGray3
-        chevronImageView.contentMode = .scaleAspectFit
-        
-        button.addSubview(iconImageView)
-        button.addSubview(titleLabel)
-        button.addSubview(chevronImageView)
-        
-        iconImageView.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(16)
-            $0.centerY.equalToSuperview()
-            $0.size.equalTo(20)
-        }
-        
-        titleLabel.snp.makeConstraints {
-            $0.leading.equalTo(iconImageView.snp.trailing).offset(10)
-            $0.centerY.equalToSuperview()
-        }
-        
-        chevronImageView.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-16)
-            $0.centerY.equalToSuperview()
-            $0.size.equalTo(20)
-        }
-        
+    private let timeSettingButton: SettingItemButton = {
+        let button = SettingItemButton()
+        button.configure(title: "복용 시간", iconSystemName: "clock.fill")
+        button.setValue(nil)
         return button
     }()
     
@@ -285,6 +249,12 @@ final class TimeSettingViewController: UIViewController {
             .take(1)
             .subscribe(onNext: { [weak self] date in
                 self?.viewModel.updateTime(date)
+                let formatter = DateFormatter()
+                formatter.locale = Locale(identifier: Locale.preferredLanguages.first ?? "ko_KR")
+                formatter.dateStyle = .none
+                formatter.timeStyle = .short
+                let timeString = formatter.string(from: date)
+                self?.timeSettingButton.setValue(timeString)
             })
             .disposed(by: disposeBag)
         
@@ -338,3 +308,4 @@ final class TimeSettingViewController: UIViewController {
         present(alert, animated: true)
     }
 }
+
