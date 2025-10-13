@@ -19,6 +19,7 @@ final class DashboardViewController: UIViewController {
     
     // MARK: - UI Components
     
+    private let backgroundImageView = UIImageView(image: UIImage(named: "background"))
     private let infoButton = UIButton(type: .system)
     private let gearButton = UIButton(type: .system)
     private let characterImageView = UIImageView()
@@ -61,9 +62,12 @@ final class DashboardViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupBackgroundImage()
+        setupHeaderViews()
         setupViews()
         setupConstraints()
         bindViewModel()
+        updateBackgroundForToday()
     }
     
     override func viewDidLayoutSubviews() {
@@ -85,6 +89,20 @@ final class DashboardViewController: UIViewController {
     }
     
     // MARK: - Setup
+    
+    private func setupBackgroundImage() {
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.clipsToBounds = true
+        view.addSubview(backgroundImageView)
+        view.sendSubviewToBack(backgroundImageView)
+        backgroundImageView.snp.makeConstraints { make in
+            make.top.equalTo(view.snp.top)
+            make.leading.trailing.equalToSuperview()
+            // Let the image be tall enough to cover the header area; extend down to message card top
+            // Use greaterThanOrEqual to avoid layout conflicts on small screens
+            make.bottom.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.top).offset(220)
+        }
+    }
     
     private func setupViews() {
         view.backgroundColor = AppColor.bg
@@ -330,6 +348,7 @@ final class DashboardViewController: UIViewController {
             .asDriver(onErrorJustReturn: viewModel.currentCycle.value!)
             .drive(onNext: { [weak self] cycle in
                 self?.updateCycleUI(cycle: cycle)
+                self?.updateBackgroundForToday()
             })
             .disposed(by: disposeBag)
         
@@ -338,6 +357,7 @@ final class DashboardViewController: UIViewController {
             .asDriver(onErrorJustReturn: DashboardMessage(text: "", imageName: .rest))
             .drive(onNext: { [weak self] message in
                 self?.updateMessageUI(message: message)
+                self?.updateBackgroundForToday()
             })
             .disposed(by: disposeBag)
         
@@ -405,6 +425,23 @@ final class DashboardViewController: UIViewController {
             characterImageView.image = image
         } else {
             characterImageView.image = UIImage(systemName: "face.smiling")
+        }
+    }
+    
+    private func updateBackgroundForToday() {
+        guard let cycle = viewModel.currentCycle.value else { return }
+        let calendar = Calendar.current
+        let now = Date()
+        guard let todayRecord = cycle.records.first(where: { calendar.isDate($0.scheduledDateTime, inSameDayAs: now) }) else {
+            // Default background when no record found
+            backgroundImageView.image = UIImage(named: "background")
+            return
+        }
+        switch todayRecord.status {
+        case .rest:
+            backgroundImageView.image = UIImage(named: "restBackground")
+        default:
+            backgroundImageView.image = UIImage(named: "background")
         }
     }
     
