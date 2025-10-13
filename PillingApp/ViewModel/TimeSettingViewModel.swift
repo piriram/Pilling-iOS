@@ -109,10 +109,11 @@ final class TimeSettingViewModel {
                     return .error(NotificationError.permissionDenied)
                 }
                 
-                // 2. 알림 스케줄링
+                // 2. 알림 스케줄링 (기본 메시지 사용)
                 return self.notificationManager.scheduleDailyNotification(
                     at: self.selectedTime.value,
-                    isEnabled: self.isAlarmEnabled.value
+                    isEnabled: self.isAlarmEnabled.value,
+                    message: UserSettings.default.notificationMessage
                 )
             }
             .flatMap { [weak self] _ -> Observable<Void> in
@@ -131,7 +132,8 @@ final class TimeSettingViewModel {
                 let updatedSettings = UserSettings(
                     scheduledTime: self.selectedTime.value,
                     notificationEnabled: self.isAlarmEnabled.value,
-                    delayThresholdMinutes: currentSettings.delayThresholdMinutes
+                    delayThresholdMinutes: currentSettings.delayThresholdMinutes,
+                    notificationMessage: currentSettings.notificationMessage
                 )
                 
                 return self.settingsRepository.saveSettings(updatedSettings)

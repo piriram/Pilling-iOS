@@ -45,7 +45,7 @@ final class LocalNotificationManager: NotificationManagerProtocol {
         }
     }
     
-    func scheduleDailyNotification(at time: Date, isEnabled: Bool) -> Observable<Void> {
+    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String) -> Observable<Void> {
         return Observable.create { [weak self] observer in
             guard let self = self else {
                 observer.onError(NotificationError.schedulingFailed)
@@ -64,8 +64,8 @@ final class LocalNotificationManager: NotificationManagerProtocol {
             
             // 알림 콘텐츠 설정
             let content = UNMutableNotificationContent()
-            content.title = "💊 복용 시간이에요!"
-            content.body = "건강한 하루를 위해 약을 복용해주세요."
+            content.title = "잔디 타임"
+            content.body = message
             content.sound = .default
             content.badge = 1
             
@@ -119,6 +119,7 @@ final class LocalNotificationManager: NotificationManagerProtocol {
         }
     }
 }
+
 enum NotificationError: Error {
     case permissionDenied
     case schedulingFailed
@@ -127,7 +128,7 @@ enum NotificationError: Error {
 
 protocol NotificationManagerProtocol {
     func requestAuthorization() -> Observable<Bool>
-    func scheduleDailyNotification(at time: Date, isEnabled: Bool) -> Observable<Void>
+    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String) -> Observable<Void>
     func cancelAllNotifications()
     func checkAuthorizationStatus() -> Observable<Bool>
 }

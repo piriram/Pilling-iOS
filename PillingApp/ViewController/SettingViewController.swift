@@ -47,7 +47,7 @@ final class SettingViewController: UIViewController {
         titleLabel.textColor = AppColor.textGray
         
         let timeLabel = UILabel()
-        timeLabel.tag = 100 // 시간 표시용 레이블 태그
+        timeLabel.tag = 100
         timeLabel.text = "오전 9:00"
         timeLabel.font = Typography.body2(.regular)
         timeLabel.textColor = AppColor.textBlack
@@ -79,6 +79,64 @@ final class SettingViewController: UIViewController {
         }
         
         timeLabel.snp.makeConstraints {
+            $0.trailing.equalTo(chevronImageView.snp.leading).offset(-8)
+            $0.centerY.equalToSuperview()
+        }
+        
+        return button
+    }()
+    
+    private let messageSettingButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemGray6
+        button.layer.cornerRadius = 12
+        button.contentHorizontalAlignment = .left
+        
+        let iconImageView = UIImageView(image: UIImage(systemName: "text.bubble.fill"))
+        iconImageView.tintColor = AppColor.textGray
+        iconImageView.contentMode = .scaleAspectFit
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "알림 메시지"
+        titleLabel.font = Typography.body2(.medium)
+        titleLabel.textColor = AppColor.textGray
+        
+        let messageLabel = UILabel()
+        messageLabel.tag = 101
+        messageLabel.text = "건강한 하루를 위해..."
+        messageLabel.font = Typography.body2(.regular)
+        messageLabel.textColor = AppColor.textBlack
+        messageLabel.textAlignment = .right
+        messageLabel.lineBreakMode = .byTruncatingTail
+        
+        let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
+        chevronImageView.tintColor = .systemGray3
+        chevronImageView.contentMode = .scaleAspectFit
+        
+        button.addSubview(iconImageView)
+        button.addSubview(titleLabel)
+        button.addSubview(messageLabel)
+        button.addSubview(chevronImageView)
+        
+        iconImageView.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(16)
+            $0.centerY.equalToSuperview()
+            $0.size.equalTo(20)
+        }
+        
+        titleLabel.snp.makeConstraints {
+            $0.leading.equalTo(iconImageView.snp.trailing).offset(10)
+            $0.centerY.equalToSuperview()
+        }
+        
+        chevronImageView.snp.makeConstraints {
+            $0.trailing.equalToSuperview().offset(-16)
+            $0.centerY.equalToSuperview()
+            $0.size.equalTo(20)
+        }
+        
+        messageLabel.snp.makeConstraints {
+            $0.leading.equalTo(titleLabel.snp.trailing).offset(8)
             $0.trailing.equalTo(chevronImageView.snp.leading).offset(-8)
             $0.centerY.equalToSuperview()
         }
@@ -178,7 +236,7 @@ final class SettingViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [alarmSectionLabel, timeSettingButton, alarmToggleContainer,
+        [alarmSectionLabel, timeSettingButton, messageSettingButton, alarmToggleContainer,
          otherSectionLabel, healthToggleContainer, healthDescriptionLabel].forEach {
             contentView.addSubview($0)
         }
@@ -211,8 +269,14 @@ final class SettingViewController: UIViewController {
             $0.height.equalTo(60)
         }
         
-        alarmToggleContainer.snp.makeConstraints {
+        messageSettingButton.snp.makeConstraints {
             $0.top.equalTo(timeSettingButton.snp.bottom).offset(12)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
+            $0.height.equalTo(60)
+        }
+        
+        alarmToggleContainer.snp.makeConstraints {
+            $0.top.equalTo(messageSettingButton.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(contentInset)
             $0.height.equalTo(60)
         }
@@ -265,6 +329,7 @@ final class SettingViewController: UIViewController {
         let input = SettingViewModel.Input(
             viewWillAppear: viewWillAppear,
             timeSettingTapped: timeSettingButton.rx.tap.asObservable(),
+            messageSettingTapped: messageSettingButton.rx.tap.asObservable(),
             alarmToggleChanged: alarmToggle.rx.isOn.changed.asObservable(),
             healthToggleChanged: healthToggle.rx.isOn.changed.asObservable()
         )
@@ -282,6 +347,13 @@ final class SettingViewController: UIViewController {
         output.showTimePicker
             .drive(onNext: { [weak self] in
                 self?.showTimePicker()
+            })
+            .disposed(by: disposeBag)
+        
+        // 메시지 설정 Alert 표시
+        output.showMessageEditor
+            .drive(onNext: { [weak self] currentMessage in
+                self?.showMessageEditor(currentMessage: currentMessage)
             })
             .disposed(by: disposeBag)
         
@@ -311,9 +383,13 @@ final class SettingViewController: UIViewController {
         formatter.dateFormat = "a h:mm"
         timeLabel?.text = formatter.string(from: settings.scheduledTime)
         
+        // 메시지 표시 업데이트
+        let messageLabel = messageSettingButton.viewWithTag(101) as? UILabel
+        messageLabel?.text = settings.notificationMessage
+        
         // 토글 상태 업데이트
         alarmToggle.isOn = settings.notificationEnabled
-        healthToggle.isOn = false // Health 설정은 추후 구현
+        healthToggle.isOn = false
     }
     
     private func showTimePicker() {
@@ -337,6 +413,48 @@ final class SettingViewController: UIViewController {
             .disposed(by: disposeBag)
         
         present(bottomSheet, animated: true)
+    }
+    
+    private func showMessageEditor(currentMessage: String) {
+        let alert = UIAlertController(
+            title: "알림 메시지 수정",
+            message: "받고 싶은 알림 메시지를 입력해주세요",
+            preferredStyle: .alert
+        )
+        
+        alert.addTextField { textField in
+            textField.text = currentMessage
+            textField.placeholder = "알림 메시지 입력"
+            textField.clearButtonMode = .whileEditing
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self, weak alert] _ in
+            guard let self = self,
+                  let textField = alert?.textFields?.first,
+                  let newMessage = textField.text,
+                  !newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return
+            }
+            
+            self.viewModel.updateMessage(newMessage)
+                .observe(on: MainScheduler.instance)
+                .subscribe(
+                    onNext: { [weak self] in
+                        self?.showToast(message: "알림 메시지가 변경되었습니다")
+                    },
+                    onError: { [weak self] error in
+                        self?.showAlert(title: "오류", message: "메시지 변경에 실패했습니다", isError: true)
+                    }
+                )
+                .disposed(by: self.disposeBag)
+        }
+        
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        
+        present(alert, animated: true)
     }
     
     private func showAlert(title: String, message: String, isError: Bool) {

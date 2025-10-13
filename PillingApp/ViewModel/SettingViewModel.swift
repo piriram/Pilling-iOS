@@ -16,6 +16,7 @@ final class SettingViewModel {
     struct Input {
         let viewWillAppear: Observable<Void>
         let timeSettingTapped: Observable<Void>
+        let messageSettingTapped: Observable<Void>
         let alarmToggleChanged: Observable<Bool>
         let healthToggleChanged: Observable<Bool>
     }
@@ -23,6 +24,7 @@ final class SettingViewModel {
     struct Output {
         let currentSettings: Driver<UserSettings>
         let showTimePicker: Driver<Void>
+        let showMessageEditor: Driver<String>
         let showError: Driver<String>
         let showSuccess: Driver<String>
     }
@@ -95,6 +97,11 @@ final class SettingViewModel {
         let showTimePicker = input.timeSettingTapped
             .asDriver(onErrorJustReturn: ())
         
+        let showMessageEditor = input.messageSettingTapped
+            .withLatestFrom(currentSettingsRelay.asObservable())
+            .map { $0.notificationMessage }
+            .asDriver(onErrorJustReturn: "")
+        
         let currentSettings = currentSettingsRelay
             .asDriver(onErrorJustReturn: .default)
         
@@ -107,6 +114,7 @@ final class SettingViewModel {
         return Output(
             currentSettings: currentSettings,
             showTimePicker: showTimePicker,
+            showMessageEditor: showMessageEditor,
             showError: showError,
             showSuccess: showSuccess
         )
@@ -120,7 +128,8 @@ final class SettingViewModel {
         let updatedSettings = UserSettings(
             scheduledTime: date,
             notificationEnabled: currentSettings.notificationEnabled,
-            delayThresholdMinutes: currentSettings.delayThresholdMinutes
+            delayThresholdMinutes: currentSettings.delayThresholdMinutes,
+            notificationMessage: currentSettings.notificationMessage
         )
         
         // 1. 설정 저장
@@ -135,7 +144,39 @@ final class SettingViewModel {
                 
                 return self.notificationManager.scheduleDailyNotification(
                     at: date,
-                    isEnabled: currentSettings.notificationEnabled
+                    isEnabled: currentSettings.notificationEnabled,
+                    message: currentSettings.notificationMessage
+                )
+            }
+            .do(onNext: { [weak self] in
+                self?.currentSettingsRelay.accept(updatedSettings)
+            })
+    }
+    
+    func updateMessage(_ message: String) -> Observable<Void> {
+        let currentSettings = currentSettingsRelay.value
+        
+        let updatedSettings = UserSettings(
+            scheduledTime: currentSettings.scheduledTime,
+            notificationEnabled: currentSettings.notificationEnabled,
+            delayThresholdMinutes: currentSettings.delayThresholdMinutes,
+            notificationMessage: message
+        )
+        
+        // 1. 설정 저장
+        return settingsRepository.saveSettings(updatedSettings)
+            .flatMap { [weak self] _ -> Observable<Void> in
+                guard let self = self else { return .empty() }
+                
+                // 2. 알림 재설정 (알림이 활성화된 경우에만)
+                guard currentSettings.notificationEnabled else {
+                    return .just(())
+                }
+                
+                return self.notificationManager.scheduleDailyNotification(
+                    at: currentSettings.scheduledTime,
+                    isEnabled: currentSettings.notificationEnabled,
+                    message: message
                 )
             }
             .do(onNext: { [weak self] in
@@ -151,7 +192,8 @@ final class SettingViewModel {
         let updatedSettings = UserSettings(
             scheduledTime: currentSettings.scheduledTime,
             notificationEnabled: isEnabled,
-            delayThresholdMinutes: currentSettings.delayThresholdMinutes
+            delayThresholdMinutes: currentSettings.delayThresholdMinutes,
+            notificationMessage: currentSettings.notificationMessage
         )
         
         // 1. 알림 권한 확인 및 스케줄링
@@ -166,7 +208,8 @@ final class SettingViewModel {
                 // 2. 알림 스케줄링 (비활성화 시 기존 알림 삭제)
                 return self.notificationManager.scheduleDailyNotification(
                     at: currentSettings.scheduledTime,
-                    isEnabled: isEnabled
+                    isEnabled: isEnabled,
+                    message: currentSettings.notificationMessage
                 )
             }
             .flatMap { [weak self] _ -> Observable<Void> in
@@ -186,7 +229,8 @@ final class SettingViewModel {
         let updatedSettings = UserSettings(
             scheduledTime: currentSettings.scheduledTime,
             notificationEnabled: currentSettings.notificationEnabled,
-            delayThresholdMinutes: currentSettings.delayThresholdMinutes
+            delayThresholdMinutes: currentSettings.delayThresholdMinutes,
+            notificationMessage: currentSettings.notificationMessage
         )
         
         return settingsRepository.saveSettings(updatedSettings)
