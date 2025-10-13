@@ -24,6 +24,10 @@ final class DIContainer {
         return LocalNotificationManager()
     }
     
+    func makeUserDefaultsManager() -> UserDefaultsManagerProtocol {
+        return UserDefaultsManager()
+    }
+    
     // MARK: - Repositories
     
     func makePillCycleRepository() -> PillCycleRepositoryProtocol {
@@ -64,6 +68,10 @@ final class DIContainer {
             updatePillStatusUseCase: makeUpdatePillStatusUseCase(),
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase()
         )
+    }
+    
+    func makePillSettingViewModel() -> PillSettingViewModel {
+        return PillSettingViewModel(userDefaultsManager: makeUserDefaultsManager())
     }
     
     func makeTimeSettingViewModel() -> TimeSettingViewModel {

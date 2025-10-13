@@ -35,6 +35,8 @@ final class PillSettingViewModel {
     let input: Input
     let output: Output
     
+    private let userDefaultsManager: UserDefaultsManagerProtocol
+    
     private let pillTypeButtonTappedSubject = PublishSubject<Void>()
     private let startDateButtonTappedSubject = PublishSubject<Void>()
     private let dateSelectedSubject = PublishSubject<Date>()
@@ -55,7 +57,9 @@ final class PillSettingViewModel {
     
     // MARK: - Initialization
     
-    init() {
+    init(userDefaultsManager: UserDefaultsManagerProtocol) {
+        self.userDefaultsManager = userDefaultsManager
+        
         // Output에 필요한 Observable 먼저 생성
         let isNextButtonEnabled = Observable
             .combineLatest(
@@ -78,9 +82,28 @@ final class PillSettingViewModel {
                 return PillSettingViewModel.formatDateWithDayInfo(date: date)
             }
         
+        // Avoid capturing self before initialization by using a local handler
+        let saveHandler: (PillInfo, Date) -> Void = { [userDefaultsManager] pillInfo, startDate in
+            // Call a static helper to persist without touching self
+            PillSettingViewModel.savePillSettings(pillInfo: pillInfo, startDate: startDate, using: userDefaultsManager)
+        }
+        
         let proceed = nextButtonTappedSubject
-            .withLatestFrom(isNextButtonEnabled)
-            .filter { $0 }
+            .withLatestFrom(
+                Observable.combineLatest(
+                    selectedPillInfoRelay.asObservable(),
+                    selectedStartDateRelay.asObservable()
+                )
+            )
+            .compactMap { pillInfo, startDate -> (PillInfo, Date)? in
+                guard let pillInfo = pillInfo, let startDate = startDate else {
+                    return nil
+                }
+                return (pillInfo, startDate)
+            }
+            .do(onNext: { pillInfo, startDate in
+                saveHandler(pillInfo, startDate)
+            })
             .map { _ in () }
             .asSignal(onErrorSignalWith: .empty())
         
@@ -121,11 +144,19 @@ final class PillSettingViewModel {
                 self?.selectedStartDateRelay.accept(date)
             })
             .disposed(by: disposeBag)
-        
-        // Removed nextButtonTappedSubject subscription with TODO comment
     }
     
     // MARK: - Private Methods
+    
+    private static func savePillSettings(pillInfo: PillInfo, startDate: Date, using manager: UserDefaultsManagerProtocol) {
+        manager.savePillInfo(pillInfo)
+        manager.savePillStartDate(startDate)
+    }
+    
+    private func savePillSettings(pillInfo: PillInfo, startDate: Date) {
+        userDefaultsManager.savePillInfo(pillInfo)
+        userDefaultsManager.savePillStartDate(startDate)
+    }
     
     private static func calculateDaysSinceStart(from startDate: Date) -> Int {
         let calendar = Calendar.current
@@ -150,3 +181,4 @@ final class PillSettingViewModel {
         }
     }
 }
+

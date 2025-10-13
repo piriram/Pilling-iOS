@@ -76,8 +76,6 @@ final class PillSettingViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // Removed override func viewDidAppear(_ animated: Bool)
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -137,7 +135,6 @@ final class PillSettingViewController: UIViewController {
     }
     
     private func configureNavigationBar() {
-        // Use default navigation bar appearance
         navigationItem.title = "약 설정"
         navigationItem.hidesBackButton = false
         navigationItem.backButtonDisplayMode = .default
@@ -220,8 +217,3 @@ final class PillSettingViewController: UIViewController {
         present(pillTypeVC, animated: false)
     }
 }
-
-
-
-
-

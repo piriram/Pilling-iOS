@@ -6,6 +6,14 @@
 //
 
 import Foundation
+// MARK: - PillInfo
+
+struct PillInfo {
+    let name: String
+    let takingDays: Int
+    let breakDays: Int
+}
+
 // MARK: - Domain/Entities/PillRecord.swift
 
 struct PillRecord {

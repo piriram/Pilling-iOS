@@ -19,8 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         // Window 생성
         let window = UIWindow(windowScene: windowScene)
-        
-        let viewModel = PillSettingViewModel()
+        let vm = DIContainer.shared.makeUserDefaultsManager()
+        let viewModel = PillSettingViewModel(userDefaultsManager: vm)
         let pillSettingViewController = PillSettingViewController(viewModel: viewModel)
 
         // Wrap with a navigation controller

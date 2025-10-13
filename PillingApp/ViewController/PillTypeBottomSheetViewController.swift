@@ -10,14 +10,6 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
-// MARK: - PillInfo
-
-struct PillInfo {
-    let name: String
-    let takingDays: Int
-    let breakDays: Int
-}
-
 // MARK: - PillTypeBottomSheetViewController
 
 final class PillTypeBottomSheetViewController: UIViewController {
