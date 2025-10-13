@@ -19,6 +19,7 @@ final class SettingViewModel {
         let messageSettingTapped: Observable<Void>
         let alarmToggleChanged: Observable<Bool>
         let healthToggleChanged: Observable<Bool>
+        let newPillCycleTapped: Observable<Void>
     }
     
     struct Output {
@@ -27,24 +28,33 @@ final class SettingViewModel {
         let showMessageEditor: Driver<String>
         let showError: Driver<String>
         let showSuccess: Driver<String>
+        let showNewPillCycleConfirmation: Driver<Void>
+        let navigateToPillSetting: Driver<Void>
     }
     
     // MARK: - Properties
     
     private let settingsRepository: UserSettingsRepositoryProtocol
     private let notificationManager: NotificationManagerProtocol
+    private let pillCycleRepository: PillCycleRepositoryProtocol
+    private let userDefaultsManager: UserDefaultsManagerProtocol
     private let disposeBag = DisposeBag()
     
     private let currentSettingsRelay = BehaviorRelay<UserSettings>(value: .default)
+    private let navigateToPillSettingSubject = PublishSubject<Void>()
     
     // MARK: - Initialization
     
     init(
         settingsRepository: UserSettingsRepositoryProtocol,
-        notificationManager: NotificationManagerProtocol
+        notificationManager: NotificationManagerProtocol,
+        pillCycleRepository: PillCycleRepositoryProtocol,
+        userDefaultsManager: UserDefaultsManagerProtocol
     ) {
         self.settingsRepository = settingsRepository
         self.notificationManager = notificationManager
+        self.pillCycleRepository = pillCycleRepository
+        self.userDefaultsManager = userDefaultsManager
     }
     
     // MARK: - Transform
@@ -102,6 +112,12 @@ final class SettingViewModel {
             .map { $0.notificationMessage }
             .asDriver(onErrorJustReturn: "")
         
+        let showNewPillCycleConfirmation = input.newPillCycleTapped
+            .asDriver(onErrorJustReturn: ())
+        
+        let navigateToPillSetting = navigateToPillSettingSubject
+            .asDriver(onErrorJustReturn: ())
+        
         let currentSettings = currentSettingsRelay
             .asDriver(onErrorJustReturn: .default)
         
@@ -116,7 +132,9 @@ final class SettingViewModel {
             showTimePicker: showTimePicker,
             showMessageEditor: showMessageEditor,
             showError: showError,
-            showSuccess: showSuccess
+            showSuccess: showSuccess,
+            showNewPillCycleConfirmation: showNewPillCycleConfirmation,
+            navigateToPillSetting: navigateToPillSetting
         )
     }
     
@@ -132,12 +150,10 @@ final class SettingViewModel {
             notificationMessage: currentSettings.notificationMessage
         )
         
-        // 1. 설정 저장
         return settingsRepository.saveSettings(updatedSettings)
             .flatMap { [weak self] _ -> Observable<Void> in
                 guard let self = self else { return .empty() }
                 
-                // 2. 알림 재설정 (알림이 활성화된 경우에만)
                 guard currentSettings.notificationEnabled else {
                     return .just(())
                 }
@@ -163,12 +179,10 @@ final class SettingViewModel {
             notificationMessage: message
         )
         
-        // 1. 설정 저장
         return settingsRepository.saveSettings(updatedSettings)
             .flatMap { [weak self] _ -> Observable<Void> in
                 guard let self = self else { return .empty() }
                 
-                // 2. 알림 재설정 (알림이 활성화된 경우에만)
                 guard currentSettings.notificationEnabled else {
                     return .just(())
                 }
@@ -184,6 +198,18 @@ final class SettingViewModel {
             })
     }
     
+    func startNewPillCycle() -> Observable<Void> {
+        // 1. 기존 사이클 삭제
+        return pillCycleRepository.deleteAllCycles()
+            .do(onNext: { [weak self] in
+                // 2. UserDefaults 삭제
+                self?.userDefaultsManager.clearPillSettings()
+                
+                // 3. 화면 전환 트리거
+                self?.navigateToPillSettingSubject.onNext(())
+            })
+    }
+    
     // MARK: - Private Methods
     
     private func updateAlarmSetting(isEnabled: Bool) -> Observable<Void> {
@@ -196,7 +222,6 @@ final class SettingViewModel {
             notificationMessage: currentSettings.notificationMessage
         )
         
-        // 1. 알림 권한 확인 및 스케줄링
         return notificationManager.requestAuthorization()
             .flatMap { [weak self] granted -> Observable<Void> in
                 guard let self = self else { return .empty() }
@@ -205,7 +230,6 @@ final class SettingViewModel {
                     return .error(NotificationError.permissionDenied)
                 }
                 
-                // 2. 알림 스케줄링 (비활성화 시 기존 알림 삭제)
                 return self.notificationManager.scheduleDailyNotification(
                     at: currentSettings.scheduledTime,
                     isEnabled: isEnabled,
@@ -214,8 +238,6 @@ final class SettingViewModel {
             }
             .flatMap { [weak self] _ -> Observable<Void> in
                 guard let self = self else { return .empty() }
-                
-                // 3. 설정 저장
                 return self.settingsRepository.saveSettings(updatedSettings)
             }
             .do(onNext: { [weak self] in

@@ -34,4 +34,5 @@ protocol PillCycleRepositoryProtocol {
     func fetchCurrentCycle() -> Observable<PillCycle?>
     func saveCycle(_ cycle: PillCycle) -> Observable<Void>
     func updateRecord(_ record: PillRecord, in cycleID: UUID) -> Observable<Void>
+    func deleteAllCycles() -> Observable<Void>
 }

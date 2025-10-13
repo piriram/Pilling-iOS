@@ -23,6 +23,24 @@ final class SettingViewController: UIViewController {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
+    private let pillSectionLabel: UILabel = {
+        let label = UILabel()
+        label.text = "약 설정"
+        label.font = Typography.headline3(.bold)
+        label.textColor = AppColor.textBlack
+        return label
+    }()
+    
+    private let newPillCycleButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = AppColor.pillGreen200
+        button.layer.cornerRadius = 12
+        button.setTitle("새 약 복용 시작하기", for: .normal)
+        button.setTitleColor(.label, for: .normal)
+        button.titleLabel?.font = Typography.body1(.bold)
+        return button
+    }()
+    
     private let alarmSectionLabel: UILabel = {
         let label = UILabel()
         label.text = "알림 설정"
@@ -236,8 +254,8 @@ final class SettingViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [alarmSectionLabel, timeSettingButton, messageSettingButton, alarmToggleContainer,
-         otherSectionLabel, healthToggleContainer, healthDescriptionLabel].forEach {
+        [pillSectionLabel, newPillCycleButton, alarmSectionLabel, timeSettingButton, messageSettingButton,
+         alarmToggleContainer, otherSectionLabel, healthToggleContainer, healthDescriptionLabel].forEach {
             contentView.addSubview($0)
         }
         
@@ -258,8 +276,19 @@ final class SettingViewController: UIViewController {
             $0.width.equalToSuperview()
         }
         
-        alarmSectionLabel.snp.makeConstraints {
+        pillSectionLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(24)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
+        }
+        
+        newPillCycleButton.snp.makeConstraints {
+            $0.top.equalTo(pillSectionLabel.snp.bottom).offset(16)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
+            $0.height.equalTo(60)
+        }
+        
+        alarmSectionLabel.snp.makeConstraints {
+            $0.top.equalTo(newPillCycleButton.snp.bottom).offset(32)
             $0.leading.trailing.equalToSuperview().inset(contentInset)
         }
         
@@ -331,7 +360,8 @@ final class SettingViewController: UIViewController {
             timeSettingTapped: timeSettingButton.rx.tap.asObservable(),
             messageSettingTapped: messageSettingButton.rx.tap.asObservable(),
             alarmToggleChanged: alarmToggle.rx.isOn.changed.asObservable(),
-            healthToggleChanged: healthToggle.rx.isOn.changed.asObservable()
+            healthToggleChanged: healthToggle.rx.isOn.changed.asObservable(),
+            newPillCycleTapped: newPillCycleButton.rx.tap.asObservable()
         )
         
         let output = viewModel.transform(input: input)
@@ -357,6 +387,20 @@ final class SettingViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        // 새 약 복용 시작 확인
+        output.showNewPillCycleConfirmation
+            .drive(onNext: { [weak self] in
+                self?.showNewPillCycleConfirmation()
+            })
+            .disposed(by: disposeBag)
+        
+        // 약 설정 화면으로 이동
+        output.navigateToPillSetting
+            .drive(onNext: { [weak self] in
+                self?.navigateToPillSetting()
+            })
+            .disposed(by: disposeBag)
+        
         // 에러 표시
         output.showError
             .drive(onNext: { [weak self] message in
@@ -376,18 +420,15 @@ final class SettingViewController: UIViewController {
     // MARK: - Private Methods
     
     private func updateUI(with settings: UserSettings) {
-        // 시간 표시 업데이트
         let timeLabel = timeSettingButton.viewWithTag(100) as? UILabel
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "a h:mm"
         timeLabel?.text = formatter.string(from: settings.scheduledTime)
         
-        // 메시지 표시 업데이트
         let messageLabel = messageSettingButton.viewWithTag(101) as? UILabel
         messageLabel?.text = settings.notificationMessage
         
-        // 토글 상태 업데이트
         alarmToggle.isOn = settings.notificationEnabled
         healthToggle.isOn = false
     }
@@ -455,6 +496,45 @@ final class SettingViewController: UIViewController {
         alert.addAction(confirmAction)
         
         present(alert, animated: true)
+    }
+    
+    private func showNewPillCycleConfirmation() {
+        let alert = UIAlertController(
+            title: "새 약 복용 시작",
+            message: "현재 기록된 복용 정보가 모두 삭제됩니다.\n정말로 새로운 약 복용을 시작하시겠습니까?",
+            preferredStyle: .alert
+        )
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        let confirmAction = UIAlertAction(title: "시작하기", style: .destructive) { [weak self] _ in
+            self?.viewModel.startNewPillCycle()
+                .observe(on: MainScheduler.instance)
+                .subscribe(
+                    onError: { [weak self] error in
+                        self?.showAlert(title: "오류", message: "초기화에 실패했습니다", isError: true)
+                    }
+                )
+                .disposed(by: self?.disposeBag ?? DisposeBag())
+        }
+        
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        
+        present(alert, animated: true)
+    }
+    
+    private func navigateToPillSetting() {
+        let viewModel = DIContainer.shared.makePillSettingViewModel()
+        let pillSettingVC = PillSettingViewController(viewModel: viewModel)
+        let navigationController = UINavigationController(rootViewController: pillSettingVC)
+        navigationController.modalPresentationStyle = .fullScreen
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = navigationController
+            window.makeKeyAndVisible()
+        }
     }
     
     private func showAlert(title: String, message: String, isError: Bool) {

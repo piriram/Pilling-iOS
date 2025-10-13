@@ -7,6 +7,7 @@
 
 import Foundation
 import RxSwift
+
 // MARK: - Domain/UseCases/CalculateDashboardMessageUseCase.swift
 
 protocol CalculateDashboardMessageUseCaseProtocol {
@@ -29,69 +30,91 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
             return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest)
         }
         
+        // 1. 휴약 기간 체크
+        if case .rest = todayItem.status {
+            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest)
+        }
+        
+        // 2. 연속 미복용 체크 (48시간 초과가 2일 이상)
         let consecutiveMissed = calculateConsecutiveMissedDays(cycle: cycle)
-        
         if consecutiveMissed >= 2 {
-            return DashboardMessage(text: "저를 잊으셨나요 ㅠㅠ", imageName: .warning)
-        }
-        
-        // 자동 감지: 실제로 오늘 2번 복용 버튼을 누른 경우
-        if let cycle = cycle {
-            let todaysTakenCount = cycle.records.filter { record in
-                calendar.isDate(record.scheduledDateTime, inSameDayAs: now)
-            }.filter { record in
-                switch record.status {
-                case .todayTaken, .todayTakenDelayed:
-                    return true
-                default:
-                    return false
-                }
-            }.count
-            if todaysTakenCount >= 2 {
-                return DashboardMessage(
-                    text: "오늘 2알 복용 완료! 보정까지 잘하셨어요",
-                    imageName: .todayAfter
-                )
-            }
-        }
-        
-        if let yesterdayItem = items.first(where: {
-            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: now) else {
-                return false
-            }
-            return calendar.isDate($0.date, inSameDayAs: yesterday)
-        }), case .missed = yesterdayItem.status {
             return DashboardMessage(
-                text: "하루 빼먹었어요. 두알을 먹어야해요",
+                text: "연속 2일 이상 놓쳤어요.\n새로운 시트를 시작하고 7일간 추가 피임을 사용하세요",
                 imageName: .warning
             )
         }
         
+        // 3. 어제 미복용 체크 (48시간 초과)
+        if let yesterdayItem = getYesterdayItem(items: items, now: now, calendar: calendar) {
+            if case .missed = yesterdayItem.status {
+                return DashboardMessage(
+                    text: "어제 약을 놓쳤어요 (48시간 초과).\n오늘 2알을 먹어야 해요",
+                    imageName: .warning
+                )
+            }
+        }
+        
+        // 4. 오늘 상태에 따른 메시지
         switch todayItem.status {
         case .todayTaken:
-            return DashboardMessage(text: "잔디가 잘 자라고 있어요", imageName: .todayAfter)
+            // 정상 복용 완료 (24시간 이내)
+            return DashboardMessage(
+                text: "잔디가 잘 자라고 있어요",
+                imageName: .todayAfter
+            )
+            
         case .todayTakenDelayed:
+            // 지연 복용 완료 (24~48시간)
             return DashboardMessage(
-                text: "todayTakenDelayed",
+                text: "24시간 조금 지났지만 괜찮아요!\n피임 효과는 유지돼요",
                 imageName: .todayAfter
             )
+            
         case .todayDelayed:
+            // 24시간 초과, 아직 안먹음
             return DashboardMessage(
-                text: "todayDelayed",
+                text: "24시간이 지났어요!\n빨리 복용해주세요 (48시간 전까지)",
+                imageName: .warning
+            )
+            
+        case .takenDouble:
+            // 2알 복용 완료
+            return DashboardMessage(
+                text: "오늘 2알 복용 완료!\n보정까지 잘하셨어요",
                 imageName: .todayAfter
             )
-        case .takenDouble:
-            return DashboardMessage(
-                text: "오늘 2알 복용 완료! 보정까지 잘하셨어요",
-                imageName: .takingBeforeTwo
-            )
+            
         case .todayNotTaken:
-            return DashboardMessage(text: "오늘의 약을 빠르게 먹어주세요", imageName: .takingBefore)
+            // 아직 안먹음 (24시간 이내)
+            return DashboardMessage(
+                text: "오늘의 약을 빠르게 먹어주세요",
+                imageName: .takingBefore
+            )
+            
+        case .taken, .takenDelayed, .missed, .scheduled:
+            // 과거 데이터는 이미 처리됨
+            return DashboardMessage(
+                text: "오늘은 잔디도 휴식중",
+                imageName: .rest
+            )
+            
         case .rest:
-            return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest)
-        default:
-            return DashboardMessage(text: "default", imageName: .rest)
+            return DashboardMessage(
+                text: "오늘은 잔디도 휴식중",
+                imageName: .rest
+            )
         }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func getYesterdayItem(items: [DayItem], now: Date, calendar: Calendar) -> DayItem? {
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: now) else {
+            return nil
+        }
+        return items.first(where: {
+            calendar.isDate($0.date, inSameDayAs: yesterday)
+        })
     }
     
     private func calculateConsecutiveMissedDays(cycle: PillCycle?) -> Int {
@@ -99,26 +122,36 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         
         let calendar = Calendar.current
         let now = Date()
+        let today = calendar.startOfDay(for: now)
         
         var count = 0
+        
+        // 어제부터 과거로 역순 체크 (오늘은 제외)
         for record in cycle.records.reversed() {
-            let isPastOrToday = record.scheduledDateTime <= now
-            guard isPastOrToday else { continue }
+            let recordDay = calendar.startOfDay(for: record.scheduledDateTime)
             
-            let isNotTaken: Bool = {
+            // 오늘이거나 미래면 스킵
+            guard recordDay < today else { continue }
+            
+            // 휴약 기간은 카운트 안함
+            if case .rest = record.status {
+                continue
+            }
+            
+            // 미복용(48시간 초과) 체크
+            let isMissed: Bool = {
                 switch record.status {
                 case .missed:
                     return true
-                case .todayDelayed, .todayNotTaken:
-                    return calendar.isDate(record.scheduledDateTime, inSameDayAs: now)
                 default:
                     return false
                 }
             }()
             
-            if isNotTaken {
+            if isMissed {
                 count += 1
-            } else {
+            } else if record.status.isTaken {
+                // 복용한 날이 나오면 연속 끊김
                 break
             }
         }

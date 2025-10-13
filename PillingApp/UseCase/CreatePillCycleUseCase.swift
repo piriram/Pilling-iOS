@@ -41,6 +41,7 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
             
             let calendar = Calendar.current
             let now = Date()
+            let today = calendar.startOfDay(for: now)
             
             let activeDays = pillInfo.takingDays
             let breakDays = pillInfo.breakDays
@@ -55,30 +56,32 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
                 }
                 
                 let scheduledDateTime = self.combineDateAndTime(date: dayDate, timeString: scheduledTime)
+                let dayDateStartOfDay = calendar.startOfDay(for: dayDate)
                 
                 let status: PillStatus
                 if day > activeDays {
                     // 휴약 기간
                     status = .rest
+                } else if dayDateStartOfDay > today {
+                    // 미래 날짜
+                    status = .scheduled
+                } else if dayDateStartOfDay == today {
+                    // 오늘
+                    status = .todayNotTaken
                 } else {
-                    let isToday = calendar.isDate(dayDate, inSameDayAs: now)
-                    let isFuture = dayDate > calendar.startOfDay(for: now)
-                    
-                    if isFuture {
-                        status = .scheduled
-                    } else if isToday {
-                        status = .todayNotTaken
-                    } else {
-                        status = .missed
-                    }
+                    // 과거 날짜 - 모두 정상 복용으로 가정
+                    status = .taken
                 }
+                
+                // taken 상태면 takenAt에 해당 날짜의 scheduledDateTime 설정
+                let takenAt: Date? = (status == .taken) ? scheduledDateTime : nil
                 
                 let record = PillRecord(
                     id: UUID(),
                     cycleDay: day,
                     status: status,
                     scheduledDateTime: scheduledDateTime,
-                    takenAt: nil,
+                    takenAt: takenAt,
                     createdAt: now,
                     updatedAt: now
                 )

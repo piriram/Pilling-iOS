@@ -72,7 +72,11 @@ final class DashboardViewModel {
     private func updateItems() {
         guard let cycle = currentCycle.value else { return }
         
-        let dayItems = cycle.records.map { record in
+        // 최대 28개(4주)만 표시
+        let maxItems = 28
+        let visibleRecords = Array(cycle.records.prefix(maxItems))
+        
+        let dayItems = visibleRecords.map { record in
             DayItem(
                 cycleDay: record.cycleDay,
                 date: record.scheduledDateTime,

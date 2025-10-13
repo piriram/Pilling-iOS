@@ -96,7 +96,9 @@ final class DIContainer {
     func makeSettingViewModel() -> SettingViewModel {
         return SettingViewModel(
             settingsRepository: makeUserSettingsRepository(),
-            notificationManager: makeNotificationManager()
+            notificationManager: makeNotificationManager(),
+            pillCycleRepository: makePillCycleRepository(),
+            userDefaultsManager: makeUserDefaultsManager()
         )
     }
     

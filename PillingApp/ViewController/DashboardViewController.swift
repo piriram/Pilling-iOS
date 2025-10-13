@@ -217,7 +217,6 @@ final class DashboardViewController: UIViewController {
     }
     
     private func setupPageControl() {
-        pageControl.numberOfPages = 2
         pageControl.currentPage = 0
         pageControl.currentPageIndicatorTintColor = AppColor.pillGreen800
         pageControl.pageIndicatorTintColor = AppColor.notYetGray
@@ -337,6 +336,7 @@ final class DashboardViewController: UIViewController {
             .asDriver()
             .drive(onNext: { [weak self] items in
                 self?.updateCalendarHeight(for: items.count)
+                self?.updatePageControl(for: items.count)
             })
             .disposed(by: disposeBag)
         
@@ -531,6 +531,18 @@ final class DashboardViewController: UIViewController {
         calendarCollectionView.snp.updateConstraints { $0.height.equalTo(height) }
         calendarCollectionView.setCollectionViewLayout(makeCompositionalLayout(), animated: false)
         view.layoutIfNeeded()
+    }
+    
+    private func updatePageControl(for itemCount: Int) {
+        let columns = 7
+        let rows = Int(ceil(Double(itemCount) / Double(columns)))
+        
+        // 4주(4줄) 기준으로 페이지 계산
+        let rowsPerPage = 4
+        let numberOfPages = Int(ceil(Double(rows) / Double(rowsPerPage)))
+        
+        pageControl.numberOfPages = max(1, numberOfPages)
+        pageControl.currentPage = 0
     }
     
     // MARK: - User Interactions
