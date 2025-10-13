@@ -151,13 +151,22 @@ final class TimeSettingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("[TimeSettingVC] viewDidLoad")
         setupUI()
         bindViewModel()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        print("[TimeSettingVC] viewWillAppear - navBarTint: \(navigationController?.navigationBar.tintColor?.description ?? "nil")")
         navigationController?.navigationBar.tintColor = .black
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        let presentedName = presentedViewController.map { String(describing: type(of: $0)) } ?? "nil"
+        let navDesc = navigationController != nil ? "hasNav" : "noNav"
+        print("[TimeSettingVC] viewDidAppear - presented: \(presentedName), nav: \(navDesc)")
     }
     
     // MARK: - Setup
@@ -240,13 +249,26 @@ final class TimeSettingViewController: UIViewController {
             $0.top.equalTo(healthDescriptionLabel.snp.bottom).offset(60)
             $0.leading.trailing.equalToSuperview().inset(contentInset)
             $0.height.equalTo(70)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+            $0.bottom.equalToSuperview().offset(-20)
         }
     }
     
     // MARK: - Binding
     
     private func bindViewModel() {
+        timeSettingButton.rx.tap
+            .subscribe(onNext: { print("[TimeSettingVC][Input] timeSettingButton tapped") })
+            .disposed(by: disposeBag)
+        alarmToggle.rx.isOn.changed
+            .subscribe(onNext: { print("[TimeSettingVC][Input] alarmToggle changed: \($0)") })
+            .disposed(by: disposeBag)
+        healthToggle.rx.isOn.changed
+            .subscribe(onNext: { print("[TimeSettingVC][Input] healthToggle changed: \($0)") })
+            .disposed(by: disposeBag)
+        completeButton.rx.tap
+            .subscribe(onNext: { print("[TimeSettingVC][Input] completeButton tapped") })
+            .disposed(by: disposeBag)
+        
         let input = TimeSettingViewModel.Input(
             backButtonTapped: Observable<Void>.empty(),
             timeSettingButtonTapped: timeSettingButton.rx.tap.asObservable(),
@@ -259,12 +281,14 @@ final class TimeSettingViewController: UIViewController {
         
         output.showTimePicker
             .drive(onNext: { [weak self] in
+                print("[TimeSettingVC][Output] showTimePicker")
                 self?.showDatePicker()
             })
             .disposed(by: disposeBag)
         
         output.navigateToDashboard
             .drive(onNext: { [weak self] in
+                print("[TimeSettingVC][Output] navigateToDashboard")
                 self?.navigateToDashboard()
             })
             .disposed(by: disposeBag)
@@ -273,6 +297,9 @@ final class TimeSettingViewController: UIViewController {
     // MARK: - Private Methods
     
     private func showDatePicker() {
+        let presentedName = presentedViewController.map { String(describing: type(of: $0)) } ?? "nil"
+        print("[TimeSettingVC] showDatePicker - current presented: \(presentedName)")
+        
         let alert = UIAlertController(title: "복용 시간 설정", message: "\n\n\n\n\n\n\n\n", preferredStyle: .actionSheet)
         
         let datePicker = UIDatePicker()
@@ -288,6 +315,7 @@ final class TimeSettingViewController: UIViewController {
         }
         
         let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            print("[TimeSettingVC] time confirmed: \(datePicker.date)")
             self?.viewModel.updateTime(datePicker.date)
         }
         
@@ -296,15 +324,24 @@ final class TimeSettingViewController: UIViewController {
         alert.addAction(confirmAction)
         alert.addAction(cancelAction)
         
+        if let pop = alert.popoverPresentationController {
+            pop.sourceView = self.view
+            pop.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.maxY - 10, width: 1, height: 1)
+            pop.permittedArrowDirections = []
+            print("[TimeSettingVC] actionSheet popover configured for iPad")
+        }
+        print("[TimeSettingVC] presenting actionSheet for time picker")
         present(alert, animated: true)
     }
     
     private func navigateToDashboard() {
+        print("[TimeSettingVC] navigateToDashboard called")
         let dashboardViewModel = DIContainer.shared.makeDashboardViewModel()
         let dashboardVC = DashboardViewController(viewModel: dashboardViewModel)
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
+            print("[TimeSettingVC] replacing rootViewController with Dashboard inside window: \(window)")
             let navigationController = UINavigationController(rootViewController: dashboardVC)
             window.rootViewController = navigationController
             window.makeKeyAndVisible()
