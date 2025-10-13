@@ -46,7 +46,16 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         
         // 3. 어제 미복용 체크 (48시간 초과)
         if let yesterdayItem = getYesterdayItem(items: items, now: now, calendar: calendar) {
-            if case .missed = yesterdayItem.status {
+            // 어제 미복용이더라도, 오늘 2알 복용(takenDouble)로 보정했으면 경고를 표시하지 않음
+            if case .missed = yesterdayItem.status, case .takenDouble = todayItem.status {
+                // 오늘 상태 분기에서 적절한 메시지를 처리하도록 경고 반환을 건너뜀
+            } else if case .missed = yesterdayItem.status, case .todayTaken = todayItem.status {
+                // 어제를 놓쳤고 오늘 한 알만 복용한 경우: todayAfter 스타일로 한 알 더 복용 안내
+                return DashboardMessage(
+                    text: "한알을 더 먹어야 해요",
+                    imageName: .takingBefore
+                )
+            } else if case .missed = yesterdayItem.status {
                 return DashboardMessage(
                     text: "어제 약을 놓쳤어요 (48시간 초과).\n오늘 2알을 먹어야 해요",
                     imageName: .warning
@@ -159,3 +168,4 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         return count
     }
 }
+
