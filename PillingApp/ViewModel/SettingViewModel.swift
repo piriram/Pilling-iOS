@@ -17,9 +17,25 @@ final class SettingViewModel {
         let viewWillAppear: Observable<Void>
         let timeSettingTapped: Observable<Void>
         let messageSettingTapped: Observable<Void>
-        let alarmToggleChanged: Observable<Bool>
-        let healthToggleChanged: Observable<Bool>
+        let alarmToggleChanged: Observable<Bool>?
+        let healthToggleChanged: Observable<Bool>?
         let newPillCycleTapped: Observable<Void>
+
+        init(
+            viewWillAppear: Observable<Void>,
+            timeSettingTapped: Observable<Void>,
+            messageSettingTapped: Observable<Void>,
+            alarmToggleChanged: Observable<Bool>? = nil,
+            healthToggleChanged: Observable<Bool>? = nil,
+            newPillCycleTapped: Observable<Void>
+        ) {
+            self.viewWillAppear = viewWillAppear
+            self.timeSettingTapped = timeSettingTapped
+            self.messageSettingTapped = messageSettingTapped
+            self.alarmToggleChanged = alarmToggleChanged
+            self.healthToggleChanged = healthToggleChanged
+            self.newPillCycleTapped = newPillCycleTapped
+        }
     }
     
     struct Output {
@@ -72,37 +88,41 @@ final class SettingViewModel {
             .bind(to: currentSettingsRelay)
             .disposed(by: disposeBag)
         
-        // 알람 토글 변경 시 즉시 저장 및 알림 업데이트
-        input.alarmToggleChanged
-            .flatMapLatest { [weak self] isEnabled -> Observable<Void> in
-                guard let self = self else { return .empty() }
-                return self.updateAlarmSetting(isEnabled: isEnabled)
-                    .do(onNext: {
-                        successTracker.onNext("알림 설정이 변경되었습니다")
-                    })
-                    .catch { error in
-                        errorTracker.onNext(self.handleError(error))
-                        return .empty()
-                    }
-            }
-            .subscribe()
-            .disposed(by: disposeBag)
+        // 알람 토글 변경 시 즉시 저장 및 알림 업데이트 (옵션)
+        if let alarmChanged = input.alarmToggleChanged {
+            alarmChanged
+                .flatMapLatest { [weak self] isEnabled -> Observable<Void> in
+                    guard let self = self else { return .empty() }
+                    return self.updateAlarmSetting(isEnabled: isEnabled)
+                        .do(onNext: {
+                            successTracker.onNext("알림 설정이 변경되었습니다")
+                        })
+                        .catch { error in
+                            errorTracker.onNext(self.handleError(error))
+                            return .empty()
+                        }
+                }
+                .subscribe()
+                .disposed(by: disposeBag)
+        }
         
-        // Health 토글 변경 시 즉시 저장
-        input.healthToggleChanged
-            .flatMapLatest { [weak self] isEnabled -> Observable<Void> in
-                guard let self = self else { return .empty() }
-                return self.updateHealthSetting(isEnabled: isEnabled)
-                    .do(onNext: {
-                        successTracker.onNext("Health 연동 설정이 변경되었습니다")
-                    })
-                    .catch { error in
-                        errorTracker.onNext(self.handleError(error))
-                        return .empty()
-                    }
-            }
-            .subscribe()
-            .disposed(by: disposeBag)
+        // Health 토글 변경 시 즉시 저장 (옵션)
+        if let healthChanged = input.healthToggleChanged {
+            healthChanged
+                .flatMapLatest { [weak self] isEnabled -> Observable<Void> in
+                    guard let self = self else { return .empty() }
+                    return self.updateHealthSetting(isEnabled: isEnabled)
+                        .do(onNext: {
+                            successTracker.onNext("Health 연동 설정이 변경되었습니다")
+                        })
+                        .catch { error in
+                            errorTracker.onNext(self.handleError(error))
+                            return .empty()
+                        }
+                }
+                .subscribe()
+                .disposed(by: disposeBag)
+        }
         
         let showTimePicker = input.timeSettingTapped
             .asDriver(onErrorJustReturn: ())
@@ -275,3 +295,4 @@ final class SettingViewModel {
         return "오류가 발생했습니다.\n다시 시도해주세요."
     }
 }
+

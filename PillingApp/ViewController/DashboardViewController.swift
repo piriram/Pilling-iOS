@@ -81,7 +81,7 @@ final class DashboardViewController: UIViewController {
         extendedLayoutIncludesOpaqueBars = true
         edgesForExtendedLayout = [.top, .left, .right, .bottom]
     }
-
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: false)
@@ -565,7 +565,7 @@ final class DashboardViewController: UIViewController {
     
     private func presentCalendarSheet(for index: Int, item: DayItem) {
         if #available(iOS 15.0, *) {
-            let viewController = CalendarSheetViewController { [weak self] chosenStatus in
+            let viewController = CalendarSheetViewController(selectedDate: item.date) { [weak self] chosenStatus in
                 self?.viewModel.updateState(at: index, to: chosenStatus)
             }
             viewController.modalPresentationStyle = .pageSheet
@@ -580,6 +580,7 @@ final class DashboardViewController: UIViewController {
             return
         }
         
+        // iOS 15 미만 fallback은 그대로 유지
         let alertController = UIAlertController(title: "상태 선택", message: nil, preferredStyle: .actionSheet)
         
         alertController.addAction(UIAlertAction(title: "복용", style: .default) { [weak self] _ in
@@ -595,7 +596,9 @@ final class DashboardViewController: UIViewController {
         })
         
         alertController.addAction(UIAlertAction(title: "미복용", style: .default) { [weak self] _ in
-            self?.viewModel.updateState(at: index, to: .missed)
+            let isToday = Calendar.current.isDate(item.date, inSameDayAs: Date())
+            let status: PillStatus = isToday ? .scheduled : .missed
+            self?.viewModel.updateState(at: index, to: status)
         })
         
         alertController.addAction(UIAlertAction(title: "예정으로 변경", style: .default) { [weak self] _ in

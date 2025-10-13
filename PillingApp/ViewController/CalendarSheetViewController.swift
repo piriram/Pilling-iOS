@@ -9,9 +9,11 @@ import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
+
 // MARK: - Presentation/Dashboard/Views/CalendarSheetViewController.swift
 
 final class CalendarSheetViewController: UIViewController {
+    private let selectedDate: Date
     private let onSelectStatus: (PillStatus) -> Void
     private let disposeBag = DisposeBag()
     
@@ -22,7 +24,8 @@ final class CalendarSheetViewController: UIViewController {
         return stack
     }()
     
-    init(onSelectStatus: @escaping (PillStatus) -> Void) {
+    init(selectedDate: Date, onSelectStatus: @escaping (PillStatus) -> Void) {
+        self.selectedDate = selectedDate
         self.onSelectStatus = onSelectStatus
         super.init(nibName: nil, bundle: nil)
     }
@@ -51,16 +54,8 @@ final class CalendarSheetViewController: UIViewController {
         containerStack.addArrangedSubview(titleLabel)
         
         addStatusButton(title: "복용", status: .taken)
-        addStatusButton(title: "지연 복용", status: .takenDelayed)
         addStatusButton(title: "2알 복용", status: .takenDouble)
-        addStatusButton(title: "미복용", status: .missed)
-        
-        let divider = UIView()
-        divider.backgroundColor = .separator
-        divider.snp.makeConstraints { $0.height.equalTo(1) }
-        containerStack.addArrangedSubview(divider)
-        
-        addStatusButton(title: "예정으로 변경", status: .scheduled, isDestructive: false)
+        addMissedButton()
         
         let spacer = UIView()
         spacer.snp.makeConstraints { $0.height.equalTo(12) }
@@ -82,6 +77,31 @@ final class CalendarSheetViewController: UIViewController {
             .bind { [weak self] in
                 self?.dismiss(animated: true)
                 self?.onSelectStatus(status)
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    private func addMissedButton() {
+        let button = UIButton(type: .system)
+        button.setTitle("미복용", for: .normal)
+        button.setTitleColor(.label, for: .normal)
+        button.contentHorizontalAlignment = .leading
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        button.backgroundColor = .secondarySystemBackground
+        button.layer.cornerRadius = 12
+        button.contentEdgeInsets = .init(top: 12, left: 14, bottom: 12, right: 14)
+        containerStack.addArrangedSubview(button)
+        
+        button.rx.tap
+            .bind { [weak self] in
+                guard let self = self else { return }
+                self.dismiss(animated: true)
+                
+                let calendar = Calendar.current
+                let isToday = calendar.isDateInToday(self.selectedDate)
+                let isInPast = self.selectedDate < calendar.startOfDay(for: Date())
+                let status: PillStatus = isToday ? .scheduled : (isInPast ? .missed : .scheduled)
+                self.onSelectStatus(status)
             }
             .disposed(by: disposeBag)
     }
