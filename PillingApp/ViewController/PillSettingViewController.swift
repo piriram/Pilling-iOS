@@ -76,14 +76,7 @@ final class PillSettingViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Lifecycle
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        let presentedName = presentedViewController.map { String(describing: type(of: $0)) } ?? "nil"
-        let navDesc = navigationController != nil ? "hasNav" : "noNav"
-        print("[PillSettingVC] didAppear - presented: \(presentedName), nav: \(navDesc), isBeingPresented: \(isBeingPresented), isMovingToParent: \(isMovingToParent)")
-    }
+    // Removed override func viewDidAppear(_ animated: Bool)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -196,19 +189,10 @@ final class PillSettingViewController: UIViewController {
         viewModel.output.proceed
             .emit(onNext: { [weak self] in
                 guard let self = self else { return }
-                let presentedName = self.presentedViewController.map { String(describing: type(of: $0)) } ?? "nil"
-                print("[PillSettingVC] proceed tapped - presented: \(presentedName), nav: \(self.navigationController != nil)")
-                if let presented = self.presentedViewController {
-                    print("[PillSettingVC][Warning] Dismissing presented VC before push: \(type(of: presented))")
-                    // Do not dismiss automatically here to avoid behavior change; just log for now.
-                }
                 let vm = DIContainer.shared.makeTimeSettingViewModel()
                 let nextVC = TimeSettingViewController(viewModel: vm)
                 if let nav = self.navigationController {
-                    print("[PillSettingVC] Pushing TimeSettingViewController")
                     nav.pushViewController(nextVC, animated: true)
-                } else {
-                    print("[PillSettingVC][Error] No navigationController to push")
                 }
             })
             .disposed(by: disposeBag)
@@ -217,12 +201,8 @@ final class PillSettingViewController: UIViewController {
     // MARK: - Private Methods
     
     private func presentDatePickerBottomSheet() {
-        let presentedName = presentedViewController.map { String(describing: type(of: $0)) } ?? "nil"
-        print("[PillSettingVC] presentDatePickerBottomSheet called - current presented: \(presentedName)")
-        
         let datePickerVC = DatePickerBottomSheetViewController()
         
-        print("[PillSettingVC] presenting DatePickerBottomSheetViewController")
         datePickerVC.selectedDate
             .bind(to: viewModel.input.dateSelected)
             .disposed(by: disposeBag)
@@ -231,12 +211,8 @@ final class PillSettingViewController: UIViewController {
     }
     
     private func presentPillTypeBottomSheet() {
-        let presentedName = presentedViewController.map { String(describing: type(of: $0)) } ?? "nil"
-        print("[PillSettingVC] presentPillTypeBottomSheet called - current presented: \(presentedName)")
-        
         let pillTypeVC = PillTypeBottomSheetViewController()
         
-        print("[PillSettingVC] presenting PillTypeBottomSheetViewController")
         pillTypeVC.pillInfoSelected
             .bind(to: viewModel.input.pillInfoSelected)
             .disposed(by: disposeBag)
@@ -328,7 +304,6 @@ final class SettingItemButton: UIButton {
     
     func configure(title: String, iconSystemName: String? = nil) {
         itemTitleLabel.text = title
-        print("[SettingItemButton] configure - title: \(title), icon: \(iconSystemName ?? "nil")")
         if let name = iconSystemName {
             leadingIconImageView.image = UIImage(systemName: name)
             leadingIconImageView.isHidden = false
@@ -339,7 +314,6 @@ final class SettingItemButton: UIButton {
     }
     
     func setValue(_ value: String?) {
-        print("[SettingItemButton] setValue - value: \(value ?? "nil") for title: \(itemTitleLabel.text ?? "")")
         valueLabel.text = value
     }
 }
@@ -448,14 +422,12 @@ final class PillSettingViewModel {
         pillInfoSelectedSubject
             .subscribe(onNext: { [weak self] pillInfo in
                 self?.selectedPillInfoRelay.accept(pillInfo)
-                print("[PillSettingVM] pillInfoSelected - name: \(pillInfo.name), taking: \(pillInfo.takingDays), break: \(pillInfo.breakDays)")
             })
             .disposed(by: disposeBag)
         
         dateSelectedSubject
             .subscribe(onNext: { [weak self] date in
                 self?.selectedStartDateRelay.accept(date)
-                print("[PillSettingVM] dateSelected - \(date)")
             })
             .disposed(by: disposeBag)
         
@@ -477,19 +449,13 @@ final class PillSettingViewModel {
         let selectedDay = calendar.startOfDay(for: date)
         if selectedDay < today {
             let days = calculateDaysSinceStart(from: date)
-            let result = "\(dateText) (\(days)일째)"
-            print("[PillSettingVM] formatDateWithDayInfo(<past>) -> \(result)")
-            return result
+            return "\(dateText) (\(days)일째)"
         } else if selectedDay == today {
-            let result = "\(dateText) (오늘)"
-            print("[PillSettingVM] formatDateWithDayInfo(<today>) -> \(result)")
-            return result
+            return "\(dateText) (오늘)"
         } else {
             let components = calendar.dateComponents([.day], from: today, to: selectedDay)
             let daysRemaining = components.day ?? 0
-            let result = "\(dateText) (\(daysRemaining)일 남음)"
-            print("[PillSettingVM] formatDateWithDayInfo(<future>) -> \(result)")
-            return result
+            return "\(dateText) (\(daysRemaining)일 남음)"
         }
     }
 }
