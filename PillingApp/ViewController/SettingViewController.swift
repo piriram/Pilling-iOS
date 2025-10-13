@@ -162,65 +162,6 @@ final class SettingViewController: UIViewController {
         return button
     }()
     
-    private let alarmToggleContainer: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemGray6
-        view.layer.cornerRadius = 12
-        return view
-    }()
-    
-    private let alarmTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "소리 알람 여부"
-        label.font = Typography.body2(.medium)
-        label.textColor = AppColor.textBlack
-        return label
-    }()
-    
-    private let alarmToggle: UISwitch = {
-        let toggle = UISwitch()
-        toggle.onTintColor = AppColor.pillGreen200
-        return toggle
-    }()
-    
-    private let otherSectionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "기타 설정"
-        label.font = Typography.headline3(.bold)
-        label.textColor = AppColor.textBlack
-        return label
-    }()
-    
-    private let healthToggleContainer: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemGray6
-        view.layer.cornerRadius = 12
-        return view
-    }()
-    
-    private let healthTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Apple Health 연동"
-        label.font = Typography.body2(.medium)
-        label.textColor = AppColor.textBlack
-        return label
-    }()
-    
-    private let healthToggle: UISwitch = {
-        let toggle = UISwitch()
-        toggle.onTintColor = AppColor.pillGreen200
-        return toggle
-    }()
-    
-    private let healthDescriptionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "복용 기록을 Apple Health에 동기화합니다"
-        label.font = .systemFont(ofSize: 12, weight: .regular)
-        label.textColor = .systemGray
-        label.numberOfLines = 0
-        return label
-    }()
-    
     // MARK: - Initialization
     
     init(viewModel: SettingViewModel) {
@@ -254,17 +195,8 @@ final class SettingViewController: UIViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        [pillSectionLabel, newPillCycleButton, alarmSectionLabel, timeSettingButton, messageSettingButton,
-         alarmToggleContainer, otherSectionLabel, healthToggleContainer, healthDescriptionLabel].forEach {
+        [pillSectionLabel, newPillCycleButton, alarmSectionLabel, timeSettingButton, messageSettingButton].forEach {
             contentView.addSubview($0)
-        }
-        
-        [alarmTitleLabel, alarmToggle].forEach {
-            alarmToggleContainer.addSubview($0)
-        }
-        
-        [healthTitleLabel, healthToggle].forEach {
-            healthToggleContainer.addSubview($0)
         }
         
         scrollView.snp.makeConstraints {
@@ -302,48 +234,6 @@ final class SettingViewController: UIViewController {
             $0.top.equalTo(timeSettingButton.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(contentInset)
             $0.height.equalTo(60)
-        }
-        
-        alarmToggleContainer.snp.makeConstraints {
-            $0.top.equalTo(messageSettingButton.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
-            $0.height.equalTo(60)
-        }
-        
-        alarmTitleLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(16)
-            $0.centerY.equalToSuperview()
-        }
-        
-        alarmToggle.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-16)
-            $0.centerY.equalToSuperview()
-        }
-        
-        otherSectionLabel.snp.makeConstraints {
-            $0.top.equalTo(alarmToggleContainer.snp.bottom).offset(32)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
-        }
-        
-        healthToggleContainer.snp.makeConstraints {
-            $0.top.equalTo(otherSectionLabel.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
-            $0.height.equalTo(60)
-        }
-        
-        healthTitleLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().offset(16)
-            $0.centerY.equalToSuperview()
-        }
-        
-        healthToggle.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-16)
-            $0.centerY.equalToSuperview()
-        }
-        
-        healthDescriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(healthToggleContainer.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(contentInset + 4)
             $0.bottom.equalToSuperview().offset(-40)
         }
     }
@@ -359,8 +249,6 @@ final class SettingViewController: UIViewController {
             viewWillAppear: viewWillAppear,
             timeSettingTapped: timeSettingButton.rx.tap.asObservable(),
             messageSettingTapped: messageSettingButton.rx.tap.asObservable(),
-            alarmToggleChanged: alarmToggle.rx.isOn.changed.asObservable(),
-            healthToggleChanged: healthToggle.rx.isOn.changed.asObservable(),
             newPillCycleTapped: newPillCycleButton.rx.tap.asObservable()
         )
         
@@ -428,9 +316,6 @@ final class SettingViewController: UIViewController {
         
         let messageLabel = messageSettingButton.viewWithTag(101) as? UILabel
         messageLabel?.text = settings.notificationMessage
-        
-        alarmToggle.isOn = settings.notificationEnabled
-        healthToggle.isOn = false
     }
     
     private func showTimePicker() {
@@ -586,3 +471,4 @@ final class SettingViewController: UIViewController {
         }
     }
 }
+
