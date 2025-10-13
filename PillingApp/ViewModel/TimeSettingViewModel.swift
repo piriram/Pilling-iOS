@@ -23,13 +23,15 @@ final class TimeSettingViewModel {
     
     struct Output {
         let showTimePicker: Driver<Void>
-        let navigateToDashboard: Driver<Void>
+        let showSettingComplete: Driver<Void>
         let dismissView: Driver<Void>
+        let showError: Driver<String>
     }
     
     // MARK: - Properties
     
     private let settingsRepository: UserSettingsRepositoryProtocol
+    private let notificationManager: NotificationManagerProtocol
     private let disposeBag = DisposeBag()
     
     private let selectedTime = BehaviorRelay<Date>(value: Date())
@@ -38,8 +40,12 @@ final class TimeSettingViewModel {
     
     // MARK: - Initialization
     
-    init(settingsRepository: UserSettingsRepositoryProtocol) {
+    init(
+        settingsRepository: UserSettingsRepositoryProtocol,
+        notificationManager: NotificationManagerProtocol
+    ) {
         self.settingsRepository = settingsRepository
+        self.notificationManager = notificationManager
     }
     
     // MARK: - Transform
@@ -56,20 +62,31 @@ final class TimeSettingViewModel {
             .bind(to: isHealthEnabled)
             .disposed(by: disposeBag)
         
-        let navigateToDashboard = input.completeButtonTapped
+        let errorTracker = PublishSubject<String>()
+        
+        let showSettingComplete = input.completeButtonTapped
             .flatMapLatest { [weak self] _ -> Observable<Void> in
                 guard let self = self else { return .empty() }
-                return self.saveSettings()
+                return self.setupNotificationAndSaveSettings()
+                    .catch { error in
+                        let errorMessage = self.handleError(error)
+                        errorTracker.onNext(errorMessage)
+                        return .empty()
+                    }
             }
             .asDriver(onErrorJustReturn: ())
         
         let dismissView = input.backButtonTapped
             .asDriver(onErrorJustReturn: ())
         
+        let showError = errorTracker
+            .asDriver(onErrorJustReturn: "알 수 없는 오류가 발생했습니다.")
+        
         return Output(
             showTimePicker: showTimePicker,
-            navigateToDashboard: navigateToDashboard,
-            dismissView: dismissView
+            showSettingComplete: showSettingComplete,
+            dismissView: dismissView,
+            showError: showError
         )
     }
     
@@ -80,6 +97,31 @@ final class TimeSettingViewModel {
     }
     
     // MARK: - Private Methods
+    
+    private func setupNotificationAndSaveSettings() -> Observable<Void> {
+        // 1. 알림 권한 요청
+        return notificationManager.requestAuthorization()
+            .flatMap { [weak self] granted -> Observable<Void> in
+                guard let self = self else { return .empty() }
+                
+                // 권한이 거부되면 에러 발생
+                guard granted else {
+                    return .error(NotificationError.permissionDenied)
+                }
+                
+                // 2. 알림 스케줄링
+                return self.notificationManager.scheduleDailyNotification(
+                    at: self.selectedTime.value,
+                    isEnabled: self.isAlarmEnabled.value
+                )
+            }
+            .flatMap { [weak self] _ -> Observable<Void> in
+                guard let self = self else { return .empty() }
+                
+                // 3. 설정 저장
+                return self.saveSettings()
+            }
+    }
     
     private func saveSettings() -> Observable<Void> {
         return settingsRepository.fetchSettings()
@@ -94,5 +136,19 @@ final class TimeSettingViewModel {
                 
                 return self.settingsRepository.saveSettings(updatedSettings)
             }
+    }
+    
+    private func handleError(_ error: Error) -> String {
+        if let notificationError = error as? NotificationError {
+            switch notificationError {
+            case .permissionDenied:
+                return "알림 권한이 필요합니다.\n설정에서 알림을 허용해주세요."
+            case .schedulingFailed:
+                return "알림 설정에 실패했습니다.\n다시 시도해주세요."
+            case .invalidTime:
+                return "유효하지 않은 시간입니다."
+            }
+        }
+        return "오류가 발생했습니다.\n다시 시도해주세요."
     }
 }

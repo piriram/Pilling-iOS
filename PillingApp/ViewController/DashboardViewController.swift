@@ -354,6 +354,14 @@ final class DashboardViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
+        gearButton.rx.tap
+            .bind { [weak self] in
+                let vm = DIContainer.shared.makeSettingViewModel()
+                let vc = SettingViewController(viewModel: vm)
+                self?.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
         takePillButton.rx.tap
             .bind { [weak self] in
                 self?.viewModel.takePill()

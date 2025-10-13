@@ -6,7 +6,6 @@
 //
 
 import Foundation
-// MARK: - DI/DIContainer.swift
 
 final class DIContainer {
     static let shared = DIContainer()
@@ -18,6 +17,12 @@ final class DIContainer {
     private lazy var coreDataManager: CoreDataManager = {
         return CoreDataManager.shared
     }()
+    
+    // MARK: - Managers
+    
+    func makeNotificationManager() -> NotificationManagerProtocol {
+        return LocalNotificationManager()
+    }
     
     // MARK: - Repositories
     
@@ -60,18 +65,28 @@ final class DIContainer {
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase()
         )
     }
-}
-
-extension DIContainer {
     
     func makeTimeSettingViewModel() -> TimeSettingViewModel {
         return TimeSettingViewModel(
-            settingsRepository: makeUserSettingsRepository()
+            settingsRepository: makeUserSettingsRepository(),
+            notificationManager: makeNotificationManager()
         )
     }
     
     func makeTimeSettingViewController() -> TimeSettingViewController {
         let viewModel = makeTimeSettingViewModel()
         return TimeSettingViewController(viewModel: viewModel)
+    }
+    
+    func makeSettingViewModel() -> SettingViewModel {
+        return SettingViewModel(
+            settingsRepository: makeUserSettingsRepository(),
+            notificationManager: makeNotificationManager()
+        )
+    }
+    
+    func makeSettingViewController() -> SettingViewController {
+        let viewModel = makeSettingViewModel()
+        return SettingViewController(viewModel: viewModel)
     }
 }

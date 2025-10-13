@@ -263,9 +263,15 @@ final class TimeSettingViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        output.navigateToDashboard
+        output.showSettingComplete
             .drive(onNext: { [weak self] in
-                self?.navigateToDashboard()
+                self?.showSettingCompleteFloatingView()
+            })
+            .disposed(by: disposeBag)
+        
+        output.showError
+            .drive(onNext: { [weak self] errorMessage in
+                self?.showErrorAlert(message: errorMessage)
             })
             .disposed(by: disposeBag)
     }
@@ -273,35 +279,26 @@ final class TimeSettingViewController: UIViewController {
     // MARK: - Private Methods
     
     private func showDatePicker() {
-        let alert = UIAlertController(title: "복용 시간 설정", message: "\n\n\n\n\n\n\n\n", preferredStyle: .actionSheet)
+        let bottomSheet = TimePickerBottomSheet()
         
-        let datePicker = UIDatePicker()
-        datePicker.datePickerMode = .time
-        datePicker.preferredDatePickerStyle = .wheels
-        datePicker.locale = Locale(identifier: "ko_KR")
+        bottomSheet.selectedTime
+            .take(1)
+            .subscribe(onNext: { [weak self] date in
+                self?.viewModel.updateTime(date)
+            })
+            .disposed(by: disposeBag)
         
-        alert.view.addSubview(datePicker)
+        present(bottomSheet, animated: true)
+    }
+    
+    private func showSettingCompleteFloatingView() {
+        let floatingView = SettingCompleteFloatingView()
         
-        datePicker.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.top.equalToSuperview().offset(50)
+        floatingView.onAutoDismiss = { [weak self] in
+            self?.navigateToDashboard()
         }
         
-        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
-            self?.viewModel.updateTime(datePicker.date)
-        }
-        
-        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
-        
-        alert.addAction(confirmAction)
-        alert.addAction(cancelAction)
-        
-        if let pop = alert.popoverPresentationController {
-            pop.sourceView = self.view
-            pop.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.maxY - 10, width: 1, height: 1)
-            pop.permittedArrowDirections = []
-        }
-        present(alert, animated: true)
+        floatingView.show(in: view)
     }
     
     private func navigateToDashboard() {
@@ -315,5 +312,29 @@ final class TimeSettingViewController: UIViewController {
             window.makeKeyAndVisible()
         }
     }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "알림 설정 오류",
+            message: message,
+            preferredStyle: .alert
+        )
+        
+        let confirmAction = UIAlertAction(title: "확인", style: .default)
+        
+        // 권한이 거부된 경우 설정으로 이동하는 버튼 추가
+        if message.contains("권한") {
+            let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { _ in
+                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsURL)
+                }
+            }
+            alert.addAction(settingsAction)
+            alert.addAction(confirmAction)
+        } else {
+            alert.addAction(confirmAction)
+        }
+        
+        present(alert, animated: true)
+    }
 }
-
