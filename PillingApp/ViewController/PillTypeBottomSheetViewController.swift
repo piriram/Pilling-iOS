@@ -29,6 +29,9 @@ final class PillTypeBottomSheetViewController: UIViewController {
     private var selectedTakingDays = 24
     private var selectedBreakDays = 4
     
+    private let selectedTakingDaysRelay = BehaviorRelay<Int>(value: 24)
+    private let selectedBreakDaysRelay = BehaviorRelay<Int>(value: 4)
+    
     // MARK: - UI Components
     
     private let dimmedView: UIView = {
@@ -113,6 +116,17 @@ final class PillTypeBottomSheetViewController: UIViewController {
         return button
     }()
     
+    private let warningLabel: UILabel = {
+        let label = UILabel()
+        label.text = "복용일과 휴약일의 합은 28일 이하여야 해요."
+        label.font = .systemFont(ofSize: 13, weight: .regular)
+        label.textColor = .systemRed
+        label.numberOfLines = 0
+        label.isHidden = true
+        label.textAlignment = .left
+        return label
+    }()
+    
     private let pickerContainerView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -186,8 +200,12 @@ final class PillTypeBottomSheetViewController: UIViewController {
         containerView.addSubview(takingDaysButton)
         containerView.addSubview(breakDaysLabel)
         containerView.addSubview(breakDaysButton)
+        containerView.addSubview(warningLabel)
         containerView.addSubview(confirmButton)
         confirmButton.setTitle("설정완료", for: .normal)
+        
+        selectedTakingDaysRelay.accept(selectedTakingDays)
+        selectedBreakDaysRelay.accept(selectedBreakDays)
         
         view.addSubview(pickerContainerView)
         pickerContainerView.addSubview(pickerToolbar)
@@ -247,6 +265,11 @@ final class PillTypeBottomSheetViewController: UIViewController {
             $0.height.equalTo(52)
         }
         
+        warningLabel.snp.makeConstraints {
+            $0.top.equalTo(breakDaysButton.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(24)
+        }
+        
         confirmButton.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(24)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
@@ -277,6 +300,9 @@ final class PillTypeBottomSheetViewController: UIViewController {
         if let takingIndex = takingDaysOptions.firstIndex(of: selectedTakingDays) {
             pickerView.selectRow(takingIndex, inComponent: 0, animated: false)
         }
+        if let breakIndex = breakDaysOptions.firstIndex(of: selectedBreakDays) {
+            pickerView.selectRow(breakIndex, inComponent: 0, animated: false)
+        }
         
         let doneButton = UIBarButtonItem(
             title: "완료",
@@ -300,7 +326,17 @@ final class PillTypeBottomSheetViewController: UIViewController {
     }
     
     private func bind() {
-        confirmButton.isEnabled = true
+        Observable
+            .combineLatest(selectedTakingDaysRelay.asObservable(), selectedBreakDaysRelay.asObservable())
+            .map { taking, breaking in (taking + breaking) <= 28 }
+            .bind(to: confirmButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        Observable
+            .combineLatest(selectedTakingDaysRelay.asObservable(), selectedBreakDaysRelay.asObservable())
+            .map { taking, breaking in !((taking + breaking) > 28) }
+            .bind(to: warningLabel.rx.isHidden)
+            .disposed(by: disposeBag)
         
         takingDaysButton.rx.tap
             .subscribe(onNext: { [weak self] in
@@ -478,9 +514,11 @@ extension PillTypeBottomSheetViewController: UIPickerViewDelegate, UIPickerViewD
         case .takingDays:
             selectedTakingDays = takingDaysOptions[row]
             takingDaysButton.setTitle("\(selectedTakingDays)일", for: .normal)
+            selectedTakingDaysRelay.accept(selectedTakingDays)
         case .breakDays:
             selectedBreakDays = breakDaysOptions[row]
             breakDaysButton.setTitle("\(selectedBreakDays)일", for: .normal)
+            selectedBreakDaysRelay.accept(selectedBreakDays)
         }
     }
 }

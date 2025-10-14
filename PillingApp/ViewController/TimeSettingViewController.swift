@@ -20,9 +20,6 @@ final class TimeSettingViewController: UIViewController {
     
     // MARK: - UI Components
     
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    
     private let clockImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "clock_image")
@@ -54,44 +51,6 @@ final class TimeSettingViewController: UIViewController {
         button.configure(title: "복용 시간", iconSystemName: "clock.fill")
         button.setValue(nil)
         return button
-    }()
-    
-    private let alarmTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "소리 알람 여부"
-        label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .label
-        return label
-    }()
-    
-    private let alarmToggle: UISwitch = {
-        let toggle = UISwitch()
-        toggle.onTintColor = AppColor.pillGreen200
-        toggle.isOn = true
-        return toggle
-    }()
-    
-    private let healthTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Apple Health 연동"
-        label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .label
-        return label
-    }()
-    
-    private let healthToggle: UISwitch = {
-        let toggle = UISwitch()
-        toggle.onTintColor = AppColor.pillGreen200
-        toggle.isOn = true
-        return toggle
-    }()
-    
-    private let healthDescriptionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "설명텍스트입니다."
-        label.font = .systemFont(ofSize: 12, weight: .regular)
-        label.textColor = .systemGray
-        return label
     }()
     
     private let completeButton: PrimaryActionButton = {
@@ -133,78 +92,38 @@ final class TimeSettingViewController: UIViewController {
         navigationItem.hidesBackButton = false
         navigationItem.backButtonDisplayMode = .default
         
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        
         [clockImageView, titleLabel, subtitleLabel,
-         timeSettingButton, alarmTitleLabel, alarmToggle,
-         healthTitleLabel, healthToggle, healthDescriptionLabel,
-         completeButton].forEach {
-            contentView.addSubview($0)
-        }
-        
-        scrollView.snp.makeConstraints {
-            $0.edges.equalTo(view.safeAreaLayoutGuide)
-        }
-        
-        contentView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.width.equalToSuperview()
+         timeSettingButton, completeButton].forEach {
+            view.addSubview($0)
         }
         
         clockImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(28)
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
             $0.centerX.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(contentInset)
+            $0.horizontalEdges.equalTo(view).inset(contentInset)
             $0.height.equalTo(200)
         }
         
         titleLabel.snp.makeConstraints {
-            $0.top.equalTo(clockImageView.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
+            $0.top.equalTo(clockImageView.snp.bottom).offset(32)
+            $0.leading.trailing.equalTo(view).inset(contentInset)
         }
         
         subtitleLabel.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
+            $0.leading.trailing.equalTo(view).inset(contentInset)
         }
         
         timeSettingButton.snp.makeConstraints {
-            $0.top.equalTo(subtitleLabel.snp.bottom).offset(40)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
+            $0.top.equalTo(subtitleLabel.snp.bottom).offset(52)
+            $0.leading.trailing.equalTo(view).inset(contentInset)
             $0.height.equalTo(60)
         }
         
-        alarmTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(timeSettingButton.snp.bottom).offset(32)
-            $0.leading.equalToSuperview().offset(contentInset)
-        }
-        
-        alarmToggle.snp.makeConstraints {
-            $0.centerY.equalTo(alarmTitleLabel)
-            $0.trailing.equalToSuperview().offset(-contentInset)
-        }
-        
-        healthTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(alarmTitleLabel.snp.bottom).offset(24)
-            $0.leading.equalToSuperview().offset(contentInset)
-        }
-        
-        healthToggle.snp.makeConstraints {
-            $0.centerY.equalTo(healthTitleLabel)
-            $0.trailing.equalToSuperview().offset(-contentInset)
-        }
-        
-        healthDescriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(healthTitleLabel.snp.bottom).offset(8)
-            $0.leading.equalToSuperview().offset(contentInset)
-        }
-        
         completeButton.snp.makeConstraints {
-            $0.top.equalTo(healthDescriptionLabel.snp.bottom).offset(60)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide).inset(contentInset)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
             $0.height.equalTo(70)
-            $0.bottom.equalToSuperview().offset(-20)
         }
     }
     
@@ -214,8 +133,6 @@ final class TimeSettingViewController: UIViewController {
         let input = TimeSettingViewModel.Input(
             backButtonTapped: Observable<Void>.empty(),
             timeSettingButtonTapped: timeSettingButton.rx.tap.asObservable(),
-            alarmToggleChanged: alarmToggle.rx.isOn.changed.asObservable(),
-            healthToggleChanged: healthToggle.rx.isOn.changed.asObservable(),
             completeButtonTapped: completeButton.rx.tap.asObservable()
         )
         

@@ -16,8 +16,6 @@ final class TimeSettingViewModel {
     struct Input {
         let backButtonTapped: Observable<Void>
         let timeSettingButtonTapped: Observable<Void>
-        let alarmToggleChanged: Observable<Bool>
-        let healthToggleChanged: Observable<Bool>
         let completeButtonTapped: Observable<Void>
     }
     
@@ -38,7 +36,6 @@ final class TimeSettingViewModel {
     
     private let selectedTime = BehaviorRelay<Date>(value: Date())
     private let isAlarmEnabled = BehaviorRelay<Bool>(value: true)
-    private let isHealthEnabled = BehaviorRelay<Bool>(value: true)
     
     // MARK: - Initialization
     
@@ -59,14 +56,6 @@ final class TimeSettingViewModel {
     func transform(input: Input) -> Output {
         let showTimePicker = input.timeSettingButtonTapped
             .asDriver(onErrorJustReturn: ())
-        
-        input.alarmToggleChanged
-            .bind(to: isAlarmEnabled)
-            .disposed(by: disposeBag)
-        
-        input.healthToggleChanged
-            .bind(to: isHealthEnabled)
-            .disposed(by: disposeBag)
         
         let errorTracker = PublishSubject<String>()
         

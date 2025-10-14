@@ -50,15 +50,6 @@ final class DatePickerBottomSheetViewController: UIViewController {
         return view
     }()
     
-    private let subtitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "날짜를 선택하면 자동으로 저장됩니다"
-        label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.textColor = .systemGray
-        label.textAlignment = .center
-        return label
-    }()
-    
     private let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
@@ -113,7 +104,6 @@ final class DatePickerBottomSheetViewController: UIViewController {
         view.addSubview(containerView)
         
         containerView.addSubview(handleBar)
-        containerView.addSubview(subtitleLabel)
         containerView.addSubview(datePicker)
     }
     
@@ -134,13 +124,8 @@ final class DatePickerBottomSheetViewController: UIViewController {
             $0.height.equalTo(5)
         }
         
-        subtitleLabel.snp.makeConstraints {
-            $0.top.equalTo(handleBar.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview().inset(24)
-        }
-        
         datePicker.snp.makeConstraints {
-            $0.top.equalTo(subtitleLabel.snp.bottom).offset(24)
+            $0.top.equalTo(handleBar.snp.bottom).offset(24)
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-20)
         }
@@ -148,12 +133,23 @@ final class DatePickerBottomSheetViewController: UIViewController {
     
     private func setupGestures() {
         // Dimmed view tap gesture
-        let tapGesture = UITapGestureRecognizer()
-        dimmedView.addGestureRecognizer(tapGesture)
+        let dimmedTapGesture = UITapGestureRecognizer()
+        dimmedView.addGestureRecognizer(dimmedTapGesture)
         
-        tapGesture.rx.event
+        dimmedTapGesture.rx.event
             .subscribe(onNext: { [weak self] _ in
                 self?.dismissBottomSheet()
+            })
+            .disposed(by: disposeBag)
+        
+        // DatePicker tap gesture - 날짜 셀 탭 감지
+        let datePickerTapGesture = UITapGestureRecognizer()
+        datePickerTapGesture.cancelsTouchesInView = false
+        datePicker.addGestureRecognizer(datePickerTapGesture)
+        
+        datePickerTapGesture.rx.event
+            .subscribe(onNext: { [weak self] _ in
+                self?.handleDateSelection()
             })
             .disposed(by: disposeBag)
         
@@ -172,19 +168,24 @@ final class DatePickerBottomSheetViewController: UIViewController {
         datePicker.rx.controlEvent(.valueChanged)
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                self.selectedDateSubject.onNext(self.datePicker.date)
-                
-                // 햅틱 피드백
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred()
-                
-                // 딜레이 후 시트 닫기
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    self.dismissBottomSheet()
-                }
+                self?.handleDateSelection()
             })
             .disposed(by: disposeBag)
+    }
+    
+    // MARK: - Date Selection
+    
+    private func handleDateSelection() {
+        selectedDateSubject.onNext(datePicker.date)
+        
+        // 햅틱 피드백
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+        
+        // 딜레이 후 시트 닫기
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.dismissBottomSheet()
+        }
     }
     
     // MARK: - Animation
@@ -254,4 +255,3 @@ final class DatePickerBottomSheetViewController: UIViewController {
         }
     }
 }
-

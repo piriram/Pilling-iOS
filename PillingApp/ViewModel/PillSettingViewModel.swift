@@ -28,6 +28,7 @@ final class PillSettingViewModel {
         let presentDatePicker: Signal<Void>
         let presentPillTypePicker: Signal<Void>
         let proceed: Signal<Void>
+        let alertMessage: Signal<String>
     }
     
     // MARK: - Properties
@@ -42,6 +43,7 @@ final class PillSettingViewModel {
     private let dateSelectedSubject = PublishSubject<Date>()
     private let pillInfoSelectedSubject = PublishSubject<PillInfo>()
     private let nextButtonTappedSubject = PublishSubject<Void>()
+    private let alertMessageSubject = PublishSubject<String>()
     
     private let selectedPillInfoRelay = BehaviorRelay<PillInfo?>(value: nil)
     private let selectedStartDateRelay = BehaviorRelay<Date?>(value: nil)
@@ -76,7 +78,8 @@ final class PillSettingViewModel {
                 selectedStartDateRelay.asObservable()
             )
             .map { pillInfo, startDate in
-                pillInfo != nil && startDate != nil
+                guard let info = pillInfo, let _ = startDate else { return false }
+                return (info.takingDays + info.breakDays) <= 28
             }
         
         let selectedPillTypeText = selectedPillInfoRelay
@@ -105,6 +108,7 @@ final class PillSettingViewModel {
                 }
                 return (pillInfo, startDate)
             }
+            .filter { pillInfo, _ in (pillInfo.takingDays + pillInfo.breakDays) <= 28 }
             .do(onNext: { [userDefaultsManager] pillInfo, startDate in
                 userDefaultsManager.savePillInfo(pillInfo)
                 userDefaultsManager.savePillStartDate(startDate)
@@ -119,7 +123,8 @@ final class PillSettingViewModel {
             isNextButtonEnabled: isNextButtonEnabled.asDriver(onErrorJustReturn: false),
             presentDatePicker: startDateButtonTappedSubject.asSignal(onErrorSignalWith: .empty()),
             presentPillTypePicker: pillTypeButtonTappedSubject.asSignal(onErrorSignalWith: .empty()),
-            proceed: proceed
+            proceed: proceed,
+            alertMessage: alertMessageSubject.asSignal(onErrorSignalWith: .empty())
         )
         
         // 바인딩
@@ -131,7 +136,12 @@ final class PillSettingViewModel {
     private func bindActions() {
         pillInfoSelectedSubject
             .subscribe(onNext: { [weak self] pillInfo in
-                self?.selectedPillInfoRelay.accept(pillInfo)
+                let total = pillInfo.takingDays + pillInfo.breakDays
+                if total <= 28 {
+                    self?.selectedPillInfoRelay.accept(pillInfo)
+                } else {
+                    self?.alertMessageSubject.onNext("복용일과 휴약일의 합은 28일 이하여야 해요.")
+                }
             })
             .disposed(by: disposeBag)
         
@@ -167,3 +177,4 @@ final class PillSettingViewModel {
         }
     }
 }
+

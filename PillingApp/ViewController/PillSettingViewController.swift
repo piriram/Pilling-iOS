@@ -99,14 +99,14 @@ final class PillSettingViewController: UIViewController {
     
     private func setupConstraints() {
         iconImageView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).inset(-20)
+            $0.top.equalTo(view.safeAreaLayoutGuide).inset(0)
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(200)
         }
         
         mainTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(iconImageView.snp.bottom).offset(20)
+            $0.top.equalTo(iconImageView.snp.bottom).offset(36)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
         
@@ -116,13 +116,13 @@ final class PillSettingViewController: UIViewController {
         }
         
         pillTypeButton.snp.makeConstraints {
-            $0.top.equalTo(subtitleLabel.snp.bottom).offset(40)
+            $0.top.equalTo(subtitleLabel.snp.bottom).offset(48)
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(60)
         }
         
         currentDaysButton.snp.makeConstraints {
-            $0.top.equalTo(pillTypeButton.snp.bottom).offset(16)
+            $0.top.equalTo(pillTypeButton.snp.bottom).offset(24)
             $0.leading.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(60)
         }
@@ -193,6 +193,12 @@ final class PillSettingViewController: UIViewController {
                 }
             })
             .disposed(by: disposeBag)
+        
+        viewModel.output.alertMessage
+            .emit(onNext: { [weak self] message in
+                self?.presentAlert(message: message)
+            })
+            .disposed(by: disposeBag)
     }
     
     // MARK: - Private Methods
@@ -215,5 +221,11 @@ final class PillSettingViewController: UIViewController {
             .disposed(by: disposeBag)
         
         present(pillTypeVC, animated: false)
+    }
+    
+    private func presentAlert(message: String) {
+        let alert = UIAlertController(title: "알림", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        present(alert, animated: true)
     }
 }
