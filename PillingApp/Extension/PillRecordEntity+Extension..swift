@@ -20,6 +20,7 @@ extension PillRecordEntity {
             status: pillStatus,
             scheduledDateTime: scheduledDateTime ?? Date(),
             takenAt: takenAt,
+            memo: memo ?? "",
             createdAt: createdAt ?? Date(),
             updatedAt: updatedAt ?? Date()
         )
@@ -35,6 +36,7 @@ extension PillRecordEntity {
         entity.status = Int16(domain.status.rawValue)
         entity.scheduledDateTime = domain.scheduledDateTime
         entity.takenAt = domain.takenAt
+        entity.memo = domain.memo
         entity.createdAt = domain.createdAt
         entity.updatedAt = domain.updatedAt
         return entity
@@ -45,6 +47,8 @@ extension PillRecordEntity {
         status = Int16(domain.status.rawValue)
         scheduledDateTime = domain.scheduledDateTime
         takenAt = domain.takenAt
+        memo = domain.memo
         updatedAt = domain.updatedAt
     }
 }
+

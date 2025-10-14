@@ -48,6 +48,7 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
             status: newStatus,
             scheduledDateTime: record.scheduledDateTime,
             takenAt: now,
+            memo: record.memo,
             createdAt: record.createdAt,
             updatedAt: now
         )

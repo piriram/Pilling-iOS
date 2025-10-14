@@ -184,6 +184,31 @@ final class SettingViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: false)
+
+        // Configure white navigation bar appearance
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.shadowColor = .clear
+        appearance.backgroundColor = .white
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.black]
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.tintColor = .black
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        // Restore default appearance (system background) so other screens are unaffected
+        let defaultAppearance = UINavigationBarAppearance()
+        defaultAppearance.configureWithDefaultBackground()
+        navigationController?.navigationBar.standardAppearance = defaultAppearance
+        navigationController?.navigationBar.compactAppearance = defaultAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = defaultAppearance
+        navigationController?.navigationBar.tintColor = .black
     }
     
     // MARK: - Setup
@@ -208,19 +233,9 @@ final class SettingViewController: UIViewController {
             $0.width.equalToSuperview()
         }
         
-        pillSectionLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(24)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
-        }
-        
-        newPillCycleButton.snp.makeConstraints {
-            $0.top.equalTo(pillSectionLabel.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
-            $0.height.equalTo(60)
-        }
-        
+        // Alarm section first
         alarmSectionLabel.snp.makeConstraints {
-            $0.top.equalTo(newPillCycleButton.snp.bottom).offset(32)
+            $0.top.equalToSuperview().offset(24)
             $0.leading.trailing.equalToSuperview().inset(contentInset)
         }
         
@@ -232,6 +247,18 @@ final class SettingViewController: UIViewController {
         
         messageSettingButton.snp.makeConstraints {
             $0.top.equalTo(timeSettingButton.snp.bottom).offset(12)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
+            $0.height.equalTo(60)
+        }
+        
+        // Move pill section below alarm section
+        pillSectionLabel.snp.makeConstraints {
+            $0.top.equalTo(messageSettingButton.snp.bottom).offset(32)
+            $0.leading.trailing.equalToSuperview().inset(contentInset)
+        }
+        
+        newPillCycleButton.snp.makeConstraints {
+            $0.top.equalTo(pillSectionLabel.snp.bottom).offset(16)
             $0.leading.trailing.equalToSuperview().inset(contentInset)
             $0.height.equalTo(60)
             $0.bottom.equalToSuperview().offset(-40)

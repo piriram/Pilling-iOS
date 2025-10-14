@@ -564,50 +564,15 @@ final class DashboardViewController: UIViewController {
     }
     
     private func presentCalendarSheet(for index: Int, item: DayItem) {
-        if #available(iOS 15.0, *) {
-            let viewController = CalendarSheetViewController(selectedDate: item.date) { [weak self] chosenStatus in
-                self?.viewModel.updateState(at: index, to: chosenStatus)
+        guard let cycle = viewModel.currentCycle.value else { return }
+        if #available(iOS 16.0, *) {
+            CalendarSheetPresenter.present(from: self,
+                                           selectedIndex: index,
+                                           item: item,
+                                           cycle: cycle) { [weak self] idx, status in
+                self?.viewModel.updateState(at: idx, to: status)
             }
-            viewController.modalPresentationStyle = .pageSheet
-            
-            if let sheet = viewController.sheetPresentationController {
-                sheet.detents = [.medium(), .large()]
-                sheet.preferredCornerRadius = 24
-                sheet.prefersGrabberVisible = true
-            }
-            
-            present(viewController, animated: true)
-            return
         }
-        
-        // iOS 15 미만 fallback은 그대로 유지
-        let alertController = UIAlertController(title: "상태 선택", message: nil, preferredStyle: .actionSheet)
-        
-        alertController.addAction(UIAlertAction(title: "복용", style: .default) { [weak self] _ in
-            self?.viewModel.updateState(at: index, to: .taken)
-        })
-        
-        alertController.addAction(UIAlertAction(title: "지연 복용", style: .default) { [weak self] _ in
-            self?.viewModel.updateState(at: index, to: .takenDelayed)
-        })
-        
-        alertController.addAction(UIAlertAction(title: "2알 복용", style: .default) { [weak self] _ in
-            self?.viewModel.updateState(at: index, to: .takenDouble)
-        })
-        
-        alertController.addAction(UIAlertAction(title: "미복용", style: .default) { [weak self] _ in
-            let isToday = Calendar.current.isDate(item.date, inSameDayAs: Date())
-            let status: PillStatus = isToday ? .scheduled : .missed
-            self?.viewModel.updateState(at: index, to: status)
-        })
-        
-        alertController.addAction(UIAlertAction(title: "예정으로 변경", style: .default) { [weak self] _ in
-            self?.viewModel.updateState(at: index, to: .scheduled)
-        })
-        
-        alertController.addAction(UIAlertAction(title: "취소", style: .cancel))
-        
-        present(alertController, animated: true)
     }
     
     private func presentInfoFloatingView() {
@@ -724,3 +689,4 @@ final class DashboardViewController: UIViewController {
         return UICollectionViewCompositionalLayout(section: section)
     }
 }
+

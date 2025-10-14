@@ -82,6 +82,7 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
                     status: status,
                     scheduledDateTime: scheduledDateTime,
                     takenAt: takenAt,
+                    memo: "",
                     createdAt: now,
                     updatedAt: now
                 )
@@ -140,3 +141,4 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
         return calendar.date(from: combined) ?? date
     }
 }
+

@@ -22,6 +22,8 @@ struct PillRecord {
     let status: PillStatus
     let scheduledDateTime: Date
     let takenAt: Date?
+    let memo: String
     let createdAt: Date
     let updatedAt: Date
 }
+

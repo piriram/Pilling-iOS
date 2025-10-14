@@ -45,6 +45,7 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
             status: newStatus,
             scheduledDateTime: record.scheduledDateTime,
             takenAt: takenAt,
+            memo: record.memo,
             createdAt: record.createdAt,
             updatedAt: now
         )
