@@ -145,7 +145,26 @@ final class DashboardViewModel {
         updatePillStatusUseCase.execute(
             cycle: cycle,
             recordIndex: index,
-            newStatus: newStatus
+            newStatus: newStatus,
+            memo: nil
+        )
+        .subscribe(onNext: { [weak self] updatedCycle in
+            self?.currentCycle.accept(updatedCycle)
+            self?.updateItems()
+            self?.updateDashboardMessage()
+            self?.updateCanTakePill()
+        })
+        .disposed(by: disposeBag)
+    }
+    
+    func updateState(at index: Int, to newStatus: PillStatus, memo: String?) {
+        guard let cycle = currentCycle.value else { return }
+        
+        updatePillStatusUseCase.execute(
+            cycle: cycle,
+            recordIndex: index,
+            newStatus: newStatus,
+            memo: memo
         )
         .subscribe(onNext: { [weak self] updatedCycle in
             self?.currentCycle.accept(updatedCycle)
@@ -156,3 +175,4 @@ final class DashboardViewModel {
         .disposed(by: disposeBag)
     }
 }
+

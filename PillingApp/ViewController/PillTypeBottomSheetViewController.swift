@@ -9,6 +9,7 @@ import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
+import IQKeyboardManagerSwift
 
 // MARK: - PillTypeBottomSheetViewController
 
@@ -173,6 +174,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        IQKeyboardManager.shared.keyboardDistance = 60
         setupUI()
         setupConstraints()
         setupPickerView()
@@ -522,4 +524,3 @@ extension PillTypeBottomSheetViewController: UIPickerViewDelegate, UIPickerViewD
         }
     }
 }
-

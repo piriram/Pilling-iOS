@@ -13,7 +13,8 @@ protocol UpdatePillStatusUseCaseProtocol {
     func execute(
         cycle: PillCycle,
         recordIndex: Int,
-        newStatus: PillStatus
+        newStatus: PillStatus,
+        memo: String?
     ) -> Observable<PillCycle>
 }
 
@@ -27,7 +28,8 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
     func execute(
         cycle: PillCycle,
         recordIndex: Int,
-        newStatus: PillStatus
+        newStatus: PillStatus,
+        memo: String?
     ) -> Observable<PillCycle> {
         guard cycle.records.indices.contains(recordIndex) else {
             return .just(cycle)
@@ -45,7 +47,7 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
             status: newStatus,
             scheduledDateTime: record.scheduledDateTime,
             takenAt: takenAt,
-            memo: record.memo,
+            memo: memo ?? record.memo,
             createdAt: record.createdAt,
             updatedAt: now
         )
@@ -56,3 +58,4 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
             .map { updatedCycle }
     }
 }
+

@@ -569,8 +569,8 @@ final class DashboardViewController: UIViewController {
             CalendarSheetPresenter.present(from: self,
                                            selectedIndex: index,
                                            item: item,
-                                           cycle: cycle) { [weak self] idx, status in
-                self?.viewModel.updateState(at: idx, to: status)
+                                           cycle: cycle) { [weak self] idx, status, memo in
+                self?.viewModel.updateState(at: idx, to: status, memo: memo)
             }
         }
     }
