@@ -9,7 +9,6 @@ import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
-import IQKeyboardManagerSwift
 
 // MARK: - Presentation/Dashboard/Views/CalendarSheetViewController.swift
 
@@ -19,22 +18,58 @@ final class CalendarSheetViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     private var currentStatus: PillStatus?
-    
     var titleText: String?
     
+    // MARK: - Bottom Sheet Properties
+    
+    private let sheetHeight: CGFloat = 350
+    private var currentSheetY: CGFloat = 0
+    
+    // MARK: - UI Components
+    
+    private let dimmedView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        view.alpha = 0
+        return view
+    }()
+    
+    private let containerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemBackground
+        view.layer.cornerRadius = 24
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.clipsToBounds = true
+        return view
+    }()
+    
+    private let handleBar: UIView = {
+        let view = UIView()
+        view.backgroundColor = AppColor.borderGray
+        view.layer.cornerRadius = 2.5
+        return view
+    }()
+    
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = Typography.headline5(.semibold)
+        label.textColor = AppColor.textBlack
+        return label
+    }()
+    
     private let memoTextView: UITextView = {
-        let tv = UITextView()
-        tv.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        tv.font = .systemFont(ofSize: 15, weight: .regular)
-        tv.textColor = AppColor.textBlack
-        tv.backgroundColor = AppColor.grayBackground
-        tv.layer.cornerRadius = 12
-        tv.layer.borderWidth = 1
-        tv.layer.borderColor = AppColor.borderGray.cgColor
-        tv.isScrollEnabled = true
-        tv.textContainer.lineFragmentPadding = 0
-        tv.keyboardDismissMode = .interactive
-        return tv
+        let textView = UITextView()
+        textView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        textView.font = .systemFont(ofSize: 15, weight: .regular)
+        textView.textColor = AppColor.textBlack
+        textView.backgroundColor = AppColor.grayBackground
+        textView.layer.cornerRadius = 12
+        textView.layer.borderWidth = 1
+        textView.layer.borderColor = AppColor.borderGray.cgColor
+        textView.isScrollEnabled = true
+        textView.textContainer.lineFragmentPadding = 0
+        textView.keyboardDismissMode = .interactive
+        return textView
     }()
     
     private let memoPlaceholderLabel: UILabel = {
@@ -45,14 +80,15 @@ final class CalendarSheetViewController: UIViewController {
         return label
     }()
     
-    private lazy var containerStack: UIStackView = {
+    private lazy var contentStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 20
         return stack
     }()
     
-    // MARK: - Custom Segmented Control
+    // MARK: - Status Selection Components
+    
     private let statusButtonsContainer: UIView = {
         let view = UIView()
         view.backgroundColor = AppColor.grayBackground
@@ -74,38 +110,120 @@ final class CalendarSheetViewController: UIViewController {
     
     private var selectedButtonTag: Int = -1
     
-    private let subtitleLabel: UILabel = {
-        let label = UILabel()
-        label.font = Typography.headline5(.semibold)
-        label.textColor = AppColor.textBlack
-        return label
-    }()
-    
-    private let dragIndicator: UIView = {
-        let view = UIView()
-        view.backgroundColor = AppColor.borderGray
-        view.layer.cornerRadius = 2.5
-        return view
-    }()
+    // MARK: - Initialization
     
     init(selectedDate: Date, onSelectStatus: @escaping (PillStatus, String) -> Void) {
         self.selectedDate = selectedDate
         self.onSelectStatus = onSelectStatus
         super.init(nibName: nil, bundle: nil)
+        modalPresentationStyle = .overFullScreen
+        modalTransitionStyle = .crossDissolve
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
+        setupGestures()
         bindStatusButtons()
-        setupKeyboardDismissGesture()
         bindMemoTextView()
-        self.presentationController?.delegate = self
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showBottomSheet()
+    }
+    
+    // MARK: - Setup
+    
+    private func setupViews() {
+        view.backgroundColor = .clear
+        
+        view.addSubview(dimmedView)
+        view.addSubview(containerView)
+        
+        containerView.addSubview(handleBar)
+        containerView.addSubview(contentStackView)
+        
+        subtitleLabel.text = titleText ?? title
+        contentStackView.addArrangedSubview(subtitleLabel)
+        
+        setupStatusButtons()
+        
+        contentStackView.addArrangedSubview(memoTextView)
+        memoTextView.addSubview(memoPlaceholderLabel)
+        
+        setupConstraints()
+    }
+    
+    private func setupStatusButtons() {
+        contentStackView.addArrangedSubview(statusButtonsContainer)
+        
+        statusButtonsContainer.addSubview(statusButtonsStack)
+        statusButtonsStack.addArrangedSubview(notTakenButton)
+        statusButtonsStack.addArrangedSubview(takenButton)
+        statusButtonsStack.addArrangedSubview(takenDoubleButton)
+    }
+    
+    private func setupConstraints() {
+        dimmedView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        containerView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(sheetHeight)
+            make.top.equalTo(view.snp.bottom)
+        }
+        
+        handleBar.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(12)
+            make.centerX.equalToSuperview()
+            make.width.equalTo(36)
+            make.height.equalTo(5)
+        }
+        
+        contentStackView.snp.makeConstraints { make in
+            make.top.equalTo(handleBar.snp.bottom).offset(24)
+            make.leading.trailing.equalToSuperview().inset(24)
+        }
+        
+        statusButtonsContainer.snp.makeConstraints { make in
+            make.height.equalTo(48)
+        }
+        
+        statusButtonsStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(4)
+        }
+        
+        memoTextView.snp.makeConstraints { make in
+            make.height.equalTo(120)
+        }
+        
+        memoPlaceholderLabel.snp.makeConstraints { make in
+            make.top.equalTo(memoTextView).inset(12)
+            make.leading.equalTo(memoTextView).inset(12)
+        }
+    }
+    
+    private func setupGestures() {
+        let dimmedTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleDimmedViewTap))
+        dimmedView.addGestureRecognizer(dimmedTapGesture)
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture))
+        containerView.addGestureRecognizer(panGesture)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    // MARK: - Status Button Creation
     
     private func createStatusButton(title: String, tag: Int) -> UIButton {
         let button = UIButton(type: .custom)
@@ -120,68 +238,7 @@ final class CalendarSheetViewController: UIViewController {
         return button
     }
     
-    private func setupViews() {
-        view.backgroundColor = .systemBackground
-        
-        view.addSubview(dragIndicator)
-        dragIndicator.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(8)
-            make.centerX.equalToSuperview()
-            make.width.equalTo(36)
-            make.height.equalTo(5)
-        }
-        
-        subtitleLabel.text = titleText ?? self.title
-        subtitleLabel.font = Typography.headline5(.semibold)
-        
-        view.addSubview(containerStack)
-        containerStack.snp.makeConstraints { make in
-            make.top.equalTo(dragIndicator.snp.bottom).offset(24)
-            make.leading.trailing.equalToSuperview().inset(24)
-        }
-        
-        containerStack.addArrangedSubview(subtitleLabel)
-        
-        // Setup custom segmented control
-        containerStack.addArrangedSubview(statusButtonsContainer)
-        statusButtonsContainer.snp.makeConstraints { make in
-            make.height.equalTo(48)
-        }
-        
-        statusButtonsContainer.addSubview(statusButtonsStack)
-        statusButtonsStack.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(4)
-        }
-        
-        statusButtonsStack.addArrangedSubview(notTakenButton)
-        statusButtonsStack.addArrangedSubview(takenButton)
-        statusButtonsStack.addArrangedSubview(takenDoubleButton)
-        
-        containerStack.addArrangedSubview(memoTextView)
-        memoTextView.snp.makeConstraints { make in
-            make.height.equalTo(120)
-        }
-        
-        memoTextView.addSubview(memoPlaceholderLabel)
-        memoPlaceholderLabel.snp.makeConstraints { make in
-            make.top.equalTo(memoTextView).inset(12)
-            make.leading.equalTo(memoTextView).inset(12)
-        }
-        
-        let spacer = UIView()
-        spacer.snp.makeConstraints { $0.height.equalTo(20) }
-        containerStack.addArrangedSubview(spacer)
-    }
-    
-    private func setupKeyboardDismissGesture() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
-    }
+    // MARK: - Binding
     
     private func bindStatusButtons() {
         let buttons = [notTakenButton, takenButton, takenDoubleButton]
@@ -192,56 +249,16 @@ final class CalendarSheetViewController: UIViewController {
                     guard let self = self else { return }
                     self.selectButton(tag: button.tag)
                     
-                    let status: PillStatus?
-                    switch button.tag {
-                    case 0:
-                        let calendar = Calendar.current
-                        let isToday = calendar.isDateInToday(self.selectedDate)
-                        let isInPast = self.selectedDate < calendar.startOfDay(for: Date())
-                        status = isToday ? .scheduled : (isInPast ? .missed : .todayNotTaken)
-                    case 1:
-                        status = .taken
-                    case 2:
-                        status = .takenDouble
-                    default:
-                        status = nil
-                    }
+                    let status = self.determineStatus(for: button.tag)
                     
                     if let status = status {
                         self.currentStatus = status
-                        self.dismiss(animated: true)
-                        self.onSelectStatus(status, self.memoTextView.text ?? "")
+                        self.hideBottomSheet {
+                            self.onSelectStatus(status, self.memoTextView.text ?? "")
+                        }
                     }
                 }
                 .disposed(by: disposeBag)
-        }
-    }
-    
-    private func selectButton(tag: Int) {
-        let buttons = [notTakenButton, takenButton, takenDoubleButton]
-        selectedButtonTag = tag
-        
-        buttons.forEach { button in
-            let isSelected = button.tag == tag
-            
-            UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
-                button.isSelected = isSelected
-                button.backgroundColor = isSelected ? AppColor.pillGreen800 : .clear
-                button.titleLabel?.font = isSelected
-                ? .systemFont(ofSize: 14, weight: .semibold)
-                : .systemFont(ofSize: 14, weight: .medium)
-                
-                if isSelected {
-                    button.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-                    button.layer.shadowColor = AppColor.pillGreen800.cgColor
-                    button.layer.shadowOffset = CGSize(width: 0, height: 2)
-                    button.layer.shadowOpacity = 0.3
-                    button.layer.shadowRadius = 4
-                } else {
-                    button.transform = .identity
-                    button.layer.shadowOpacity = 0
-                }
-            }
         }
     }
     
@@ -256,6 +273,52 @@ final class CalendarSheetViewController: UIViewController {
                 self?.memoPlaceholderLabel.isHidden = hasText
             }
             .disposed(by: disposeBag)
+    }
+    
+    // MARK: - Status Logic
+    
+    private func determineStatus(for tag: Int) -> PillStatus? {
+        switch tag {
+        case 0:
+            let calendar = Calendar.current
+            let isToday = calendar.isDateInToday(selectedDate)
+            let isInPast = selectedDate < calendar.startOfDay(for: Date())
+            return isToday ? .scheduled : (isInPast ? .missed : .todayNotTaken)
+        case 1:
+            return .taken
+        case 2:
+            return .takenDouble
+        default:
+            return nil
+        }
+    }
+    
+    private func selectButton(tag: Int) {
+        let buttons = [notTakenButton, takenButton, takenDoubleButton]
+        selectedButtonTag = tag
+        
+        buttons.forEach { button in
+            let isSelected = button.tag == tag
+            
+            UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
+                button.isSelected = isSelected
+                button.backgroundColor = isSelected ? AppColor.pillGreen800 : .clear
+                button.titleLabel?.font = isSelected
+                    ? .systemFont(ofSize: 14, weight: .semibold)
+                    : .systemFont(ofSize: 14, weight: .medium)
+                
+                if isSelected {
+                    button.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+                    button.layer.shadowColor = AppColor.pillGreen800.cgColor
+                    button.layer.shadowOffset = CGSize(width: 0, height: 2)
+                    button.layer.shadowOpacity = 0.3
+                    button.layer.shadowRadius = 4
+                } else {
+                    button.transform = .identity
+                    button.layer.shadowOpacity = 0
+                }
+            }
+        }
     }
     
     func setInitialSelection(for status: PillStatus) {
@@ -276,18 +339,81 @@ final class CalendarSheetViewController: UIViewController {
         }
         currentStatus = status
     }
-}
-
-extension CalendarSheetViewController: UIAdaptivePresentationControllerDelegate {
-    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+    
+    // MARK: - Bottom Sheet Animations
+    
+    private func showBottomSheet() {
+        containerView.snp.updateConstraints { make in
+            make.top.equalTo(view.snp.bottom).offset(-sheetHeight)
+        }
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+            self.dimmedView.alpha = 1
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func hideBottomSheet(completion: (() -> Void)? = nil) {
+        containerView.snp.updateConstraints { make in
+            make.top.equalTo(view.snp.bottom)
+        }
+        
+        UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseIn) {
+            self.dimmedView.alpha = 0
+            self.view.layoutIfNeeded()
+        } completion: { _ in
+            self.dismiss(animated: false) {
+                completion?()
+            }
+        }
+    }
+    
+    // MARK: - Gesture Handlers
+    
+    @objc private func handleDimmedViewTap() {
+        handleSheetDismiss()
+    }
+    
+    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: view)
+        let velocity = gesture.velocity(in: view)
+        
+        switch gesture.state {
+        case .changed:
+            if translation.y > 0 {
+                containerView.transform = CGAffineTransform(translationX: 0, y: translation.y)
+            }
+        case .ended:
+            let shouldDismiss = translation.y > sheetHeight / 3 || velocity.y > 1000
+            
+            if shouldDismiss {
+                hideBottomSheet {
+                    self.handleSheetDismiss()
+                }
+            } else {
+                UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
+                    self.containerView.transform = .identity
+                }
+            }
+        default:
+            break
+        }
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    private func handleSheetDismiss() {
         if let status = currentStatus {
             onSelectStatus(status, memoTextView.text ?? "")
         } else {
             let calendar = Calendar.current
-            let isToday = calendar.isDateInToday(self.selectedDate)
-            let isInPast = self.selectedDate < calendar.startOfDay(for: Date())
+            let isToday = calendar.isDateInToday(selectedDate)
+            let isInPast = selectedDate < calendar.startOfDay(for: Date())
             let fallbackStatus: PillStatus = isToday ? .scheduled : (isInPast ? .missed : .scheduled)
             onSelectStatus(fallbackStatus, memoTextView.text ?? "")
         }
+        hideBottomSheet()
     }
 }
