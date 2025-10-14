@@ -22,6 +22,7 @@ final class DashboardViewController: UIViewController {
     private let backgroundImageView = UIImageView(image: UIImage(named: "background"))
     private let infoButton = UIButton(type: .system)
     private let gearButton = UIButton(type: .system)
+    private let historyButton = UIButton(type: .system)
     private let characterImageView = UIImageView()
     private let progressLabel = UILabel()
     private let totalLabel = UILabel()
@@ -119,6 +120,9 @@ final class DashboardViewController: UIViewController {
         infoButton.tintColor = AppColor.secondary
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
         gearButton.tintColor = AppColor.secondary
+        
+        historyButton.setImage(UIImage(systemName: "clock.arrow.circlepath"), for: .normal)
+        historyButton.tintColor = AppColor.secondary
         
         characterImageView.contentMode = .scaleAspectFit
         
@@ -234,6 +238,7 @@ final class DashboardViewController: UIViewController {
     
     private func addSubviews() {
         view.addSubview(infoButton)
+        view.addSubview(historyButton)
         view.addSubview(gearButton)
         view.addSubview(characterImageView)
         view.addSubview(headerInfoStackView)
@@ -253,10 +258,16 @@ final class DashboardViewController: UIViewController {
         
         infoButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(14)
-            make.trailing.equalTo(gearButton.snp.leading).offset(-8)
+            make.leading.equalToSuperview().inset(contentInset)
             make.width.height.equalTo(30)
         }
-        
+
+        historyButton.snp.makeConstraints { make in
+            make.centerY.equalTo(infoButton)
+            make.leading.equalTo(infoButton.snp.trailing).offset(8)
+            make.width.height.equalTo(30)
+        }
+
         gearButton.snp.makeConstraints { make in
             make.centerY.equalTo(infoButton)
             make.trailing.equalToSuperview().inset(contentInset)
@@ -385,6 +396,14 @@ final class DashboardViewController: UIViewController {
         infoButton.rx.tap
             .bind { [weak self] in
                 self?.presentInfoFloatingView()
+            }
+            .disposed(by: disposeBag)
+        
+        historyButton.rx.tap
+            .bind { [weak self] in
+                let vm = DIContainer.shared.makePillCycleHistoryViewModel()
+                let vc = PillCycleHistoryViewController(viewModel: vm)
+                self?.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)
         

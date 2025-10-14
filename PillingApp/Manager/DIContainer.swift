@@ -106,4 +106,10 @@ final class DIContainer {
         let viewModel = makeSettingViewModel()
         return SettingViewController(viewModel: viewModel)
     }
+    
+    // MARK: - History
+    func makePillCycleHistoryViewModel() -> PillCycleHistoryViewModel {
+        return PillCycleHistoryViewModel(context: coreDataManager.viewContext)
+    }
 }
+
