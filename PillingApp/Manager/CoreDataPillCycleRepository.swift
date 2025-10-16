@@ -24,10 +24,36 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
         return coreDataManager
             .fetch(
                 entityType: PillCycleEntity.self,
-                sortDescriptors: [NSSortDescriptor(key: "startDate", ascending: false)]
+                sortDescriptors: [
+                    NSSortDescriptor(key: "createdAt", ascending: false),
+                    NSSortDescriptor(key: "startDate", ascending: false)
+                ]
             )
             .map { entities in
-                return entities.first?.toDomain()
+                let cycles = entities.map { $0.toDomain() }
+                guard !cycles.isEmpty else { return nil }
+                
+                let now = Date()
+                let cal = Calendar.current
+                
+                // 1) 진행 중(오늘 포함) 사이클 우선
+                if let ongoing = cycles.first(where: { cycle in
+                    let start = cycle.startDate
+                    let totalDays: Int = {
+                        if let mirrorVal = Mirror(reflecting: cycle).children.first(where: { $0.label == "totalDays" })?.value as? Int {
+                            return mirrorVal
+                        } else {
+                            return cycle.activeDays + cycle.breakDays
+                        }
+                    }()
+                    let end = cal.date(byAdding: .day, value: max(totalDays - 1, 0), to: start) ?? start
+                    return (start ... end).contains(now)
+                }) {
+                    return ongoing
+                }
+                
+                // 2) 없으면 createdAt 최신 반환
+                return cycles.first
             }
     }
     
@@ -129,7 +155,10 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
         return coreDataManager
             .fetch(
                 entityType: PillCycleEntity.self,
-                sortDescriptors: [NSSortDescriptor(key: "startDate", ascending: false)]
+                sortDescriptors: [
+                    NSSortDescriptor(key: "createdAt", ascending: false),
+                    NSSortDescriptor(key: "startDate", ascending: false)
+                ]
             )
             .map { entities in
                 return entities.map { $0.toDomain() }
