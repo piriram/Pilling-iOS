@@ -7,7 +7,7 @@
 
 import Foundation
 import RxSwift
-// MARK: - Domain/UseCases/UpdatePillStatusUseCase.swift
+// MARK: - UpdatePillStatusUseCaseProtocol
 
 protocol UpdatePillStatusUseCaseProtocol {
     func execute(
@@ -18,11 +18,18 @@ protocol UpdatePillStatusUseCaseProtocol {
     ) -> Observable<PillCycle>
 }
 
+// MARK: - UpdatePillStatusUseCase
+
 final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
     private let cycleRepository: PillCycleRepositoryProtocol
+    private let timeProvider: TimeProvider
     
-    init(cycleRepository: PillCycleRepositoryProtocol) {
+    init(
+        cycleRepository: PillCycleRepositoryProtocol,
+        timeProvider: TimeProvider
+    ) {
         self.cycleRepository = cycleRepository
+        self.timeProvider = timeProvider
     }
     
     func execute(
@@ -37,7 +44,7 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         
         var updatedCycle = cycle
         var record = updatedCycle.records[recordIndex]
-        let now = Date()
+        let now = timeProvider.now
         
         let takenAt: Date? = newStatus.isTaken ? (record.takenAt ?? now) : nil
         
@@ -58,4 +65,3 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
             .map { updatedCycle }
     }
 }
-

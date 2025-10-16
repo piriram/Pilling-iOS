@@ -8,25 +8,31 @@
 import Foundation
 import RxSwift
 
-// MARK: - Domain/UseCases/TakePillUseCase.swift
+// MARK: - TakePillUseCaseProtocol
 
 protocol TakePillUseCaseProtocol {
     func execute(cycle: PillCycle, settings: UserSettings) -> Observable<PillCycle>
 }
 
+// MARK: - TakePillUseCase
+
 final class TakePillUseCase: TakePillUseCaseProtocol {
     private let cycleRepository: PillCycleRepositoryProtocol
+    private let timeProvider: TimeProvider
     
-    init(cycleRepository: PillCycleRepositoryProtocol) {
+    init(
+        cycleRepository: PillCycleRepositoryProtocol,
+        timeProvider: TimeProvider
+    ) {
         self.cycleRepository = cycleRepository
+        self.timeProvider = timeProvider
     }
     
     func execute(cycle: PillCycle, settings: UserSettings) -> Observable<PillCycle> {
-        let calendar = Calendar.current
-        let now = Date()
+        let now = timeProvider.now
         
         guard let todayIndex = cycle.records.firstIndex(where: {
-            calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
+            timeProvider.isDate($0.scheduledDateTime, inSameDayAs: now)
         }) else {
             return .just(cycle)
         }

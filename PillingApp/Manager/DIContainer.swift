@@ -18,6 +18,12 @@ final class DIContainer {
         return CoreDataManager.shared
     }()
     
+    // MARK: - Time Provider (추가)
+    
+    lazy var timeProvider: TimeProvider = {
+        SystemTimeProvider()
+    }()
+    
     // MARK: - Managers
     
     func makeNotificationManager() -> NotificationManagerProtocol {
@@ -48,19 +54,30 @@ final class DIContainer {
     }
     
     func makeTakePillUseCase() -> TakePillUseCaseProtocol {
-        return TakePillUseCase(cycleRepository: makePillCycleRepository())
+        return TakePillUseCase(
+            cycleRepository: makePillCycleRepository(),
+            timeProvider: timeProvider  // 추가
+        )
     }
     
     func makeUpdatePillStatusUseCase() -> UpdatePillStatusUseCaseProtocol {
-        return UpdatePillStatusUseCase(cycleRepository: makePillCycleRepository())
+        return UpdatePillStatusUseCase(
+            cycleRepository: makePillCycleRepository(),
+            timeProvider: timeProvider  // 추가
+        )
     }
     
     func makeCalculateDashboardMessageUseCase() -> CalculateDashboardMessageUseCaseProtocol {
-        return CalculateDashboardMessageUseCase()
+        return CalculateDashboardMessageUseCase(
+            timeProvider: timeProvider  // 추가
+        )
     }
     
     func makeCreatePillCycleUseCase() -> CreatePillCycleUseCaseProtocol {
-        return CreatePillCycleUseCase(cycleRepository: makePillCycleRepository())
+        return CreatePillCycleUseCase(
+            cycleRepository: makePillCycleRepository(),
+            timeProvider: timeProvider  // 추가
+        )
     }
     
     // MARK: - ViewModels
@@ -108,8 +125,8 @@ final class DIContainer {
     }
     
     // MARK: - History
+    
     func makePillCycleHistoryViewModel() -> PillCycleHistoryViewModel {
         return PillCycleHistoryViewModel(context: coreDataManager.viewContext)
     }
 }
-
