@@ -174,7 +174,8 @@
 				DEVELOPMENT_TEAM = 557346W8SC;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PillingApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PillingApp;
+				INFOPLIST_KEY_CFBundleDisplayName = Pilling;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -215,7 +216,8 @@
 				DEVELOPMENT_TEAM = 557346W8SC;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PillingApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PillingApp;
+				INFOPLIST_KEY_CFBundleDisplayName = Pilling;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
