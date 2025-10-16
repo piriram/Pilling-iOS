@@ -32,7 +32,7 @@ extension PillCycleEntity {
             breakDays: Int(breakDays),
             scheduledTime: scheduledTime ?? "09:00",
             records: domainRecords,
-            createdAt: startDate ?? Date()
+            createdAt: (self.createdAt ?? self.startDate) ?? Date()
         )
     }
     
@@ -47,6 +47,7 @@ extension PillCycleEntity {
         entity.activeDays = Int16(domain.activeDays)
         entity.breakDays = Int16(domain.breakDays)
         entity.scheduledTime = domain.scheduledTime
+        entity.createdAt = Date()
         
         domain.records.forEach { record in
             let recordEntity = PillRecordEntity.from(domain: record, context: context)
@@ -64,3 +65,4 @@ extension PillCycleEntity {
         scheduledTime = domain.scheduledTime
     }
 }
+

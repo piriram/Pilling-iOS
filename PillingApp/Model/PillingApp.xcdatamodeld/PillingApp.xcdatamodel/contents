@@ -3,6 +3,7 @@
     <entity name="PillCycleEntity" representedClassName="PillCycleEntity" syncable="YES" codeGenerationType="class">
         <attribute name="activeDays" attributeType="Integer 16" defaultValueString="21" usesScalarValueType="YES"/>
         <attribute name="breakDays" attributeType="Integer 16" defaultValueString="7" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="cycleNumber" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="scheduledTime" attributeType="String" defaultValueString="9:00"/>

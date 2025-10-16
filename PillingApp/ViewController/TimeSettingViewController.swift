@@ -55,7 +55,7 @@ final class TimeSettingViewController: UIViewController {
     
     private let completeButton: PrimaryActionButton = {
         let button = PrimaryActionButton()
-        button.setTitle("설정완료!", for: .normal)
+        button.setTitle("설정 완료!", for: .normal)
         return button
     }()
     

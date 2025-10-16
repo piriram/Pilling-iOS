@@ -44,7 +44,7 @@ final class SettingCompleteFloatingView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "설정완료!"
+        label.text = "설정 완료!"
         label.font = Typography.headline2(.bold)
         label.textColor = AppColor.textBlack
         label.textAlignment = .center
