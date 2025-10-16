@@ -204,7 +204,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
         containerView.addSubview(breakDaysButton)
         containerView.addSubview(warningLabel)
         containerView.addSubview(confirmButton)
-        confirmButton.setTitle("설정완료", for: .normal)
+        confirmButton.setTitle("설정 완료", for: .normal)
         
         selectedTakingDaysRelay.accept(selectedTakingDays)
         selectedBreakDaysRelay.accept(selectedBreakDays)

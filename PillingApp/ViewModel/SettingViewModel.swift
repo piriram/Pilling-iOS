@@ -20,14 +20,14 @@ final class SettingViewModel {
         let alarmToggleChanged: Observable<Bool>?
         let healthToggleChanged: Observable<Bool>?
         let newPillCycleTapped: Observable<Void>
-
+        
         init(
-            viewWillAppear: Observable<Void>,
-            timeSettingTapped: Observable<Void>,
-            messageSettingTapped: Observable<Void>,
-            alarmToggleChanged: Observable<Bool>? = nil,
-            healthToggleChanged: Observable<Bool>? = nil,
-            newPillCycleTapped: Observable<Void>
+        viewWillAppear: Observable<Void>,
+        timeSettingTapped: Observable<Void>,
+        messageSettingTapped: Observable<Void>,
+        alarmToggleChanged: Observable<Bool>? = nil,
+        healthToggleChanged: Observable<Bool>? = nil,
+        newPillCycleTapped: Observable<Void>
         ) {
             self.viewWillAppear = viewWillAppear
             self.timeSettingTapped = timeSettingTapped
@@ -163,6 +163,7 @@ final class SettingViewModel {
     func updateTime(_ date: Date) -> Observable<Void> {
         let currentSettings = currentSettingsRelay.value
         
+        // NOTE: assuming UserSettings has a fifth field for HealthKit/other state
         let updatedSettings = UserSettings(
             scheduledTime: date,
             notificationEnabled: currentSettings.notificationEnabled,
@@ -192,6 +193,7 @@ final class SettingViewModel {
     func updateMessage(_ message: String) -> Observable<Void> {
         let currentSettings = currentSettingsRelay.value
         
+        // NOTE: assuming UserSettings has a fifth field for HealthKit/other state
         let updatedSettings = UserSettings(
             scheduledTime: currentSettings.scheduledTime,
             notificationEnabled: currentSettings.notificationEnabled,
@@ -219,15 +221,21 @@ final class SettingViewModel {
     }
     
     func startNewPillCycle() -> Observable<Void> {
-        // 1. 기존 사이클 삭제
-        return pillCycleRepository.deleteAllCycles()
-            .do(onNext: { [weak self] in
-                // 2. UserDefaults 삭제
-                self?.userDefaultsManager.clearPillSettings()
-                
-                // 3. 화면 전환 트리거
-                self?.navigateToPillSettingSubject.onNext(())
-            })
+        // [요청 반영] 기존 약물 복용 사이클의 **기록(history)**은 삭제하지 않고,
+        // 새 복용 설정을 위한 **현재 설정(setup state)**을 초기화하고 설정 화면으로 이동합니다.
+        return Observable<Void>.create { [weak self] observer in
+            // UserDefaults에 저장된 현재 복용 설정(PillSettings)을 초기화합니다.
+            // 이렇게 함으로써 새로운 약물 복용 설정을 시작할 수 있습니다.
+            self?.userDefaultsManager.clearPillSettings()
+            
+            // 화면 전환 트리거
+            self?.navigateToPillSettingSubject.onNext(())
+            
+            observer.onNext(())
+            observer.onCompleted()
+            
+            return Disposables.create()
+        }
     }
     
     // MARK: - Private Methods
@@ -235,6 +243,7 @@ final class SettingViewModel {
     private func updateAlarmSetting(isEnabled: Bool) -> Observable<Void> {
         let currentSettings = currentSettingsRelay.value
         
+        // NOTE: assuming UserSettings has a fifth field for HealthKit/other state
         let updatedSettings = UserSettings(
             scheduledTime: currentSettings.scheduledTime,
             notificationEnabled: isEnabled,
@@ -268,6 +277,11 @@ final class SettingViewModel {
     private func updateHealthSetting(isEnabled: Bool) -> Observable<Void> {
         let currentSettings = currentSettingsRelay.value
         
+        // WARNING: UserSettings 구조체에 Health 연동 상태를 저장하는 필드가
+        // 누락된 것으로 보입니다. 현재 코드는 Health 토글 상태를 반영하지 않고
+        // 기존 설정을 그대로 저장합니다.
+        // UserSettings에 Health 관련 필드를 추가한 후, 아래 updatedSettings 생성 시
+        // isEnabled 값을 해당 필드에 적용해야 합니다.
         let updatedSettings = UserSettings(
             scheduledTime: currentSettings.scheduledTime,
             notificationEnabled: currentSettings.notificationEnabled,
@@ -295,4 +309,3 @@ final class SettingViewModel {
         return "오류가 발생했습니다.\n다시 시도해주세요."
     }
 }
-

@@ -17,9 +17,21 @@ final class DashboardViewController: UIViewController {
     private let viewModel: DashboardViewModel
     private let disposeBag = DisposeBag()
     
+    // 히스토리 버튼 숨기기용
+    var shouldHideHistoryButton: Bool = false {
+        didSet {
+            // If view is loaded, apply immediately
+            if isViewLoaded {
+                historyButton.isHidden = shouldHideHistoryButton
+                historyButton.isEnabled = !shouldHideHistoryButton
+            }
+        }
+    }
+    
     // MARK: - UI Components
     
     private let backgroundImageView = UIImageView(image: UIImage(named: "background"))
+    private let historyButton = UIButton(type: .system)
     private let infoButton = UIButton(type: .system)
     private let gearButton = UIButton(type: .system)
     private let characterImageView = UIImageView()
@@ -120,6 +132,18 @@ final class DashboardViewController: UIViewController {
     private func setupHeaderViews() {
         infoButton.setImage(DashboardUI.Icon.info, for: .normal)
         infoButton.tintColor = AppColor.secondary
+        
+        // History button (left of info)
+        if #available(iOS 13.0, *) {
+            historyButton.setImage(UIImage(systemName: "clock.arrow.circlepath"), for: .normal)
+        } else {
+            historyButton.setTitle("H", for: .normal)
+        }
+        historyButton.tintColor = AppColor.secondary
+        
+        historyButton.isHidden = shouldHideHistoryButton
+        historyButton.isEnabled = !shouldHideHistoryButton
+        
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
         gearButton.tintColor = AppColor.secondary
         
@@ -236,6 +260,7 @@ final class DashboardViewController: UIViewController {
     }
     
     private func addSubviews() {
+        view.addSubview(historyButton)
         view.addSubview(infoButton)
         view.addSubview(gearButton)
         view.addSubview(characterImageView)
@@ -257,6 +282,11 @@ final class DashboardViewController: UIViewController {
         infoButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(14)
             make.trailing.equalTo(gearButton.snp.leading).offset(-8)
+            make.width.height.equalTo(30)
+        }
+        historyButton.snp.makeConstraints { make in
+            make.centerY.equalTo(infoButton)
+            make.trailing.equalTo(infoButton.snp.leading).offset(-8)
             make.width.height.equalTo(30)
         }
         
@@ -396,6 +426,15 @@ final class DashboardViewController: UIViewController {
                 let vm = DIContainer.shared.makeSettingViewModel()
                 let vc = SettingViewController(viewModel: vm)
                 self?.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        historyButton.rx.tap
+            .bind { [weak self] in
+                guard let self = self else { return }
+                let vm = DIContainer.shared.makePillCycleHistoryViewModel()
+                let vc = PillCycleHistoryViewController(viewModel: vm)
+                self.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)
         
@@ -694,4 +733,3 @@ final class DashboardViewController: UIViewController {
     
     
 }
-
