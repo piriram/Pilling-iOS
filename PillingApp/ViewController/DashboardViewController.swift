@@ -80,6 +80,9 @@ final class DashboardViewController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: false)
         extendedLayoutIncludesOpaqueBars = true
         edgesForExtendedLayout = [.top, .left, .right, .bottom]
+        
+        // 화면 진입 시 현재 날짜 기준으로 isToday 재평가
+        viewModel.refreshForCurrentDate()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -449,7 +452,7 @@ final class DashboardViewController: UIViewController {
             return
         }
         switch todayRecord.status {
-        case .rest:
+        case .missed:
             backgroundImageView.image = UIImage(named: "restBackground")
         default:
             backgroundImageView.image = UIImage(named: "background")
@@ -582,7 +585,7 @@ final class DashboardViewController: UIViewController {
         }
         infoView.show(in: self.view)
     }
-    
+
     private func makeGuideItemWithCalendarCell(status: PillStatus, text: String) -> UIView {
         let containerView = UIView()
         
@@ -688,5 +691,7 @@ final class DashboardViewController: UIViewController {
         
         return UICollectionViewCompositionalLayout(section: section)
     }
+    
+    
 }
 

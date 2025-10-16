@@ -20,6 +20,7 @@ final class DashboardViewModel {
     private let userDefaultsManager: UserDefaultsManagerProtocol
     
     private let disposeBag = DisposeBag()
+    private let calendar = Calendar.current
     
     // MARK: - Outputs
     
@@ -77,10 +78,13 @@ final class DashboardViewModel {
         let visibleRecords = Array(cycle.records.prefix(maxItems))
         
         let dayItems = visibleRecords.map { record in
-            DayItem(
+            // 날짜 기준으로 status를 today 버전 또는 historical 버전으로 변환
+            let adjustedStatus = record.status.adjustedForDate(record.scheduledDateTime, calendar: calendar)
+            
+            return DayItem(
                 cycleDay: record.cycleDay,
                 date: record.scheduledDateTime,
-                status: record.status
+                status: adjustedStatus
             )
         }
         
@@ -101,7 +105,6 @@ final class DashboardViewModel {
             return
         }
         
-        let calendar = Calendar.current
         let now = Date()
         
         guard let todayRecord = cycle.records.first(where: {
@@ -116,7 +119,9 @@ final class DashboardViewModel {
             return
         }
         
-        if todayRecord.status.isTaken {
+        // today 버전으로 변환한 status로 체크
+        let adjustedStatus = todayRecord.status.adjustedForDate(todayRecord.scheduledDateTime, calendar: calendar)
+        if adjustedStatus.isTaken {
             canTakePill.accept(false)
             return
         }
@@ -125,6 +130,13 @@ final class DashboardViewModel {
     }
     
     // MARK: - Public Methods (Inputs)
+    
+    /// Dashboard 화면 진입 시 현재 날짜 기준으로 UI를 갱신
+    func refreshForCurrentDate() {
+        updateItems()
+        updateDashboardMessage()
+        updateCanTakePill()
+    }
     
     func takePill() {
         guard let cycle = currentCycle.value else { return }
@@ -175,4 +187,3 @@ final class DashboardViewModel {
         .disposed(by: disposeBag)
     }
 }
-
