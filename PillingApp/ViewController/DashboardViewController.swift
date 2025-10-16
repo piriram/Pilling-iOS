@@ -22,7 +22,6 @@ final class DashboardViewController: UIViewController {
     private let backgroundImageView = UIImageView(image: UIImage(named: "background"))
     private let infoButton = UIButton(type: .system)
     private let gearButton = UIButton(type: .system)
-    private let historyButton = UIButton(type: .system)
     private let characterImageView = UIImageView()
     private let progressLabel = UILabel()
     private let totalLabel = UILabel()
@@ -81,6 +80,9 @@ final class DashboardViewController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: false)
         extendedLayoutIncludesOpaqueBars = true
         edgesForExtendedLayout = [.top, .left, .right, .bottom]
+        
+        // 화면 진입 시 현재 날짜 기준으로 isToday 재평가
+        viewModel.refreshForCurrentDate()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -120,9 +122,6 @@ final class DashboardViewController: UIViewController {
         infoButton.tintColor = AppColor.secondary
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
         gearButton.tintColor = AppColor.secondary
-        
-        historyButton.setImage(UIImage(systemName: "clock.arrow.circlepath"), for: .normal)
-        historyButton.tintColor = AppColor.secondary
         
         characterImageView.contentMode = .scaleAspectFit
         
@@ -238,7 +237,6 @@ final class DashboardViewController: UIViewController {
     
     private func addSubviews() {
         view.addSubview(infoButton)
-        view.addSubview(historyButton)
         view.addSubview(gearButton)
         view.addSubview(characterImageView)
         view.addSubview(headerInfoStackView)
@@ -258,16 +256,10 @@ final class DashboardViewController: UIViewController {
         
         infoButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(14)
-            make.leading.equalToSuperview().inset(contentInset)
+            make.trailing.equalTo(gearButton.snp.leading).offset(-8)
             make.width.height.equalTo(30)
         }
-
-        historyButton.snp.makeConstraints { make in
-            make.centerY.equalTo(infoButton)
-            make.leading.equalTo(infoButton.snp.trailing).offset(8)
-            make.width.height.equalTo(30)
-        }
-
+        
         gearButton.snp.makeConstraints { make in
             make.centerY.equalTo(infoButton)
             make.trailing.equalToSuperview().inset(contentInset)
@@ -399,14 +391,6 @@ final class DashboardViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        historyButton.rx.tap
-            .bind { [weak self] in
-                let vm = DIContainer.shared.makePillCycleHistoryViewModel()
-                let vc = PillCycleHistoryViewController(viewModel: vm)
-                self?.navigationController?.pushViewController(vc, animated: true)
-            }
-            .disposed(by: disposeBag)
-        
         gearButton.rx.tap
             .bind { [weak self] in
                 let vm = DIContainer.shared.makeSettingViewModel()
@@ -468,7 +452,7 @@ final class DashboardViewController: UIViewController {
             return
         }
         switch todayRecord.status {
-        case .rest:
+        case .missed:
             backgroundImageView.image = UIImage(named: "restBackground")
         default:
             backgroundImageView.image = UIImage(named: "background")
@@ -601,7 +585,7 @@ final class DashboardViewController: UIViewController {
         }
         infoView.show(in: self.view)
     }
-    
+
     private func makeGuideItemWithCalendarCell(status: PillStatus, text: String) -> UIView {
         let containerView = UIView()
         
@@ -707,5 +691,7 @@ final class DashboardViewController: UIViewController {
         
         return UICollectionViewCompositionalLayout(section: section)
     }
+    
+    
 }
 
