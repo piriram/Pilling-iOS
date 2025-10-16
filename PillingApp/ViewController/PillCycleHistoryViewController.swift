@@ -73,11 +73,15 @@ final class PillCycleHistoryViewController: UIViewController {
             .bind(to: emptyLabel.rx.isHidden)
             .disposed(by: disposeBag)
         
-        // Row selection (optional: push detail if needed)
+        // Row selection (navigate to detail)
         tableView.rx.modelSelected(PillCycle.self)
             .subscribe(onNext: { [weak self] cycle in
-                self?.tableView.deselectRow(at: self?.tableView.indexPathForSelectedRow ?? IndexPath(row: 0, section: 0), animated: true)
-                // TODO: Navigate to detail if needed
+                guard let self = self else { return }
+                if let indexPath = self.tableView.indexPathForSelectedRow {
+                    self.tableView.deselectRow(at: indexPath, animated: true)
+                }
+                let detailVC = PillCycleDetailViewController(cycle: cycle)
+                self.navigationController?.pushViewController(detailVC, animated: true)
             })
             .disposed(by: disposeBag)
     }

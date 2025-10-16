@@ -17,6 +17,17 @@ final class DashboardViewController: UIViewController {
     private let viewModel: DashboardViewModel
     private let disposeBag = DisposeBag()
     
+    // 히스토리 버튼 숨기기용
+    var shouldHideHistoryButton: Bool = false {
+        didSet {
+            // If view is loaded, apply immediately
+            if isViewLoaded {
+                historyButton.isHidden = shouldHideHistoryButton
+                historyButton.isEnabled = !shouldHideHistoryButton
+            }
+        }
+    }
+    
     // MARK: - UI Components
     
     private let backgroundImageView = UIImageView(image: UIImage(named: "background"))
@@ -129,6 +140,9 @@ final class DashboardViewController: UIViewController {
             historyButton.setTitle("H", for: .normal)
         }
         historyButton.tintColor = AppColor.secondary
+        
+        historyButton.isHidden = shouldHideHistoryButton
+        historyButton.isEnabled = !shouldHideHistoryButton
         
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
         gearButton.tintColor = AppColor.secondary
