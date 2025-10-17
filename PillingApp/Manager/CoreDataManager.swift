@@ -13,7 +13,7 @@ import RxSwift
 final class CoreDataManager {
     static let shared = CoreDataManager()
     
-    private let appGroupIdentifier = "group.app.pilltastic.pilling"
+    private let appGroupIdentifier = "group.app.Pilltastic.Pilling"
     
     private init() {}
     

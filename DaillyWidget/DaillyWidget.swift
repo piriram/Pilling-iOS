@@ -19,7 +19,7 @@ struct DaillyWidget: Widget {
         }
         .configurationDisplayName("피임약 복용 위젯")
         .description("오늘의 복용 상태를 확인하세요")
-        .supportedFamilies([.systemSmall,.systemMedium,.systemLarge])
+        .supportedFamilies([.systemSmall])
     }
 }
 
