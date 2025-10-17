@@ -12,6 +12,5 @@ import SwiftUI
 struct DaillyWidgetBundle: WidgetBundle {
     var body: some Widget {
         DaillyWidget()
-        DaillyWidgetControl()
     }
 }
