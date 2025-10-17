@@ -18,7 +18,7 @@ final class DashboardViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     // 히스토리 버튼 숨기기용
-    var shouldHideHistoryButton: Bool = false {
+    var shouldHideHistoryButton: Bool = true {
         didSet {
             // If view is loaded, apply immediately
             if isViewLoaded {
