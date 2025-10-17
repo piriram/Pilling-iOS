@@ -19,9 +19,12 @@ enum PillStatus: Int {
     case scheduled = 8
     case rest = 9
     
+    case todayTakenTooEarly = 10
+    case takenTooEarly = 11
+    
     var backgroundColor: UIColor {
         switch self {
-        case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed:
+        case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed, .todayTakenTooEarly, .takenTooEarly:
             return AppColor.pillGreen800
         case .takenDouble:
             return AppColor.pillWhite
@@ -36,7 +39,7 @@ enum PillStatus: Int {
     
     var isToday: Bool {
         switch self {
-        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed:
+        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed, .todayTakenTooEarly:
             return true
         default:
             return false
@@ -45,7 +48,7 @@ enum PillStatus: Int {
     
     var isTaken: Bool {
         switch self {
-        case .taken, .takenDelayed, .takenDouble, .todayTaken, .todayTakenDelayed:
+        case .taken, .takenDelayed, .takenDouble, .todayTaken, .todayTakenDelayed, .todayTakenTooEarly, .takenTooEarly:
             return true
         default:
             return false
@@ -61,12 +64,14 @@ extension PillStatus {
             return .todayTaken
         case .takenDelayed:
             return .todayTakenDelayed
+        case .takenTooEarly:
+            return .todayTakenTooEarly
         case .scheduled:
             return .todayNotTaken
         case .missed:
             return .todayDelayed
         // 이미 today 버전이거나 변환 불필요한 경우
-        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed, .takenDouble, .rest:
+        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed, .takenDouble, .rest, .todayTakenTooEarly:
             return self
         }
     }
@@ -78,10 +83,12 @@ extension PillStatus {
             return .taken
         case .todayTakenDelayed:
             return .takenDelayed
+        case .todayTakenTooEarly:
+            return .takenTooEarly
         case .todayNotTaken, .todayDelayed:
-            return .scheduled
+            return .missed
         // 이미 historical 버전이거나 변환 불필요한 경우
-        case .taken, .takenDelayed, .takenDouble, .missed, .scheduled, .rest:
+        case .taken, .takenDelayed, .takenDouble, .missed, .scheduled, .rest, .takenTooEarly:
             return self
         }
     }

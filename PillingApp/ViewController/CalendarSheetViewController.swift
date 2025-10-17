@@ -326,7 +326,7 @@ final class CalendarSheetViewController: UIViewController {
         switch status {
         case .missed, .scheduled, .todayNotTaken, .todayDelayed:
             tag = 0
-        case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed:
+        case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed, .todayTakenTooEarly, .takenTooEarly:
             tag = 1
         case .takenDouble:
             tag = 2
