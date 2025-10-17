@@ -4,6 +4,12 @@
 //
 //  Created by 잠만보김쥬디 on 10/17/25.
 //
+//
+//  PillingDailyWidgetProvider.swift
+//  PillingDailyWidget
+//
+//  Created by Widget Team on 10/17/25.
+//
 
 import WidgetKit
 
@@ -40,12 +46,24 @@ struct PillingDailyWidgetProvider: TimelineProvider {
     // MARK: - Private Methods
     
     private func createEntry() -> PillingDailyWidgetEntry {
+        print("🔍 위젯: 데이터 조회 시작")
+        
         guard let cycle = coreDataManager.fetchCurrentCycle() else {
+            print("❌ 위젯: cycle이 nil입니다! 데이터가 없거나 조회 실패")
             return .empty
         }
         
+        print("✅ 위젯: cycle 찾음")
+        print("   - ID: \(cycle.id)")
+        print("   - 시작일: \(cycle.startDate)")
+        print("   - 복용일: \(cycle.activeDays)일")
+        print("   - 휴약일: \(cycle.breakDays)일")
+        print("   - 레코드 수: \(cycle.records.count)개")
+        
         let messageType = calculateMessageUseCase.execute(cycle: cycle)
         let cycleDay = calculateCycleDay(from: cycle)
+        
+        print("📊 위젯: cycleDay=\(cycleDay), message=\(messageType.message)")
         
         let displayData = WidgetDisplayData(
             cycleDay: cycleDay,

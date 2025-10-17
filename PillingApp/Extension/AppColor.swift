@@ -26,7 +26,7 @@ public enum AppColor {
     public static let textGray = UIColor(hexString: "606060")
     public static let cheveronGray = UIColor(hexString: "A3A3A3")
     public static let grayBackground = UIColor(hexString: "F7F7F7")
-    
+    public static let gray700 = UIColor(hexString: "4B4B4B")
 }
 
 
