@@ -33,7 +33,7 @@ struct PillingDailyWidgetEntry: TimelineEntry {
             date: Date(),
             displayData: WidgetDisplayData(
                 cycleDay: 0,
-                message: "...",
+                message: "약을 설정해주세요",
                 iconImageName: "widget_icon_rest",
                 backgroundImageName: "widget_background_normal"
             )

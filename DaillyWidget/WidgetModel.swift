@@ -36,7 +36,7 @@ enum WidgetMessageType {
         case .resting:
             return "지금은 쉬는 시간"
         case .empty:
-            return "..."
+            return "약을 설정해주세요"
         }
     }
     

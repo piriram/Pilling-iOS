@@ -13,7 +13,7 @@ import Foundation
 final class SharedCoreDataManager {
     static let shared = SharedCoreDataManager()
     
-    private let appGroupIdentifier = "group.app.pilltastic.pilling"
+    private let appGroupIdentifier = "group.app.Pilltastic.Pilling"
     
     private init() {}
     
