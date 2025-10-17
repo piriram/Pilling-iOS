@@ -6,12 +6,15 @@
 //
 
 import RxSwift
+
 // MARK: - Domain/Entities/DashboardMessage.swift
 
 struct DashboardMessage {
     let text: String
     let imageName: DashboardUI.CharacterImage
+    let icon: DashboardUI.MessageIconImage
 }
+
 // MARK: - Domain/UseCases/FetchDashboardDataUseCase.swift
 
 protocol FetchDashboardDataUseCaseProtocol {

@@ -200,7 +200,7 @@ final class PillCycleDetailViewController: UIViewController {
     
     private func getStatusText(_ status: PillStatus) -> String {
         switch status {
-        case .taken, .todayTaken: return "복용"
+        case .taken, .todayTaken, .takenTooEarly, .todayTakenTooEarly: return "복용"
         case .takenDelayed, .todayTakenDelayed: return "지연 복용"
         case .takenDouble: return "이중 복용"
         case .missed, .todayDelayed: return "미복용"

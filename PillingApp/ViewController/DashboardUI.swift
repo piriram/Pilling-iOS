@@ -12,7 +12,6 @@ enum DashboardUI {
         static let gear = UIImage(systemName: "gearshape")
         static let date = UIImage(systemName: "calendar")
         static let time = UIImage(systemName: "clock.fill")
-        static let leaf = UIImage(systemName: "leaf.fill")
     }
     
     enum Metric {
@@ -44,4 +43,13 @@ enum DashboardUI {
         case warning = "Property 1=NoTaking"
         case rest = "Property 1=Rest"
     }
+    
+    enum MessageIconImage: String{
+        case notTaken = "notTaken"
+        case taken = "taken"
+        case missed = "missed"
+        case rest = "rest"
+    }
+    
 }
+

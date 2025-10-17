@@ -46,7 +46,7 @@ final class DashboardViewController: UIViewController {
     private let timeLabel = UILabel()
     
     private let messageCardView = UIView()
-    private let messageIconImageView = UIImageView(image: DashboardUI.Icon.leaf)
+    private let messageIconImageView = UIImageView(image: UIImage(systemName: "leaf.fill"))
     private let messageLabel = UILabel()
     
     private let weekdayStackView = UIStackView()
@@ -401,7 +401,7 @@ final class DashboardViewController: UIViewController {
         
         viewModel.dashboardMessage
             .compactMap { $0 }
-            .asDriver(onErrorJustReturn: DashboardMessage(text: "", imageName: .rest))
+            .asDriver(onErrorJustReturn: DashboardMessage(text: "", imageName: .rest, icon: .rest))
             .drive(onNext: { [weak self] message in
                 self?.updateMessageUI(message: message)
                 self?.updateBackgroundForToday()
@@ -475,10 +475,30 @@ final class DashboardViewController: UIViewController {
     private func updateMessageUI(message: DashboardMessage) {
         messageLabel.text = message.text
         
+        // Update character image
         if let image = UIImage(named: message.imageName.rawValue) {
             characterImageView.image = image
         } else {
             characterImageView.image = UIImage(systemName: "face.smiling")
+        }
+        
+        // Update message icon image
+        if let iconImage = UIImage(named: message.icon.rawValue) {
+            messageIconImageView.image = iconImage
+            messageIconImageView.tintColor = nil
+        } else {
+            // Fallback to SF Symbol if asset not found
+            switch message.icon {
+            case .taken:
+                messageIconImageView.image = UIImage(systemName: "checkmark.circle.fill")
+            case .notTaken:
+                messageIconImageView.image = UIImage(systemName: "circle")
+            case .missed:
+                messageIconImageView.image = UIImage(systemName: "exclamationmark.triangle.fill")
+            case .rest:
+                messageIconImageView.image = UIImage(systemName: "leaf.fill")
+            }
+            messageIconImageView.tintColor = AppColor.pillGreen800
         }
     }
     
@@ -486,14 +506,42 @@ final class DashboardViewController: UIViewController {
         guard let cycle = viewModel.currentCycle.value else { return }
         let calendar = Calendar.current
         let now = Date()
+
+        // Find today's record
         guard let todayRecord = cycle.records.first(where: { calendar.isDate($0.scheduledDateTime, inSameDayAs: now) }) else {
             backgroundImageView.image = UIImage(named: "background")
             return
         }
-        switch todayRecord.status {
-        case .missed:
+
+        // Helper: calculate consecutive missed days before today (excluding rest)
+        func consecutiveMissedDaysBeforeToday() -> Int {
+            let todayStart = calendar.startOfDay(for: now)
+            var count = 0
+            // Iterate records in reverse chronological order
+            for record in cycle.records.reversed() {
+                let day = calendar.startOfDay(for: record.scheduledDateTime)
+                // consider only days strictly before today
+                guard day < todayStart else { continue }
+                // skip rest days
+                if case .rest = record.status { continue }
+                if case .missed = record.status {
+                    count += 1
+                } else if record.status.isTaken {
+                    break
+                } else {
+                    // any other status breaks the streak
+                    break
+                }
+            }
+            return count
+        }
+
+        let missedStreak = consecutiveMissedDaysBeforeToday()
+
+        // Apply new condition: today is not taken (todayNotTaken) AND missed for 2+ consecutive previous days
+        if todayRecord.status == .todayNotTaken && missedStreak >= 2 {
             backgroundImageView.image = UIImage(named: "restBackground")
-        default:
+        } else {
             backgroundImageView.image = UIImage(named: "background")
         }
     }
@@ -624,7 +672,7 @@ final class DashboardViewController: UIViewController {
         }
         infoView.show(in: self.view)
     }
-
+    
     private func makeGuideItemWithCalendarCell(status: PillStatus, text: String) -> UIView {
         let containerView = UIView()
         

@@ -44,9 +44,21 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
             return .just(cycle)
         }
         
-        let timeDiff = now.timeIntervalSince(record.scheduledDateTime)
+        let timeDiff = now.timeIntervalSince(record.scheduledDateTime) // 실제 - 예정 (음수면 빠름, 양수면 늦음)
+        let twoHours: TimeInterval = 2 * 60 * 60
+        
+        let isTooEarly = (-timeDiff) >= twoHours // 예정보다 2시간 이상 빠름
         let isWithinWindow = abs(timeDiff) <= Double(settings.delayThresholdMinutes * 60)
-        let newStatus: PillStatus = isWithinWindow ? .todayTaken : .todayTakenDelayed
+        
+        let newStatus: PillStatus = {
+            if isTooEarly {
+                return .todayTakenTooEarly
+            } else if isWithinWindow {
+                return .todayTaken
+            } else {
+                return .todayTakenDelayed
+            }
+        }()
         
         let updatedRecord = PillRecord(
             id: record.id,
@@ -65,3 +77,4 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
             .map { updatedCycle }
     }
 }
+
