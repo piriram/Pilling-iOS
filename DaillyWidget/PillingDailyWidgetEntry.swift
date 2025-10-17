@@ -7,6 +7,9 @@
 
 import WidgetKit
 
+import WidgetKit
+import SwiftUI
+
 // MARK: - PillingDailyWidgetEntry
 
 struct PillingDailyWidgetEntry: TimelineEntry {
@@ -37,3 +40,6 @@ struct PillingDailyWidgetEntry: TimelineEntry {
         )
     }
 }
+
+
+
