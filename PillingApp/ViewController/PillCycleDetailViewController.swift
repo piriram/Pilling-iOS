@@ -29,7 +29,7 @@ final class PillCycleDetailViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -85,20 +85,17 @@ final class PillCycleDetailViewController: UIViewController {
     private func createSummaryView() -> UIView {
         let container = UIView()
         
-        // Cycle Number
         let cycleNumberLabel = UILabel()
         cycleNumberLabel.font = Typography.headline4(.bold)
         cycleNumberLabel.textColor = .label
         cycleNumberLabel.text = "사이클 \(cycle.cycleNumber)"
         
-        // Date Range
         let dateRangeLabel = UILabel()
         dateRangeLabel.font = Typography.body2()
         dateRangeLabel.textColor = .secondaryLabel
         let endDate = Calendar.current.date(byAdding: .day, value: cycle.activeDays + cycle.breakDays - 1, to: cycle.startDate) ?? cycle.startDate
         dateRangeLabel.text = "\(formatDate(cycle.startDate)) ~ \(formatDate(endDate))"
         
-        // Scheduled Time
         let scheduledTimeLabel = UILabel()
         scheduledTimeLabel.font = Typography.body2()
         scheduledTimeLabel.textColor = .secondaryLabel
@@ -200,13 +197,18 @@ final class PillCycleDetailViewController: UIViewController {
     
     private func getStatusText(_ status: PillStatus) -> String {
         switch status {
-        case .taken, .todayTaken, .takenTooEarly, .todayTakenTooEarly: return "복용"
-        case .takenDelayed, .todayTakenDelayed: return "지연 복용"
-        case .takenDouble: return "이중 복용"
-        case .missed, .todayDelayed: return "미복용"
-        case .scheduled, .todayNotTaken: return "예정"
-        case .rest: return "휴약"
+        case .taken, .todayTaken, .takenTooEarly, .todayTakenTooEarly:
+            return "복용"
+        case .takenDelayed, .todayTakenDelayed:
+            return "지연 복용"
+        case .takenDouble:
+            return "이중 복용"
+        case .missed, .todayDelayed, .todayDelayedCritical:
+            return "미복용"
+        case .scheduled, .todayNotTaken:
+            return "예정"
+        case .rest:
+            return "휴약"
         }
     }
-    
 }

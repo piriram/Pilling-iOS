@@ -299,7 +299,7 @@ final class DashboardViewController: UIViewController {
         characterImageView.snp.makeConstraints { make in
             make.top.equalTo(infoButton.snp.bottom)
             make.leading.equalToSuperview().inset(contentInset)
-            make.width.lessThanOrEqualTo(180)
+            make.width.equalTo((UIScreen.main.bounds.width - contentInset) / 2)
             make.height.equalTo(180)
         }
         
@@ -310,7 +310,7 @@ final class DashboardViewController: UIViewController {
         }
         
         messageCardView.snp.makeConstraints { make in
-            make.top.lessThanOrEqualTo(characterImageView.snp.bottom).offset(16)
+            make.top.lessThanOrEqualTo(characterImageView.snp.bottom).offset(24)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(52)
         }
@@ -506,13 +506,13 @@ final class DashboardViewController: UIViewController {
         guard let cycle = viewModel.currentCycle.value else { return }
         let calendar = Calendar.current
         let now = Date()
-
+        
         // Find today's record
         guard let todayRecord = cycle.records.first(where: { calendar.isDate($0.scheduledDateTime, inSameDayAs: now) }) else {
             backgroundImageView.image = UIImage(named: "background")
             return
         }
-
+        
         // Helper: calculate consecutive missed days before today (excluding rest)
         func consecutiveMissedDaysBeforeToday() -> Int {
             let todayStart = calendar.startOfDay(for: now)
@@ -535,9 +535,9 @@ final class DashboardViewController: UIViewController {
             }
             return count
         }
-
+        
         let missedStreak = consecutiveMissedDaysBeforeToday()
-
+        
         // Apply new condition: today is not taken (todayNotTaken) AND missed for 2+ consecutive previous days
         if todayRecord.status == .todayNotTaken && missedStreak >= 2 {
             backgroundImageView.image = UIImage(named: "restBackground")
@@ -702,7 +702,12 @@ final class DashboardViewController: UIViewController {
         
         containerView.layoutIfNeeded()
         
-        let dummyItem = DayItem(cycleDay: 1, date: Date(), status: status)
+        let dummyItem = DayItem(
+            cycleDay: 1,
+            date: Date(),
+            status: status,
+            scheduledDateTime: Date()
+        )
         calendarCell.configure(with: dummyItem)
         
         return containerView

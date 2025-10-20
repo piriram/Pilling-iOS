@@ -34,19 +34,23 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
             return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest, icon: .rest)
         }
         
-        
-        
-        if todayItem.status == .todayDelayed || todayItem.status == .todayNotTaken || todayItem.status == .todayTakenDelayed || todayItem.status == .todayTakenTooEarly || todayItem.status == .todayTaken {
+        if todayItem.status == .todayDelayed ||
+           todayItem.status == .todayDelayedCritical ||
+           todayItem.status == .todayNotTaken ||
+           todayItem.status == .todayTakenDelayed ||
+           todayItem.status == .todayTakenTooEarly ||
+           todayItem.status == .todayTaken {
             let consecutiveMissed = calculateConsecutiveMissedDays(cycle: cycle)
             
-            // If missed for 2+ consecutive days and took today (normal/delayed/too early), encourage consistency
+            print("todayItem.status: \(todayItem.status), conservativeMissed: \(consecutiveMissed)")
             
-            print("todayItem.status: \(todayItem.status),conservativeMissed: \(consecutiveMissed)")
             if consecutiveMissed >= 2,
-               (todayItem.status == .todayTaken || todayItem.status == .todayTakenDelayed || todayItem.status == .todayTakenTooEarly) {
+               (todayItem.status == .todayTaken ||
+                todayItem.status == .todayTakenDelayed ||
+                todayItem.status == .todayTakenTooEarly) {
                 return DashboardMessage(
                     text: "꾸준히 잔디를 심어주세요.",
-                    imageName: .takingBefore, // 임시로 taken 이미지 사용
+                    imageName: .takingBefore,
                     icon: .taken
                 )
             }
@@ -58,38 +62,37 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
                     icon: .missed
                 )
             }
-          
-           
             
             if let yesterdayItem = getYesterdayItem(items: items) {
-                // If yesterday was missed and only 1-day streak, and today is taken (normal/delayed/too early) OR still not taken, ask to take one more pill
                 if case .missed = yesterdayItem.status,
                    consecutiveMissed == 1,
                    (todayItem.status == .todayTaken ||
                     todayItem.status == .todayTakenDelayed ||
-                    todayItem.status == .todayTakenTooEarly ) {
+                    todayItem.status == .todayTakenTooEarly) {
                     return DashboardMessage(
                         text: "한알을 더 먹어야 해요",
-                        imageName: .takingBefore,
+                        imageName: .takingBeforeTwo,
                         icon: .notTaken
                     )
                 }
                 
-                if case .missed = yesterdayItem.status, case .takenDouble = todayItem.status {
+                if case .missed = yesterdayItem.status,
+                   case .takenDouble = todayItem.status {
                     // 오늘 2알 복용으로 보정한 경우
                 } else if case .missed = yesterdayItem.status,
                           (todayItem.status == .todayTaken ||
                            todayItem.status == .todayDelayed ||
-                            todayItem.status == .takenTooEarly) {
+                           todayItem.status == .todayDelayedCritical ||
+                           todayItem.status == .takenTooEarly) {
                     return DashboardMessage(
                         text: "한알을 더 먹어야 해요",
-                        imageName: .takingBefore,
+                        imageName: .takingBeforeTwo,
                         icon: .notTaken
                     )
                 } else if case .missed = yesterdayItem.status {
                     return DashboardMessage(
                         text: "오늘은 두알을 복용하세요.",
-                        imageName: .takingBefore,
+                        imageName: .fire,
                         icon: .notTaken
                     )
                 }
@@ -121,8 +124,15 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         case .todayDelayed:
             return DashboardMessage(
                 text: "잔디는 2시간을 초과하지 않게 심어주세요!",
-                imageName: .warning,
+                imageName: .groomy,
                 icon: .missed
+            )
+            
+        case .todayDelayedCritical:
+            return DashboardMessage(
+                text: "복용 시간이 4시간 이상 지났어요",
+                imageName: .fire,
+                icon: .notTaken
             )
             
         case .takenDouble:
@@ -197,5 +207,3 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         return count
     }
 }
-
-

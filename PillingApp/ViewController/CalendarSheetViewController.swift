@@ -304,8 +304,8 @@ final class CalendarSheetViewController: UIViewController {
                 button.isSelected = isSelected
                 button.backgroundColor = isSelected ? AppColor.pillGreen800 : .clear
                 button.titleLabel?.font = isSelected
-                    ? .systemFont(ofSize: 14, weight: .semibold)
-                    : .systemFont(ofSize: 14, weight: .medium)
+                ? .systemFont(ofSize: 14, weight: .semibold)
+                : .systemFont(ofSize: 14, weight: .medium)
                 
                 if isSelected {
                     button.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
@@ -324,7 +324,7 @@ final class CalendarSheetViewController: UIViewController {
     func setInitialSelection(for status: PillStatus) {
         let tag: Int
         switch status {
-        case .missed, .scheduled, .todayNotTaken, .todayDelayed:
+        case .missed, .scheduled, .todayNotTaken, .todayDelayed, .todayDelayedCritical:
             tag = 0
         case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed, .todayTakenTooEarly, .takenTooEarly:
             tag = 1
