@@ -52,6 +52,33 @@ final class DashboardViewModel {
     
     // MARK: - Private Methods
     
+    private func autoMarkPastScheduledAsMissed() {
+        guard let cycle = currentCycle.value else { return }
+        let now = Date()
+        let startOfToday = calendar.startOfDay(for: now)
+        
+        for (index, record) in cycle.records.enumerated() {
+            if record.scheduledDateTime < startOfToday {
+                if case .scheduled = record.status {
+                    updatePillStatusUseCase
+                        .execute(
+                            cycle: cycle,
+                            recordIndex: index,
+                            newStatus: .missed,
+                            memo: nil
+                        )
+                        .subscribe(onNext: { [weak self] updatedCycle in
+                            self?.currentCycle.accept(updatedCycle)
+                            self?.updateItems()
+                            self?.updateDashboardMessage()
+                            self?.updateCanTakePill()
+                        })
+                        .disposed(by: disposeBag)
+                }
+            }
+        }
+    }
+    
     private func loadPillInfo() {
         if let info = userDefaultsManager.loadPillInfo() {
             pillInfo.accept(info)
@@ -66,6 +93,7 @@ final class DashboardViewModel {
                 self?.updateItems()
                 self?.updateDashboardMessage()
                 self?.updateCanTakePill()
+                self?.autoMarkPastScheduledAsMissed()
             })
             .disposed(by: disposeBag)
     }
@@ -73,18 +101,33 @@ final class DashboardViewModel {
     private func updateItems() {
         guard let cycle = currentCycle.value else { return }
         
-        // 최대 28개(4주)만 표시
         let maxItems = 28
         let visibleRecords = Array(cycle.records.prefix(maxItems))
+        let now = Date()
         
         let dayItems = visibleRecords.map { record in
-            // 날짜 기준으로 status를 today 버전 또는 historical 버전으로 변환
-            let adjustedStatus = record.status.adjustedForDate(record.scheduledDateTime, calendar: calendar)
+            var adjustedStatus = record.status.adjustedForDate(record.scheduledDateTime, calendar: calendar)
+            
+            // 오늘 날짜이고 아직 복용하지 않았으며 지연 시간 체크
+            if calendar.isDateInToday(record.scheduledDateTime),
+               !adjustedStatus.isTaken,
+               adjustedStatus != .rest {
+                let timeInterval = now.timeIntervalSince(record.scheduledDateTime)
+                let twoHours: TimeInterval = 2 * 60 * 60
+                let fourHours: TimeInterval = 4 * 60 * 60
+                
+                if timeInterval >= fourHours {
+                    adjustedStatus = .todayDelayedCritical
+                } else if timeInterval >= twoHours {
+                    adjustedStatus = .todayDelayed
+                }
+            }
             
             return DayItem(
                 cycleDay: record.cycleDay,
                 date: record.scheduledDateTime,
-                status: adjustedStatus
+                status: adjustedStatus,
+                scheduledDateTime: record.scheduledDateTime
             )
         }
         
@@ -119,7 +162,6 @@ final class DashboardViewModel {
             return
         }
         
-        // today 버전으로 변환한 status로 체크
         let adjustedStatus = todayRecord.status.adjustedForDate(todayRecord.scheduledDateTime, calendar: calendar)
         if adjustedStatus.isTaken {
             canTakePill.accept(false)
@@ -136,6 +178,7 @@ final class DashboardViewModel {
         updateItems()
         updateDashboardMessage()
         updateCanTakePill()
+        autoMarkPastScheduledAsMissed()
     }
     
     func takePill() {

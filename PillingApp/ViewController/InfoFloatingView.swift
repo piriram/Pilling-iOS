@@ -36,12 +36,10 @@ final class InfoFloatingView: UIView {
     
     // MARK: - Public API
     func show(in container: UIView) {
-        // occupy full screen of container
         container.addSubview(self)
         self.snp.makeConstraints { $0.edges.equalToSuperview() }
         layoutIfNeeded()
         
-        // animate dim
         dimmedBackgroundView.alpha = 0
         UIView.animate(withDuration: 0.3) {
             self.dimmedBackgroundView.alpha = 1
@@ -78,7 +76,6 @@ final class InfoFloatingView: UIView {
         guideStackView.spacing = 16
         guideStackView.alignment = .leading
         
-        // Guide items
         let guideItem1 = makeGuideItemWithCalendarCell(status: .taken, text: "피임약 복용")
         let guideItem2 = makeGuideItemWithCalendarCell(status: .takenDouble, text: "피임약 2알 복용")
         let guideItem3 = makeGuideItemWithCalendarCell(status: .missed, text: "미복용")
@@ -135,14 +132,12 @@ final class InfoFloatingView: UIView {
     }
     
     private func setupActions() {
-        // Confirm button
         confirmButton.rx.tap
             .bind { [weak self] in
                 self?.onConfirm?()
             }
             .disposed(by: disposeBag)
         
-        // Tap to dismiss on dimmed area
         let tapGesture = UITapGestureRecognizer()
         dimmedBackgroundView.addGestureRecognizer(tapGesture)
         tapGesture.rx.event
@@ -182,7 +177,12 @@ final class InfoFloatingView: UIView {
         
         containerView.layoutIfNeeded()
         
-        let dummyItem = DayItem(cycleDay: 1, date: Date(), status: status)
+        let dummyItem = DayItem(
+            cycleDay: 1,
+            date: Date(),
+            status: status,
+            scheduledDateTime: Date()
+        )
         calendarCell.configure(with: dummyItem)
         
         return containerView

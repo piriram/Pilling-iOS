@@ -13,6 +13,5 @@ struct DayItem {
     let cycleDay: Int
     let date: Date
     let status: PillStatus
+    let scheduledDateTime: Date
 }
-
-

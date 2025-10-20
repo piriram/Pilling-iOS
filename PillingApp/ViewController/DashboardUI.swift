@@ -42,6 +42,9 @@ enum DashboardUI {
         case takingBefore = "Property 1=TakingBefore"
         case warning = "Property 1=NoTaking"
         case rest = "Property 1=Rest"
+        case groomy = "widget_icon_groomy"
+        case fire = "widget_icon_fire"
+        case success = "widget_icon_success"
     }
     
     enum MessageIconImage: String{

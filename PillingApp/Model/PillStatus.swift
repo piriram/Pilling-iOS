@@ -18,9 +18,9 @@ enum PillStatus: Int {
     case todayDelayed = 7
     case scheduled = 8
     case rest = 9
-    
     case todayTakenTooEarly = 10
     case takenTooEarly = 11
+    case todayDelayedCritical = 12
     
     var backgroundColor: UIColor {
         switch self {
@@ -30,7 +30,7 @@ enum PillStatus: Int {
             return AppColor.pillWhite
         case .missed:
             return AppColor.pillBrown
-        case .scheduled, .todayNotTaken, .todayDelayed:
+        case .scheduled, .todayNotTaken, .todayDelayed, .todayDelayedCritical:
             return AppColor.notYetGray
         case .rest:
             return AppColor.pillWhite
@@ -39,7 +39,7 @@ enum PillStatus: Int {
     
     var isToday: Bool {
         switch self {
-        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed, .todayTakenTooEarly:
+        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed, .todayTakenTooEarly, .todayDelayedCritical:
             return true
         default:
             return false
@@ -55,6 +55,7 @@ enum PillStatus: Int {
         }
     }
 }
+
 extension PillStatus {
     
     /// 현재 상태를 오늘 날짜 기준으로 변환
@@ -70,8 +71,7 @@ extension PillStatus {
             return .todayNotTaken
         case .missed:
             return .todayDelayed
-        // 이미 today 버전이거나 변환 불필요한 경우
-        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed, .takenDouble, .rest, .todayTakenTooEarly:
+        case .todayNotTaken, .todayTaken, .todayTakenDelayed, .todayDelayed, .takenDouble, .rest, .todayTakenTooEarly, .todayDelayedCritical:
             return self
         }
     }
@@ -85,9 +85,8 @@ extension PillStatus {
             return .takenDelayed
         case .todayTakenTooEarly:
             return .takenTooEarly
-        case .todayNotTaken, .todayDelayed:
+        case .todayNotTaken, .todayDelayed, .todayDelayedCritical:
             return .missed
-        // 이미 historical 버전이거나 변환 불필요한 경우
         case .taken, .takenDelayed, .takenDouble, .missed, .scheduled, .rest, .takenTooEarly:
             return self
         }
