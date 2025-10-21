@@ -22,4 +22,3 @@ struct DaillyWidget: Widget {
         .supportedFamilies([.systemSmall])
     }
 }
-

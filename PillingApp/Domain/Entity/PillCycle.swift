@@ -6,6 +6,16 @@
 //
 import UIKit
 import RxSwift
+
+// MARK: - Domain/RepositoryProtocols/PillCycleRepositoryProtocol.swift
+
+protocol PillCycleRepositoryProtocol {
+    func fetchCurrentCycle() -> Observable<PillCycle?>
+    func saveCycle(_ cycle: PillCycle) -> Observable<Void>
+    func updateRecord(_ record: PillRecord, in cycleID: UUID) -> Observable<Void>
+    func deleteAllCycles() -> Observable<Void>
+}
+
 // MARK: - Domain/Entities/PillCycle.swift
 
 struct PillCycle {
@@ -27,12 +37,4 @@ struct PillCycle {
     func isBreakDay(forDay day: Int) -> Bool {
         return day > activeDays && day <= totalDays
     }
-}
-// MARK: - Domain/RepositoryProtocols/PillCycleRepositoryProtocol.swift
-
-protocol PillCycleRepositoryProtocol {
-    func fetchCurrentCycle() -> Observable<PillCycle?>
-    func saveCycle(_ cycle: PillCycle) -> Observable<Void>
-    func updateRecord(_ record: PillRecord, in cycleID: UUID) -> Observable<Void>
-    func deleteAllCycles() -> Observable<Void>
 }
