@@ -13,16 +13,25 @@ import RxSwift
 final class CoreDataManager {
     static let shared = CoreDataManager()
     
+    private let appGroupIdentifier = "group.app.Pilltastic.Pilling"
+    
     private init() {}
     
     // MARK: - Core Data Stack
     
     private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "PillingApp")
-        if let description = container.persistentStoreDescriptions.first {
+        
+        // App Group을 위한 URL 설정
+        if let storeURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: appGroupIdentifier
+        )?.appendingPathComponent("PillingApp.sqlite") {
+            let description = NSPersistentStoreDescription(url: storeURL)
             description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
             description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
+            container.persistentStoreDescriptions = [description]
         }
+        
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")

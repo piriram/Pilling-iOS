@@ -14,6 +14,7 @@ import SnapKit
 
 final class CalendarSheetViewController: UIViewController {
     private let selectedDate: Date
+    private let initialMemo: String
     private let onSelectStatus: (PillStatus, String) -> Void
     private let disposeBag = DisposeBag()
     
@@ -112,8 +113,13 @@ final class CalendarSheetViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(selectedDate: Date, onSelectStatus: @escaping (PillStatus, String) -> Void) {
+    init(
+        selectedDate: Date,
+        initialMemo: String = "",
+        onSelectStatus: @escaping (PillStatus, String) -> Void
+    ) {
         self.selectedDate = selectedDate
+        self.initialMemo = initialMemo
         self.onSelectStatus = onSelectStatus
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
@@ -130,6 +136,7 @@ final class CalendarSheetViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         setupGestures()
+        setupInitialMemo()
         bindStatusButtons()
         bindMemoTextView()
     }
@@ -223,6 +230,11 @@ final class CalendarSheetViewController: UIViewController {
         view.addGestureRecognizer(tapGesture)
     }
     
+    private func setupInitialMemo() {
+        memoTextView.text = initialMemo
+        memoPlaceholderLabel.isHidden = !initialMemo.isEmpty
+    }
+    
     // MARK: - Status Button Creation
     
     private func createStatusButton(title: String, tag: Int) -> UIButton {
@@ -304,8 +316,8 @@ final class CalendarSheetViewController: UIViewController {
                 button.isSelected = isSelected
                 button.backgroundColor = isSelected ? AppColor.pillGreen800 : .clear
                 button.titleLabel?.font = isSelected
-                    ? .systemFont(ofSize: 14, weight: .semibold)
-                    : .systemFont(ofSize: 14, weight: .medium)
+                ? .systemFont(ofSize: 14, weight: .semibold)
+                : .systemFont(ofSize: 14, weight: .medium)
                 
                 if isSelected {
                     button.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
@@ -324,7 +336,7 @@ final class CalendarSheetViewController: UIViewController {
     func setInitialSelection(for status: PillStatus) {
         let tag: Int
         switch status {
-        case .missed, .scheduled, .todayNotTaken, .todayDelayed:
+        case .missed, .scheduled, .todayNotTaken, .todayDelayed, .todayDelayedCritical:
             tag = 0
         case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed, .todayTakenTooEarly, .takenTooEarly:
             tag = 1

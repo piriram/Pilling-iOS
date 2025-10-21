@@ -7,6 +7,7 @@
 
 import CoreData
 import RxSwift
+import WidgetKit
 
 // MARK: - CoreDataPillCycleRepository
 
@@ -92,6 +93,11 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
                 }
                 
                 try context.save()
+                
+                // ⭐️ 위젯 업데이트
+                WidgetCenter.shared.reloadAllTimelines()
+                print("💊 사이클 저장 완료 - 위젯 업데이트")
+                
                 observer.onNext(())
                 observer.onCompleted()
             } catch {
@@ -135,6 +141,11 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
                 }
                 
                 try context.save()
+                
+                // ⭐️ 위젯 업데이트
+                WidgetCenter.shared.reloadAllTimelines()
+                print("💊 복용 기록 업데이트 완료 - 위젯 업데이트")
+                
                 observer.onNext(())
                 observer.onCompleted()
             } catch {
@@ -149,6 +160,11 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
     
     func deleteAllCycles() -> Observable<Void> {
         return coreDataManager.deleteAll(entityType: PillCycleEntity.self)
+            .do(onNext: {
+                // ⭐️ 위젯 업데이트
+                WidgetCenter.shared.reloadAllTimelines()
+                print("🗑️ 모든 사이클 삭제 완료 - 위젯 업데이트")
+            })
     }
     
     func fetchAllCycles() -> Observable<[PillCycle]> {
