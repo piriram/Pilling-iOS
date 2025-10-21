@@ -61,6 +61,12 @@ struct PillingDailyWidgetProvider: TimelineProvider {
                     let delayedEntry = createEntry(for: delayedTime, cycle: cycle)
                     entries.append(delayedEntry)
                 }
+                
+                // Entry 3: 4시간 후 (심각한 딜레이 경고)
+                if let criticalDelayedTime = calendar.date(byAdding: .hour, value: 4, to: scheduledTime) {
+                    let criticalEntry = createEntry(for: criticalDelayedTime, cycle: cycle)
+                    entries.append(criticalEntry)
+                }
             } else {
                 // 복용 시간이 없으면 (휴약일 등) 하루에 한 번만
                 let entry = createEntry(for: targetDate, cycle: cycle)

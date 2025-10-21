@@ -28,46 +28,88 @@ final class WidgetCalculateMessageUseCase {
             return .resting
         }
         
-        // 현재 시간 기준으로 상태 계산
         let todayStatus = calculateStatus(for: todayRecord, at: date)
         
-        // rest 상태 체크
         if case .rest = todayStatus {
             return .resting
         }
         
-        // 연속 미복용 일수 계산
-        let consecutiveMissed = calculateConsecutiveMissedDays(cycle: cycle, upTo: date)
-        
-        // 2일 이상 안 먹었고, 오늘 복용한 경우 - 격려 메시지
-        if consecutiveMissed >= 2,
-           (todayStatus == .todayTaken || todayStatus == .todayTakenDelayed || todayStatus == .todayTakenTooEarly) {
-            return .completed
+        // 오늘 관련 상태일 때만 복잡한 로직 적용
+        if isTodayRelatedStatus(todayStatus) {
+            let consecutiveMissed = calculateConsecutiveMissedDays(cycle: cycle, upTo: date)
+            
+            // 2일 이상 연속 미복용 + 오늘 복용 완료
+            if consecutiveMissed >= 2,
+               (todayStatus == .todayTaken ||
+                todayStatus == .todayTakenDelayed ||
+                todayStatus == .todayTakenTooEarly) {
+                return .success
+            }
+            
+            // 2일 이상 연속 미복용 + 오늘 미복용
+            if consecutiveMissed >= 2 {
+                return .waiting
+            }
+            
+            // 어제 미복용 상황 체크
+            if let yesterdayRecord = findYesterdayRecord(in: cycle, from: date) {
+                let yesterdayStatus = yesterdayRecord.status.adjustedForDate(
+                    yesterdayRecord.scheduledDateTime,
+                    calendar: timeProvider.calendar
+                )
+                
+                if case .missed = yesterdayStatus,
+                   consecutiveMissed == 1,
+                   (todayStatus == .todayTaken ||
+                    todayStatus == .todayTakenDelayed ||
+                    todayStatus == .todayTakenTooEarly) {
+                    return .pilledTwo
+                }
+                
+                if case .missed = yesterdayStatus,
+                   case .takenDouble = todayStatus {
+                    // 오늘 2알 복용으로 보정 완료
+                } else if case .missed = yesterdayStatus,
+                          (todayStatus == .todayTaken ||
+                           todayStatus == .todayDelayed ||
+                           todayStatus == .todayDelayedCritical ||
+                           todayStatus == .takenTooEarly) {
+                    return .pilledTwo
+                } else if case .missed = yesterdayStatus {
+                    return .pilledTwo
+                }
+            }
         }
         
-        // todayDelayed: 2시간 초과 - 무조건 경고! ⚠️
-        if todayStatus == .todayDelayed {
-            return .waiting
-        }
-        
-        // 2일 이상 안 먹었고, 오늘도 아직 안 먹음 - 경고!
-        if consecutiveMissed >= 2 {
-            return .waiting
-        }
-        
-        // 복용 완료 상태
-        if todayStatus == .todayTaken ||
-            todayStatus == .todayTakenDelayed ||
-            todayStatus == .takenDouble {
-            return .completed
-        }
-        
-        // 오늘 아직 안 먹음 (시간 내)
-        if todayStatus == .todayNotTaken {
+        // 개별 상태에 따른 메시지
+        switch todayStatus {
+        case .todayTaken:
+            return .success
+            
+        case .todayTakenDelayed:
+            return .success
+            
+        case .todayTakenTooEarly:
+            return .success
+            
+        case .todayDelayed:
+            return .groomy
+            
+        case .todayDelayedCritical:
+            return .fire
+            
+        case .takenDouble:
+            return .success
+            
+        case .todayNotTaken:
             return .plantingSeed
+            
+        case .taken, .takenDelayed, .missed, .scheduled, .takenTooEarly:
+            return .resting
+            
+        case .rest:
+            return .resting
         }
-        
-        return .plantingSeed
     }
     
     // MARK: - Private Methods
@@ -78,34 +120,49 @@ final class WidgetCalculateMessageUseCase {
         }
     }
     
-    /// 특정 시간에 해당하는 상태 계산
+    private func findYesterdayRecord(in cycle: PillCycle, from date: Date) -> PillRecord? {
+        guard let yesterday = timeProvider.date(byAdding: .day, value: -1, to: date) else {
+            return nil
+        }
+        return cycle.records.first { record in
+            timeProvider.isDate(record.scheduledDateTime, inSameDayAs: yesterday)
+        }
+    }
+    
     private func calculateStatus(for record: PillRecord, at date: Date) -> PillStatus {
         let calendar = timeProvider.calendar
         
-        // 이미 복용한 경우
         if record.status.isTaken {
             return record.status.adjustedForDate(record.scheduledDateTime, calendar: calendar)
         }
         
-        // 복용 예정 시간과 현재 시간 비교
         let scheduledTime = record.scheduledDateTime
         let timeDifference = date.timeIntervalSince(scheduledTime)
         
-        // 2시간 = 7200초
         let twoHours: TimeInterval = 2 * 60 * 60
+        let fourHours: TimeInterval = 4 * 60 * 60
         
-        // 아직 복용 시간 전이거나 2시간 이내
         if timeDifference < twoHours {
             return .todayNotTaken
-        } else {
-            // 2시간 초과
+        } else if timeDifference < fourHours {
             return .todayDelayed
+        } else {
+            return .todayDelayedCritical
+        }
+    }
+    
+    private func isTodayRelatedStatus(_ status: PillStatus) -> Bool {
+        switch status {
+        case .todayDelayed, .todayDelayedCritical, .todayNotTaken,
+                .todayTakenDelayed, .todayTakenTooEarly, .todayTaken:
+            return true
+        default:
+            return false
         }
     }
     
     private func calculateConsecutiveMissedDays(cycle: PillCycle, upTo targetDate: Date) -> Int {
         let today = timeProvider.startOfDay(for: targetDate)
-        
         var count = 0
         
         for record in cycle.records.reversed() {
