@@ -20,14 +20,29 @@ final class CalendarSheetPresenter {
         let currentDay = min(daysSinceStart + 1, cycle.totalDays)
         let dayText = "\(currentDay)일차/\(cycle.totalDays)"
         
-        let viewController = CalendarSheetViewController(selectedDate: item.date) { chosenStatus, memo in
-            update(selectedIndex, chosenStatus, memo)
-        }
+        // 기존 메모 가져오기
+        let existingMemo = cycle.records[safe: selectedIndex]?.memo ?? ""
+        
+        let viewController = CalendarSheetViewController(
+            selectedDate: item.date,
+            initialMemo: existingMemo,
+            onSelectStatus: { chosenStatus, memo in
+                update(selectedIndex, chosenStatus, memo)
+            }
+        )
         
         viewController.titleText = dayText
         viewController.title = dayText
         viewController.setInitialSelection(for: item.status)
         
         presenter.present(viewController, animated: false)
+    }
+}
+
+// MARK: - Array Safe Subscript
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        return indices.contains(index) ? self[index] : nil
     }
 }

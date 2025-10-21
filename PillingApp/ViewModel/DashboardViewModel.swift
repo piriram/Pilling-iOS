@@ -142,8 +142,12 @@ final class DashboardViewModel {
                 
                 // 휴약 기간이 아닌 경우
                 if adjustedStatus != .rest {
+                    // ⭐️ takenDouble은 재계산하지 않고 그대로 유지
+                    if record.status == .takenDouble {
+                        adjustedStatus = .takenDouble
+                    }
                     // 복용하지 않은 경우: 지연 시간 체크
-                    if !adjustedStatus.isTaken {
+                    else if !adjustedStatus.isTaken {
                         let timeInterval = now.timeIntervalSince(todayScheduledDateTime)
                         let twoHours: TimeInterval = 2 * 60 * 60
                         let fourHours: TimeInterval = 4 * 60 * 60
@@ -306,8 +310,22 @@ final class DashboardViewModel {
         .disposed(by: disposeBag)
     }
     
+    // DashboardViewModel의 updateState 메서드
+    
     func updateState(at index: Int, to newStatus: PillStatus, memo: String?) {
-        guard let cycle = currentCycle.value else { return }
+        guard let cycle = currentCycle.value else {
+            print("❌ updateState: cycle이 nil입니다")
+            return
+        }
+        
+        print("🔄 updateState 시작: index=\(index), newStatus=\(newStatus), memo=\(memo ?? "없음")")
+        print("📦 현재 cycle.records 개수: \(cycle.records.count)")
+        
+        if index < cycle.records.count {
+            print("📝 변경 전 상태: \(cycle.records[index].status)")
+        } else {
+            print("⚠️ index가 범위를 벗어남: \(index) >= \(cycle.records.count)")
+        }
         
         updatePillStatusUseCase.execute(
             cycle: cycle,
@@ -315,12 +333,30 @@ final class DashboardViewModel {
             newStatus: newStatus,
             memo: memo
         )
-        .subscribe(onNext: { [weak self] updatedCycle in
-            self?.currentCycle.accept(updatedCycle)
-            self?.updateItems()
-            self?.updateDashboardMessage()
-            self?.updateCanTakePill()
-        })
+        .subscribe(
+            onNext: { [weak self] updatedCycle in
+                print("✅ UseCase 완료: updatedCycle 수신")
+                
+                if index < updatedCycle.records.count {
+                    print("📝 변경 후 상태: \(updatedCycle.records[index].status)")
+                }
+                
+                self?.currentCycle.accept(updatedCycle)
+                print("🔄 currentCycle 업데이트 완료")
+                
+                self?.updateItems()
+                print("🔄 updateItems 완료")
+                
+                self?.updateDashboardMessage()
+                print("🔄 updateDashboardMessage 완료")
+                
+                self?.updateCanTakePill()
+                print("🔄 updateCanTakePill 완료")
+            },
+            onError: { error in
+                print("❌ UseCase 에러: \(error)")
+            }
+        )
         .disposed(by: disposeBag)
     }
 }

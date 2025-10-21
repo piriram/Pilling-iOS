@@ -52,11 +52,11 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         }
         
         if todayItem.status == .todayDelayed ||
-           todayItem.status == .todayDelayedCritical ||
-           todayItem.status == .todayNotTaken ||
-           todayItem.status == .todayTakenDelayed ||
-           todayItem.status == .todayTakenTooEarly ||
-           todayItem.status == .todayTaken {
+            todayItem.status == .todayDelayedCritical ||
+            todayItem.status == .todayNotTaken ||
+            todayItem.status == .todayTakenDelayed ||
+            todayItem.status == .todayTakenTooEarly ||
+            todayItem.status == .todayTaken {
             let consecutiveMissed = calculateConsecutiveMissedDays(cycle: cycle)
             
             print("todayItem.status: \(todayItem.status), conservativeMissed: \(consecutiveMissed)")
@@ -87,7 +87,7 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
                     todayItem.status == .todayTakenDelayed ||
                     todayItem.status == .todayTakenTooEarly) {
                     return DashboardMessage(
-                        text: "한알을 더 먹어야 해요",
+                        text: "어제 미복용했다면 오늘은 2알!!",
                         imageName: .takingBeforeTwo,
                         icon: .notTaken
                     )
@@ -96,11 +96,15 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
                 if case .missed = yesterdayItem.status,
                    case .takenDouble = todayItem.status {
                     // 오늘 2알 복용으로 보정한 경우
+                    return DashboardMessage(
+                        text: "매일 2시간 이내의 같은 시간에 복용해주세요.",
+                        imageName: .takingBefore,
+                        icon: .taken
+                    )
                 } else if case .missed = yesterdayItem.status,
                           (todayItem.status == .todayTaken ||
-                           todayItem.status == .todayDelayed ||
-                           todayItem.status == .todayDelayedCritical ||
                            todayItem.status == .takenTooEarly) {
+                    print("todayItem.status : \(todayItem.status)")
                     return DashboardMessage(
                         text: "한알을 더 먹어야 해요",
                         imageName: .takingBeforeTwo,
@@ -126,7 +130,7 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
             
         case .todayTakenDelayed:
             return DashboardMessage(
-                text: "2시간 조금 지났지만 괜찮아요!",
+                text: "2시간 지났지만 괜찮아요!",
                 imageName: .todayAfter,
                 icon: .taken
             )

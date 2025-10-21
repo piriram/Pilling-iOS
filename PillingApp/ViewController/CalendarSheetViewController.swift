@@ -14,6 +14,7 @@ import SnapKit
 
 final class CalendarSheetViewController: UIViewController {
     private let selectedDate: Date
+    private let initialMemo: String
     private let onSelectStatus: (PillStatus, String) -> Void
     private let disposeBag = DisposeBag()
     
@@ -112,8 +113,13 @@ final class CalendarSheetViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(selectedDate: Date, onSelectStatus: @escaping (PillStatus, String) -> Void) {
+    init(
+        selectedDate: Date,
+        initialMemo: String = "",
+        onSelectStatus: @escaping (PillStatus, String) -> Void
+    ) {
         self.selectedDate = selectedDate
+        self.initialMemo = initialMemo
         self.onSelectStatus = onSelectStatus
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
@@ -130,6 +136,7 @@ final class CalendarSheetViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         setupGestures()
+        setupInitialMemo()
         bindStatusButtons()
         bindMemoTextView()
     }
@@ -221,6 +228,11 @@ final class CalendarSheetViewController: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
+    }
+    
+    private func setupInitialMemo() {
+        memoTextView.text = initialMemo
+        memoPlaceholderLabel.isHidden = !initialMemo.isEmpty
     }
     
     // MARK: - Status Button Creation
