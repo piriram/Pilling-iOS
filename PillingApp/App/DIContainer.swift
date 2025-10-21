@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 final class DIContainer {
     static let shared = DIContainer()
@@ -25,10 +26,13 @@ final class DIContainer {
     }()
     
     // MARK: - Managers
-    
     func makeNotificationManager() -> NotificationManagerProtocol {
-        return LocalNotificationManager()
+        LocalNotificationManager(
+            notificationCenter: .current(),
+            timeProvider: timeProvider
+        )
     }
+    
     
     func makeUserDefaultsManager() -> UserDefaultsManagerProtocol {
         return UserDefaultsManager()

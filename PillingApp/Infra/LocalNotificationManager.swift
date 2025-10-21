@@ -9,17 +9,26 @@ import Foundation
 import UserNotifications
 import RxSwift
 
+protocol NotificationManagerProtocol {
+    func requestAuthorization() -> Observable<Bool>
+    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String) -> Observable<Void>
+    func cancelAllNotifications()
+    func checkAuthorizationStatus() -> Observable<Bool>
+}
+
 final class LocalNotificationManager: NotificationManagerProtocol {
-    
     // MARK: - Properties
-    
     private let notificationCenter: UNUserNotificationCenter
+    private let timeProvider: TimeProvider
     private let notificationIdentifier = "dailyPillReminder"
     
     // MARK: - Initialization
-    
-    init(notificationCenter: UNUserNotificationCenter = .current()) {
+    init(
+        notificationCenter: UNUserNotificationCenter = .current(),
+        timeProvider: TimeProvider
+    ) {
         self.notificationCenter = notificationCenter
+        self.timeProvider = timeProvider
     }
     
     // MARK: - NotificationManagerProtocol
@@ -30,7 +39,6 @@ final class LocalNotificationManager: NotificationManagerProtocol {
                 observer.onError(NotificationError.schedulingFailed)
                 return Disposables.create()
             }
-            
             let options: UNAuthorizationOptions = [.alert, .sound, .badge]
             self.notificationCenter.requestAuthorization(options: options) { granted, error in
                 if let error = error {
@@ -40,7 +48,6 @@ final class LocalNotificationManager: NotificationManagerProtocol {
                 observer.onNext(granted)
                 observer.onCompleted()
             }
-            
             return Disposables.create()
         }
     }
@@ -52,38 +59,36 @@ final class LocalNotificationManager: NotificationManagerProtocol {
                 return Disposables.create()
             }
             
-            // 기존 알림 삭제
+            // 기존 알림 제거
             self.notificationCenter.removePendingNotificationRequests(withIdentifiers: [self.notificationIdentifier])
             
-            // 알림이 비활성화된 경우 바로 완료
             guard isEnabled else {
                 observer.onNext(())
                 observer.onCompleted()
                 return Disposables.create()
             }
             
-            // 알림 콘텐츠 설정
+            // 알림 콘텐츠
             let content = UNMutableNotificationContent()
             content.title = "잔디 타임"
             content.body = message
             content.sound = .default
             content.badge = 1
             
-            // 시간 컴포넌트 추출
-            let calendar = Calendar.current
-            let components = calendar.dateComponents([.hour, .minute], from: time)
+            let cal = self.timeProvider.calendar
+            var comps = cal.dateComponents([.hour, .minute], from: time)
+            comps.calendar = cal
+            comps.timeZone = self.timeProvider.timeZone
             
-            // 매일 반복되는 트리거 생성
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            // 매일 반복 트리거
+            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
             
-            // 알림 요청 생성
             let request = UNNotificationRequest(
                 identifier: self.notificationIdentifier,
                 content: content,
                 trigger: trigger
             )
             
-            // 알림 등록
             self.notificationCenter.add(request) { error in
                 if let error = error {
                     observer.onError(error)
@@ -92,7 +97,6 @@ final class LocalNotificationManager: NotificationManagerProtocol {
                 observer.onNext(())
                 observer.onCompleted()
             }
-            
             return Disposables.create()
         }
     }
@@ -108,27 +112,20 @@ final class LocalNotificationManager: NotificationManagerProtocol {
                 observer.onError(NotificationError.schedulingFailed)
                 return Disposables.create()
             }
-            
             self.notificationCenter.getNotificationSettings { settings in
-                let isAuthorized = settings.authorizationStatus == .authorized
-                observer.onNext(isAuthorized)
+                // (선택) 임시 허용도 포함하고 싶으면 .provisional 도 true 로 처리
+                let allowed: Bool
+                switch settings.authorizationStatus {
+                case .authorized, .provisional: allowed = true
+                default: allowed = false
+                }
+                observer.onNext(allowed)
                 observer.onCompleted()
             }
-            
             return Disposables.create()
         }
     }
 }
 
-enum NotificationError: Error {
-    case permissionDenied
-    case schedulingFailed
-    case invalidTime
-}
 
-protocol NotificationManagerProtocol {
-    func requestAuthorization() -> Observable<Bool>
-    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String) -> Observable<Void>
-    func cancelAllNotifications()
-    func checkAuthorizationStatus() -> Observable<Bool>
-}
+

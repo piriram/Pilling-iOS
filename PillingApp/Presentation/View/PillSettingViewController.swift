@@ -204,7 +204,11 @@ final class PillSettingViewController: UIViewController {
     // MARK: - Private Methods
     
     private func presentDatePickerBottomSheet() {
-        let datePickerVC = DatePickerBottomSheetViewController()
+        let datePickerVC = DatePickerBottomSheetViewController(
+            timeProvider: DIContainer.shared.timeProvider,
+            initialDate: nil,
+            rangeDays: 28
+        )
         
         datePickerVC.selectedDate
             .bind(to: viewModel.input.dateSelected)
@@ -229,3 +233,4 @@ final class PillSettingViewController: UIViewController {
         present(alert, animated: true)
     }
 }
+

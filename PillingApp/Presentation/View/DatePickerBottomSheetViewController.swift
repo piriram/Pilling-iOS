@@ -14,63 +14,31 @@ import SnapKit
 
 final class DatePickerBottomSheetViewController: UIViewController {
     
-    // MARK: - Properties
-    
+    // MARK: - Injected
+    private let timeProvider: TimeProvider
+    private let rangeDays: Int
+    private let initialDateOverride: Date?
+
+    // MARK: - Rx
     private let disposeBag = DisposeBag()
     private let selectedDateSubject = PublishSubject<Date>()
-    
-    var selectedDate: Observable<Date> {
-        return selectedDateSubject.asObservable()
-    }
+    var selectedDate: Observable<Date> { selectedDateSubject.asObservable() }
     
     // MARK: - UI Components
-    
-    private let dimmedView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.black.withAlphaComponent(0)
-        return view
-    }()
-    
-    private let containerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 20
-        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.1
-        view.layer.shadowOffset = CGSize(width: 0, height: -2)
-        view.layer.shadowRadius = 10
-        return view
-    }()
-    
-    private let handleBar: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
-        view.layer.cornerRadius = 2.5
-        return view
-    }()
-    
-    private let datePicker: UIDatePicker = {
-        let picker = UIDatePicker()
-        picker.datePickerMode = .date
-        picker.preferredDatePickerStyle = .inline
-        picker.locale = Locale(identifier: "ko_KR")
-        picker.calendar = Calendar(identifier: .gregorian)
-        picker.tintColor = AppColor.pillGreen200
-        
-        // 현재 날짜 기준 ±28일 범위 설정
-        let currentDate = Date()
-        let calendar = Calendar.current
-        picker.minimumDate = calendar.date(byAdding: .day, value: -28, to: currentDate)
-        picker.maximumDate = calendar.date(byAdding: .day, value: 28, to: currentDate)
-        picker.date = currentDate
-        
-        return picker
-    }()
+    private let dimmedView = UIView()
+    private let containerView = UIView()
+    private let handleBar = UIView()
+    private let datePicker = UIDatePicker()
     
     // MARK: - Initialization
-    
-    init() {
+    init(
+        timeProvider: TimeProvider,
+        initialDate: Date? = nil,
+        rangeDays: Int = 28
+    ) {
+        self.timeProvider = timeProvider
+        self.initialDateOverride = initialDate
+        self.rangeDays = rangeDays
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
@@ -87,6 +55,7 @@ final class DatePickerBottomSheetViewController: UIViewController {
         setupUI()
         setupConstraints()
         setupGestures()
+        configureDatePicker()
         bind()
     }
     
@@ -99,12 +68,44 @@ final class DatePickerBottomSheetViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .clear
-        
+        dimmedView.backgroundColor = UIColor.black.withAlphaComponent(0)
+
+        containerView.backgroundColor = .white
+        containerView.layer.cornerRadius = 20
+        containerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        containerView.layer.shadowColor = UIColor.black.cgColor
+        containerView.layer.shadowOpacity = 0.1
+        containerView.layer.shadowOffset = CGSize(width: 0, height: -2)
+        containerView.layer.shadowRadius = 10
+
+        handleBar.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
+        handleBar.layer.cornerRadius = 2.5
+
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .inline
+        datePicker.locale = Locale(identifier: "ko_KR")
+        datePicker.calendar = timeProvider.calendar
+        datePicker.timeZone = timeProvider.timeZone
+        datePicker.tintColor = AppColor.pillGreen200
+
         view.addSubview(dimmedView)
         view.addSubview(containerView)
-        
         containerView.addSubview(handleBar)
         containerView.addSubview(datePicker)
+    }
+    
+    private func configureDatePicker() {
+        let cal = timeProvider.calendar
+        let now = timeProvider.now
+
+        let todayStart = timeProvider.startOfDay(for: now)
+        let minDayStart = cal.date(byAdding: .day, value: -rangeDays, to: todayStart) ?? todayStart
+        let maxDayStart = cal.date(byAdding: .day, value: +rangeDays, to: todayStart) ?? todayStart
+        let maxDayEnd = cal.date(byAdding: .second, value: 86399, to: maxDayStart) ?? maxDayStart
+
+        datePicker.minimumDate = minDayStart
+        datePicker.maximumDate = maxDayEnd
+        datePicker.date = initialDateOverride.map { timeProvider.startOfDay(for: $0) } ?? now
     }
     
     private func setupConstraints() {
