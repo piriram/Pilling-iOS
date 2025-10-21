@@ -48,13 +48,6 @@ final class PillSettingViewModel {
     private let selectedPillInfoRelay = BehaviorRelay<PillInfo?>(value: nil)
     private let selectedStartDateRelay = BehaviorRelay<Date?>(value: nil)
     
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "MM월 dd일"
-        return formatter
-    }()
-    
     private let disposeBag = DisposeBag()
     
     // MARK: - Initialization
@@ -161,7 +154,7 @@ final class PillSettingViewModel {
     }
     
     private static func formatDateWithDayInfo(date: Date) -> String {
-        let dateText = dateFormatter.string(from: date)
+        let dateText = date.formatted(style: .monthDay)
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let selectedDay = calendar.startOfDay(for: date)

@@ -13,6 +13,7 @@ public enum AppColor {
     public static let card = UIColor.secondarySystemBackground
     public static let pillGreen800 = UIColor(hexString: "7EDD1C")
     public static let pillGreen600 = UIColor(hexString: "AFF466")
+    static let pillGreen400 = UIColor.systemGreen.withAlphaComponent(0.4)
     public static let pillGreen200 = UIColor(hexString: "AFF466")
     public static let pillBrown = UIColor(hexString: "B8A07D")
     public static let notYetGray = UIColor(hexString: "3C3C43").withAlphaComponent(0.18)
@@ -26,7 +27,7 @@ public enum AppColor {
     public static let textGray = UIColor(hexString: "606060")
     public static let cheveronGray = UIColor(hexString: "A3A3A3")
     public static let grayBackground = UIColor(hexString: "F7F7F7")
-    
+    public static let gray700 = UIColor(hexString: "4B4B4B")
 }
 
 

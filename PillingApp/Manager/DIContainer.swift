@@ -88,7 +88,8 @@ final class DIContainer {
             takePillUseCase: makeTakePillUseCase(),
             updatePillStatusUseCase: makeUpdatePillStatusUseCase(),
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase(),
-            userDefaultsManager: makeUserDefaultsManager()
+            userDefaultsManager: makeUserDefaultsManager(),
+            settingsRepository: makeUserSettingsRepository()  // 추가
         )
     }
     
@@ -130,3 +131,4 @@ final class DIContainer {
         return PillCycleHistoryViewModel(context: coreDataManager.viewContext)
     }
 }
+

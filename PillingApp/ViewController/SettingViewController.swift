@@ -336,11 +336,7 @@ final class SettingViewController: UIViewController {
     
     private func updateUI(with settings: UserSettings) {
         let timeLabel = timeSettingButton.viewWithTag(100) as? UILabel
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "a h:mm"
-        timeLabel?.text = formatter.string(from: settings.scheduledTime)
-        
+        timeLabel?.text = settings.scheduledTime.formatted(style: .koreanTimeWithPeriod)
         let messageLabel = messageSettingButton.viewWithTag(101) as? UILabel
         messageLabel?.text = settings.notificationMessage
     }
