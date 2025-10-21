@@ -67,13 +67,11 @@ final class PillCycleHistoryCell: UITableViewCell {
     }
     
     func configure(with cycle: PillCycle) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy.MM.dd"
         
-        let start = formatter.string(from: cycle.startDate)
+        let start = cycle.startDate.formatted(style: .yearMonthDayPoint)
         let totalDays = (Mirror(reflecting: cycle).children.first { $0.label == "totalDays" }?.value as? Int) ?? (cycle.activeDays + cycle.breakDays)
         let endDate = Calendar.current.date(byAdding: .day, value: max(totalDays - 1, 0), to: cycle.startDate) ?? cycle.startDate
-        let end = formatter.string(from: endDate)
+        let end = endDate.formatted(style: .yearMonthDayPoint)
         
         titleLabel.text = "Cycle \(cycle.cycleNumber)"
         subtitleLabel.text = "\(start) ~ \(end) (총 \(totalDays)일)"
