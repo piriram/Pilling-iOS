@@ -305,7 +305,7 @@ final class DashboardViewController: UIViewController {
             make.width.equalTo((UIScreen.main.bounds.width - contentInset) / 2)
             
             make.height.equalTo(150)
-//            make.height.lessThanOrEqualTo(160)
+            //            make.height.lessThanOrEqualTo(160)
         }
         
         headerInfoStackView.snp.makeConstraints { make in
@@ -315,7 +315,7 @@ final class DashboardViewController: UIViewController {
         }
         
         messageCardView.snp.makeConstraints { make in
-            make.top.equalTo(characterImageView.snp.bottom).offset(16)
+            make.top.equalTo(characterImageView.snp.bottom).offset(24)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(52)
         }
@@ -359,7 +359,7 @@ final class DashboardViewController: UIViewController {
             make.bottom.equalTo(pageControl.snp.top).offset(-16)
         }
     }
-
+    
     // updateCalendarHeight 메서드 수정 - height 업데이트 제거
     private func updateCalendarHeight(for itemCount: Int) {
         // 레이아웃만 다시 설정
@@ -553,7 +553,7 @@ final class DashboardViewController: UIViewController {
         let missedStreak = consecutiveMissedDaysBeforeToday()
         
         // Apply new condition: today is not taken (todayNotTaken) AND missed for 2+ consecutive previous days
-        if todayRecord.status == .todayNotTaken && missedStreak >= 2 {
+        if (todayRecord.status == .todayNotTaken && missedStreak >= 2) || todayRecord.status == .todayDelayedCritical || todayRecord.status == .todayTakenDelayed{
             backgroundImageView.image = UIImage(named: "restBackground")
         } else {
             backgroundImageView.image = UIImage(named: "background")
