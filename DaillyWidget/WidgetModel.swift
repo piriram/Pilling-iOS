@@ -42,9 +42,9 @@ enum WidgetMessageType {
         case .empty:
             return "약을 설정해주세요"
         case .groomy:
-            return "2시간 내로 복용해주세요"
+            return "2시간 지났어요"
         case .fire:
-            return "4시간이나 지났어요"
+            return "4시간이나 지났어요!"
         case .pilledTwo:
             return "오늘은 두알"
         case .success:

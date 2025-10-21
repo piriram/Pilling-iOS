@@ -150,7 +150,7 @@ final class DashboardViewController: UIViewController {
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
         gearButton.tintColor = AppColor.secondary
         
-        characterImageView.contentMode = .scaleAspectFit
+        characterImageView.contentMode = .scaleAspectFill
         
         progressLabel.font = Typography.headline1()
         progressLabel.textColor = .black
@@ -285,25 +285,27 @@ final class DashboardViewController: UIViewController {
         infoButton.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(14)
             make.trailing.equalTo(gearButton.snp.leading).offset(-8)
-            make.width.height.equalTo(30)
+            make.width.height.lessThanOrEqualTo(30)
         }
         historyButton.snp.makeConstraints { make in
             make.centerY.equalTo(infoButton)
             make.trailing.equalTo(infoButton.snp.leading).offset(-8)
-            make.width.height.equalTo(30)
+            make.width.height.lessThanOrEqualTo(30)
         }
         
         gearButton.snp.makeConstraints { make in
             make.centerY.equalTo(infoButton)
             make.trailing.equalToSuperview().inset(contentInset)
-            make.width.height.equalTo(30)
+            make.width.height.lessThanOrEqualTo(30)
         }
         
         characterImageView.snp.makeConstraints { make in
             make.top.equalTo(infoButton.snp.bottom)
             make.leading.equalToSuperview().inset(contentInset)
             make.width.equalTo((UIScreen.main.bounds.width - contentInset) / 2)
-            make.height.equalTo(180)
+            
+            make.height.equalTo(150)
+//            make.height.lessThanOrEqualTo(160)
         }
         
         headerInfoStackView.snp.makeConstraints { make in
@@ -313,7 +315,7 @@ final class DashboardViewController: UIViewController {
         }
         
         messageCardView.snp.makeConstraints { make in
-            make.top.lessThanOrEqualTo(characterImageView.snp.bottom).offset(24)
+            make.top.equalTo(characterImageView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(52)
         }
@@ -331,29 +333,38 @@ final class DashboardViewController: UIViewController {
         }
         
         weekdayStackView.snp.makeConstraints { make in
-            make.top.lessThanOrEqualTo(messageCardView.snp.bottom).offset(40)
+            make.top.lessThanOrEqualTo(messageCardView.snp.bottom).offset(30)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(20)
         }
         
-        calendarCollectionView.snp.makeConstraints { make in
-            make.top.lessThanOrEqualTo(weekdayStackView.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(contentInset)
-            make.height.equalTo(280)
-        }
-        
-        pageControl.snp.makeConstraints { make in
-            make.top.equalTo(calendarCollectionView.snp.bottom).offset(16)
-            make.centerX.equalToSuperview()
-            make.height.equalTo(12)
-        }
-        
+        // 버튼을 먼저 설정
         takePillButton.snp.makeConstraints { make in
-            make.top.equalTo(pageControl.snp.bottom).offset(28)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(70)
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
+        
+        // 페이지 컨트롤
+        pageControl.snp.makeConstraints { make in
+            make.bottom.equalTo(takePillButton.snp.top).offset(-28)
+            make.centerX.equalToSuperview()
+            make.height.equalTo(12)
+        }
+        
+        // 캘린더 컬렉션뷰가 나머지 공간 차지
+        calendarCollectionView.snp.makeConstraints { make in
+            make.top.lessThanOrEqualTo(weekdayStackView.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(contentInset)
+            make.bottom.equalTo(pageControl.snp.top).offset(-16)
+        }
+    }
+
+    // updateCalendarHeight 메서드 수정 - height 업데이트 제거
+    private func updateCalendarHeight(for itemCount: Int) {
+        // 레이아웃만 다시 설정
+        calendarCollectionView.setCollectionViewLayout(makeCompositionalLayout(), animated: false)
+        view.layoutIfNeeded()
     }
     
     // MARK: - Binding
@@ -608,22 +619,6 @@ final class DashboardViewController: UIViewController {
                 label.text = rotatedWeekdays[index]
             }
         }
-    }
-    
-    private func updateCalendarHeight(for itemCount: Int) {
-        let width = view.bounds.width - 40
-        guard width > 0 else { return }
-        
-        let columns: CGFloat = 7
-        let spacing: CGFloat = 6
-        let rows = ceil(CGFloat(itemCount) / columns)
-        let totalSpacing = spacing * (columns - 1)
-        let itemSide = (width - totalSpacing) / columns
-        let height = rows * itemSide + (rows - 1) * spacing
-        
-        calendarCollectionView.snp.updateConstraints { $0.height.equalTo(height) }
-        calendarCollectionView.setCollectionViewLayout(makeCompositionalLayout(), animated: false)
-        view.layoutIfNeeded()
     }
     
     private func updatePageControl(for itemCount: Int) {

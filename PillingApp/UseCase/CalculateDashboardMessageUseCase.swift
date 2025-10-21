@@ -30,7 +30,24 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
             return DashboardMessage(text: "...", imageName: .rest, icon: .rest)
         }
         
-        guard let todayItem = findTodayItem(items: items) else {
+        guard let todayItem = findRelevantItem(items: items) else {
+            // 오늘 아이템이 없는데 어제 아이템이 12시간 초과한 경우 체크
+            if let yesterdayItem = getYesterdayItem(items: items) {
+                let now = timeProvider.now
+                let twelveHours: TimeInterval = 12 * 60 * 60
+                let timeSinceScheduled = now.timeIntervalSince(yesterdayItem.date)
+                
+                if timeSinceScheduled >= twelveHours,
+                   !yesterdayItem.status.isTaken,
+                   yesterdayItem.status != .rest {
+                    return DashboardMessage(
+                        text: "오늘은 두알을 복용하세요.",
+                        imageName: .fire,
+                        icon: .notTaken
+                    )
+                }
+            }
+            
             return DashboardMessage(text: "오늘은 잔디도 휴식중", imageName: .rest, icon: .rest)
         }
         
@@ -167,9 +184,31 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
     
     // MARK: - Private Methods
     
-    private func findTodayItem(items: [DayItem]) -> DayItem? {
+    private func findRelevantItem(items: [DayItem]) -> DayItem? {
         let now = timeProvider.now
-        return items.first { timeProvider.isDate($0.date, inSameDayAs: now) }
+        
+        // 1. 오늘 날짜의 아이템 찾기
+        if let todayItem = items.first(where: { timeProvider.isDate($0.date, inSameDayAs: now) }) {
+            return todayItem
+        }
+        
+        // 2. 어제 아이템이 12시간 윈도우 내인지 확인
+        guard let yesterday = timeProvider.date(byAdding: .day, value: -1, to: now),
+              let yesterdayItem = items.first(where: { timeProvider.isDate($0.date, inSameDayAs: yesterday) }) else {
+            return nil
+        }
+        
+        // 어제 복용 예정 시간으로부터 12시간 이내인지 확인
+        let twelveHours: TimeInterval = 12 * 60 * 60
+        let timeSinceScheduled = now.timeIntervalSince(yesterdayItem.date)
+        
+        if timeSinceScheduled < twelveHours,
+           !yesterdayItem.status.isTaken,
+           yesterdayItem.status != .rest {
+            return yesterdayItem
+        }
+        
+        return nil
     }
     
     private func getYesterdayItem(items: [DayItem]) -> DayItem? {
@@ -197,7 +236,11 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
                 continue
             }
             
-            if case .missed = record.status {
+            // 12시간 윈도우 체크
+            let twelveHours: TimeInterval = 12 * 60 * 60
+            let timeSinceScheduled = now.timeIntervalSince(record.scheduledDateTime)
+            
+            if timeSinceScheduled >= twelveHours, !record.status.isTaken {
                 count += 1
             } else if record.status.isTaken {
                 break

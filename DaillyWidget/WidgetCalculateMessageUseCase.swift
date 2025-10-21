@@ -24,7 +24,19 @@ final class WidgetCalculateMessageUseCase {
             return .empty
         }
         
-        guard let todayRecord = findRecord(in: cycle, for: date) else {
+        guard let todayRecord = findRelevantRecord(in: cycle, for: date) else {
+            // 오늘 레코드가 없는데 어제 레코드가 12시간 초과한 경우 체크
+            if let yesterdayRecord = findYesterdayRecord(in: cycle, from: date) {
+                let twelveHours: TimeInterval = 12 * 60 * 60
+                let timeSinceScheduled = date.timeIntervalSince(yesterdayRecord.scheduledDateTime)
+                
+                if timeSinceScheduled >= twelveHours,
+                   !yesterdayRecord.status.isTaken,
+                   yesterdayRecord.status != .rest {
+                    return .pilledTwo
+                }
+            }
+            
             return .resting
         }
         
@@ -104,7 +116,10 @@ final class WidgetCalculateMessageUseCase {
         case .todayNotTaken:
             return .plantingSeed
             
-        case .taken, .takenDelayed, .missed, .scheduled, .takenTooEarly:
+        case .missed:
+            return .pilledTwo
+            
+        case .taken, .takenDelayed, .scheduled, .takenTooEarly:
             return .resting
             
         case .rest:
@@ -114,10 +129,33 @@ final class WidgetCalculateMessageUseCase {
     
     // MARK: - Private Methods
     
-    private func findRecord(in cycle: PillCycle, for date: Date) -> PillRecord? {
-        return cycle.records.first { record in
+    private func findRelevantRecord(in cycle: PillCycle, for date: Date) -> PillRecord? {
+        // 1. 오늘 날짜의 레코드 찾기
+        if let todayRecord = cycle.records.first(where: { record in
             timeProvider.isDate(record.scheduledDateTime, inSameDayAs: date)
+        }) {
+            return todayRecord
         }
+        
+        // 2. 어제 레코드가 12시간 윈도우 내인지 확인
+        guard let yesterday = timeProvider.date(byAdding: .day, value: -1, to: date),
+              let yesterdayRecord = cycle.records.first(where: { record in
+                  timeProvider.isDate(record.scheduledDateTime, inSameDayAs: yesterday)
+              }) else {
+            return nil
+        }
+        
+        // 어제 복용 예정 시간으로부터 12시간 이내인지 확인
+        let twelveHours: TimeInterval = 12 * 60 * 60
+        let timeSinceScheduled = date.timeIntervalSince(yesterdayRecord.scheduledDateTime)
+        
+        if timeSinceScheduled < twelveHours,
+           !yesterdayRecord.status.isTaken,
+           yesterdayRecord.status != .rest {
+            return yesterdayRecord
+        }
+        
+        return nil
     }
     
     private func findYesterdayRecord(in cycle: PillCycle, from date: Date) -> PillRecord? {
@@ -141,20 +179,23 @@ final class WidgetCalculateMessageUseCase {
         
         let twoHours: TimeInterval = 2 * 60 * 60
         let fourHours: TimeInterval = 4 * 60 * 60
+        let twelveHours: TimeInterval = 12 * 60 * 60
         
         if timeDifference < twoHours {
             return .todayNotTaken
         } else if timeDifference < fourHours {
             return .todayDelayed
-        } else {
+        } else if timeDifference < twelveHours {
             return .todayDelayedCritical
+        } else {
+            return .missed
         }
     }
     
     private func isTodayRelatedStatus(_ status: PillStatus) -> Bool {
         switch status {
         case .todayDelayed, .todayDelayedCritical, .todayNotTaken,
-                .todayTakenDelayed, .todayTakenTooEarly, .todayTaken:
+             .todayTakenDelayed, .todayTakenTooEarly, .todayTaken:
             return true
         default:
             return false
@@ -179,7 +220,11 @@ final class WidgetCalculateMessageUseCase {
                 continue
             }
             
-            if case .missed = status {
+            // 12시간 윈도우 체크
+            let twelveHours: TimeInterval = 12 * 60 * 60
+            let timeSinceScheduled = targetDate.timeIntervalSince(record.scheduledDateTime)
+            
+            if timeSinceScheduled >= twelveHours, !record.status.isTaken {
                 count += 1
             } else if status.isTaken {
                 break

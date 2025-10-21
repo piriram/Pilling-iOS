@@ -19,7 +19,7 @@ struct PillingDailyWidgetView: View {
             // 상단 아이콘
             Image(entry.displayData.iconImageName)
                 .resizable()
-                .scaledToFit()
+                .scaledToFill()
                 .frame(width: 80, height: 80)
             
             // N일차
