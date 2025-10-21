@@ -55,24 +55,6 @@ final class DashboardViewModel {
     
     // MARK: - Private Methods
     
-    private func reloadSettings() {
-        settingsRepository.fetchSettings()
-            .subscribe(onNext: { [weak self] settings in
-                guard let self = self else { return }
-                self.settings.accept(settings)
-                
-                // 현재 사이클의 scheduledTime도 업데이트
-                if var cycle = self.currentCycle.value {
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "HH:mm"
-                    cycle.scheduledTime = formatter.string(from: settings.scheduledTime)
-                    self.currentCycle.accept(cycle)
-                    self.updateItems()
-                }
-            })
-            .disposed(by: disposeBag)
-    }
-    
     private func autoMarkPastScheduledAsMissed() {
         guard let cycle = currentCycle.value else { return }
         let now = Date()
@@ -119,6 +101,24 @@ final class DashboardViewModel {
             .disposed(by: disposeBag)
     }
     
+    private func reloadSettings() {
+        settingsRepository.fetchSettings()
+            .subscribe(onNext: { [weak self] settings in
+                guard let self = self else { return }
+                self.settings.accept(settings)
+                
+                // 현재 사이클의 scheduledTime도 업데이트
+                if var cycle = self.currentCycle.value {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "HH:mm"
+                    cycle.scheduledTime = formatter.string(from: settings.scheduledTime)
+                    self.currentCycle.accept(cycle)
+                    self.updateItems()
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+    
     private func updateItems() {
         guard let cycle = currentCycle.value else { return }
         
@@ -126,21 +126,43 @@ final class DashboardViewModel {
         let visibleRecords = Array(cycle.records.prefix(maxItems))
         let now = Date()
         
+        // 현재 설정된 복용 시간 가져오기
+        let currentScheduledTime = settings.value.scheduledTime
+        
         let dayItems = visibleRecords.map { record in
             var adjustedStatus = record.status.adjustedForDate(record.scheduledDateTime, calendar: calendar)
             
-            // 오늘 날짜이고 아직 복용하지 않았으며 지연 시간 체크
-            if calendar.isDateInToday(record.scheduledDateTime),
-               !adjustedStatus.isTaken,
-               adjustedStatus != .rest {
-                let timeInterval = now.timeIntervalSince(record.scheduledDateTime)
-                let twoHours: TimeInterval = 2 * 60 * 60
-                let fourHours: TimeInterval = 4 * 60 * 60
+            // 오늘 날짜인 경우, 현재 설정 시간 기준으로 재계산
+            if calendar.isDateInToday(record.scheduledDateTime) {
+                // 오늘 날짜의 실제 예정 시간을 현재 설정 기준으로 다시 계산
+                let todayScheduledDateTime = calculateTodayScheduledTime(
+                    from: currentScheduledTime,
+                    calendar: calendar
+                )
                 
-                if timeInterval >= fourHours {
-                    adjustedStatus = .todayDelayedCritical
-                } else if timeInterval >= twoHours {
-                    adjustedStatus = .todayDelayed
+                // 휴약 기간이 아닌 경우
+                if adjustedStatus != .rest {
+                    // 복용하지 않은 경우: 지연 시간 체크
+                    if !adjustedStatus.isTaken {
+                        let timeInterval = now.timeIntervalSince(todayScheduledDateTime)
+                        let twoHours: TimeInterval = 2 * 60 * 60
+                        let fourHours: TimeInterval = 4 * 60 * 60
+                        
+                        if timeInterval >= fourHours {
+                            adjustedStatus = .todayDelayedCritical
+                        } else if timeInterval >= twoHours {
+                            adjustedStatus = .todayDelayed
+                        } else {
+                            adjustedStatus = .todayNotTaken
+                        }
+                    }
+                    // 복용한 경우: takenAt 기준으로 상태 재계산
+                    else if let takenAt = record.takenAt {
+                        adjustedStatus = calculateTakenStatus(
+                            takenAt: takenAt,
+                            scheduledDateTime: todayScheduledDateTime
+                        )
+                    }
                 }
             }
             
@@ -153,6 +175,47 @@ final class DashboardViewModel {
         }
         
         items.accept(dayItems)
+    }
+    
+    /// 오늘 날짜에 현재 설정된 복용 시간을 적용한 Date 계산
+    private func calculateTodayScheduledTime(
+        from scheduledTime: Date,
+        calendar: Calendar
+    ) -> Date {
+        let now = Date()
+        let todayComponents = calendar.dateComponents([.year, .month, .day], from: now)
+        let timeComponents = calendar.dateComponents([.hour, .minute], from: scheduledTime)
+        
+        var combined = DateComponents()
+        combined.year = todayComponents.year
+        combined.month = todayComponents.month
+        combined.day = todayComponents.day
+        combined.hour = timeComponents.hour
+        combined.minute = timeComponents.minute
+        
+        return calendar.date(from: combined) ?? now
+    }
+    
+    /// 실제 복용 시간과 예정 시간을 비교하여 복용 상태 계산
+    private func calculateTakenStatus(
+        takenAt: Date,
+        scheduledDateTime: Date
+    ) -> PillStatus {
+        let timeInterval = takenAt.timeIntervalSince(scheduledDateTime)
+        let twoHours: TimeInterval = 2 * 60 * 60
+        
+        // 2시간 이상 일찍 복용
+        if timeInterval < -twoHours {
+            return .todayTakenTooEarly
+        }
+        // 2시간 이상 늦게 복용
+        else if timeInterval > twoHours {
+            return .todayTakenDelayed
+        }
+        // 정상 범위 내 복용
+        else {
+            return .todayTaken
+        }
     }
     
     private func updateDashboardMessage() {
@@ -194,17 +257,22 @@ final class DashboardViewModel {
     
     // MARK: - Public Methods (Inputs)
     
-    /// 설정 변경 후 UI 업데이트 (설정값만 다시 로드)
-    func refreshSettings() {
-        reloadSettings()
-    }
-    
     /// Dashboard 화면 진입 시 현재 날짜 기준으로 UI를 갱신
     func refreshForCurrentDate() {
         updateItems()
         updateDashboardMessage()
         updateCanTakePill()
         autoMarkPastScheduledAsMissed()
+    }
+    
+    /// 설정 변경 후 화면 복귀 시 최신 설정 및 사이클 데이터 다시 로드
+    func reloadData() {
+        loadDashboardData()
+    }
+    
+    /// 설정 변경 후 UI 업데이트 (설정값만 다시 로드)
+    func refreshSettings() {
+        reloadSettings()
     }
     
     func takePill() {
@@ -256,4 +324,3 @@ final class DashboardViewModel {
         .disposed(by: disposeBag)
     }
 }
-

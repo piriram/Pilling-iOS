@@ -23,6 +23,10 @@ enum WidgetMessageType {
     case plantingSeed  // 잔디를 심어보세요!
     case completed     // 잔디 심기 완료
     case resting       // 지금은 쉬는 시간
+    case groomy
+    case fire
+    case success
+    case pilledTwo
     case empty         // 데이터 없음
     
     var message: String {
@@ -32,11 +36,19 @@ enum WidgetMessageType {
         case .plantingSeed:
             return "잔디를 심어보세요!"
         case .completed:
-            return "잔디 심기 완료"
+            return "한알 심기 완료"
         case .resting:
             return "지금은 쉬는 시간"
         case .empty:
             return "약을 설정해주세요"
+        case .groomy:
+            return "2시간 내로 복용해주세요"
+        case .fire:
+            return "4시간이나 지났어요"
+        case .pilledTwo:
+            return "오늘은 두알"
+        case .success:
+            return "오늘 복용 완료."
         }
     }
     
@@ -50,8 +62,16 @@ enum WidgetMessageType {
             return "widget_icon_completed"
         case .resting:
             return "widget_icon_rest"
+        case .groomy:
+            return "widget_icon_groomy"
+        case .fire:
+            return "widget_icon_fire"
+        case .success:
+            return "widget_icon_success"
         case .empty:
             return "widget_icon_rest"
+        case .pilledTwo:
+            return "widget_icon_two"
         }
     }
     
@@ -59,7 +79,11 @@ enum WidgetMessageType {
         switch self {
         case .waiting:
             return "widget_background_warning"
-        case .plantingSeed, .completed, .resting, .empty:
+        case .groomy:
+            return "widget_background_groomy"
+        case .fire:
+            return "widget_background_fire"
+        default:
             return "widget_background_normal"
         }
     }

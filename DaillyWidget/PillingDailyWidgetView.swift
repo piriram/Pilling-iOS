@@ -15,12 +15,12 @@ struct PillingDailyWidgetView: View {
     
     var body: some View {
         
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             // 상단 아이콘
             Image(entry.displayData.iconImageName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 90, height: 90)
+                .frame(width: 80, height: 80)
             
             // N일차
             if entry.displayData.cycleDay > 0 {
@@ -36,7 +36,6 @@ struct PillingDailyWidgetView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
             
-            Spacer()
         }
         .containerBackground(for: .widget) {
             Image(entry.displayData.backgroundImageName)
@@ -44,7 +43,7 @@ struct PillingDailyWidgetView: View {
                 .scaledToFill()
         }
         .widgetURL(URL(string: "pillingapp://widget"))
-        Spacer()
+        
     }
 }
 
