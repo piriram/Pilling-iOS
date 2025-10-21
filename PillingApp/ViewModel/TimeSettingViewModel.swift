@@ -153,7 +153,7 @@ final class TimeSettingViewModel {
                     scheduledTime: self.selectedTime.value,
                     notificationEnabled: self.isAlarmEnabled.value,
                     delayThresholdMinutes: currentSettings.delayThresholdMinutes,
-                    notificationMessage: currentSettings.notificationMessage
+                    notificationMessage: UserSettings.defaultNotificationMessage
                 )
                 
                 return self.settingsRepository.saveSettings(updatedSettings)
@@ -188,3 +188,4 @@ final class TimeSettingViewModel {
 enum SetupError: Error {
     case missingPillInfo
 }
+

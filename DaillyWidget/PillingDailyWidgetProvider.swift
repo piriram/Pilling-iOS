@@ -67,6 +67,12 @@ struct PillingDailyWidgetProvider: TimelineProvider {
                     let criticalEntry = createEntry(for: criticalDelayedTime, cycle: cycle)
                     entries.append(criticalEntry)
                 }
+                
+                // Entry 4: 12시간 후 (missed, 2알 복용 안내)
+                if let missedTime = calendar.date(byAdding: .hour, value: 12, to: scheduledTime) {
+                    let missedEntry = createEntry(for: missedTime, cycle: cycle)
+                    entries.append(missedEntry)
+                }
             } else {
                 // 복용 시간이 없으면 (휴약일 등) 하루에 한 번만
                 let entry = createEntry(for: targetDate, cycle: cycle)
