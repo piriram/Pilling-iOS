@@ -13,7 +13,7 @@ import RxCocoa
 
 final class DashboardViewModel {
     
-    private let fetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol
+    private let fetchDashboardDataUseCase: GetDashboardSnapshotUseCaseProtocol
     private let takePillUseCase: TakePillUseCaseProtocol
     private let updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol
     private let calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
@@ -35,7 +35,7 @@ final class DashboardViewModel {
     // MARK: - Initialization
     
     init(
-        fetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol,
+        fetchDashboardDataUseCase: GetDashboardSnapshotUseCaseProtocol,
         takePillUseCase: TakePillUseCaseProtocol,
         updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol,
         calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,

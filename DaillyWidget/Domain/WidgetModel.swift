@@ -26,7 +26,8 @@ enum WidgetMessageType {
     case groomy
     case fire
     case success
-    case pilledTwo
+    case yesterdayMissed
+    case oneMorePill
     case empty         // 데이터 없음
     
     var message: String {
@@ -45,8 +46,10 @@ enum WidgetMessageType {
             return "2시간 지났어요"
         case .fire:
             return "4시간 지났어요!"
-        case .pilledTwo:
+        case .yesterdayMissed:
             return "오늘은 두알"
+        case .oneMorePill:
+            return "하나더"
         case .success:
             return "오늘 복용 완료."
         }
@@ -64,13 +67,13 @@ enum WidgetMessageType {
             return "widget_icon_rest"
         case .groomy:
             return "widget_icon_groomy"
-        case .fire:
+        case .fire,.yesterdayMissed:
             return "widget_icon_fire"
         case .success:
             return "widget_icon_success"
         case .empty:
             return "widget_icon_rest"
-        case .pilledTwo:
+        case .oneMorePill:
             return "widget_icon_two"
         }
     }

@@ -6,12 +6,12 @@
 //
 
 import RxSwift
-// MARK: - Domain/UseCases/FetchDashboardDataUseCase.swift
 
-protocol FetchDashboardDataUseCaseProtocol {
+protocol GetDashboardSnapshotUseCaseProtocol {
     func execute() -> Observable<(cycle: PillCycle?, settings: UserSettings)>
 }
-final class FetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol {
+
+final class GetDashboardSnapshotUseCase: GetDashboardSnapshotUseCaseProtocol {
     private let cycleRepository: PillCycleRepositoryProtocol
     private let settingsRepository: UserSettingsRepositoryProtocol
     

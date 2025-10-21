@@ -17,6 +17,7 @@ protocol TimeProvider {
     func isDate(_ date1: Date, inSameDayAs date2: Date) -> Bool
     func date(byAdding component: Calendar.Component, value: Int, to date: Date) -> Date?
     func dateComponents(_ components: Set<Calendar.Component>, from date: Date) -> DateComponents
+    func format(_ date: Date, style: DateFormatStyle) -> String
 }
 
 final class SystemTimeProvider: TimeProvider {
@@ -48,5 +49,9 @@ final class SystemTimeProvider: TimeProvider {
     
     func dateComponents(_ components: Set<Calendar.Component>, from date: Date) -> DateComponents {
         calendar.dateComponents(components, from: date)
+    }
+    
+    func format(_ date: Date, style: DateFormatStyle) -> String {
+        date.formatted(style: style, timeZone: timeZone)
     }
 }

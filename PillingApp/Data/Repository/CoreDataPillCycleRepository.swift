@@ -14,9 +14,11 @@ import WidgetKit
 final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
     
     private let coreDataManager: CoreDataManager
+    private let timeProvider: TimeProvider
     
-    init(coreDataManager: CoreDataManager) {
+    init(coreDataManager: CoreDataManager, timeProvider: TimeProvider) {
         self.coreDataManager = coreDataManager
+        self.timeProvider = timeProvider
     }
     
     // MARK: - PillCycleRepositoryProtocol
@@ -30,12 +32,12 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
                     NSSortDescriptor(key: "startDate", ascending: false)
                 ]
             )
-            .map { entities in
+            .map { [timeProvider] entities in
                 let cycles = entities.map { $0.toDomain() }
                 guard !cycles.isEmpty else { return nil }
                 
-                let now = Date()
-                let cal = Calendar.current
+                let now = timeProvider.now
+                let cal = timeProvider.calendar
                 
                 // 1) 진행 중(오늘 포함) 사이클 우선
                 if let ongoing = cycles.first(where: { cycle in
@@ -47,7 +49,8 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
                             return cycle.activeDays + cycle.breakDays
                         }
                     }()
-                    let end = cal.date(byAdding: .day, value: max(totalDays - 1, 0), to: start) ?? start
+                    let endStartOfDay = cal.date(byAdding: .day, value: max(totalDays - 1, 0), to: timeProvider.startOfDay(for: start)) ?? start
+                    let end = cal.date(byAdding: .second, value: 86399, to: endStartOfDay) ?? endStartOfDay
                     return (start ... end).contains(now)
                 }) {
                     return ongoing
@@ -181,3 +184,4 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
             }
     }
 }
+

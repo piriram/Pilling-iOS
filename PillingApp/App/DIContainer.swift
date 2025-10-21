@@ -37,7 +37,10 @@ final class DIContainer {
     // MARK: - Repositories
     
     func makePillCycleRepository() -> PillCycleRepositoryProtocol {
-        return CoreDataPillCycleRepository(coreDataManager: coreDataManager)
+        return CoreDataPillCycleRepository(
+            coreDataManager: coreDataManager,
+            timeProvider: timeProvider
+        )
     }
     
     func makeUserSettingsRepository() -> UserSettingsRepositoryProtocol {
@@ -46,8 +49,8 @@ final class DIContainer {
     
     // MARK: - UseCases
     
-    func makeFetchDashboardDataUseCase() -> FetchDashboardDataUseCaseProtocol {
-        return FetchDashboardDataUseCase(
+    func makeFetchDashboardDataUseCase() -> GetDashboardSnapshotUseCaseProtocol {
+        return GetDashboardSnapshotUseCase(
             cycleRepository: makePillCycleRepository(),
             settingsRepository: makeUserSettingsRepository()
         )

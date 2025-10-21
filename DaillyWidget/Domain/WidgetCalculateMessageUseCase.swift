@@ -33,7 +33,7 @@ final class WidgetCalculateMessageUseCase {
                 if timeSinceScheduled >= twelveHours,
                    !yesterdayRecord.status.isTaken,
                    yesterdayRecord.status != .rest {
-                    return .pilledTwo  // "오늘은 두알을 복용하세요"
+                    return .oneMorePill  // "오늘은 두알을 복용하세요"
                 }
             }
             
@@ -76,23 +76,23 @@ final class WidgetCalculateMessageUseCase {
                    (todayStatus == .todayTaken ||
                     todayStatus == .todayTakenDelayed ||
                     todayStatus == .todayTakenTooEarly) {
-                    return .pilledTwo  // "어제 미복용했다면 오늘은 2알!!"
+                    return .oneMorePill  // "어제 미복용했다면 오늘은 2알!!"
                 }
                 
-                // ⭐️ 어제 missed && 오늘 takenDouble (2알 복용으로 보정 완료)
+                // 어제 missed && 오늘 takenDouble (2알 복용으로 보정 완료)
                 if case .missed = yesterdayStatus,
                    case .takenDouble = todayStatus {
                     return .success  // "매일 2시간 이내의 같은 시간에 복용해주세요"
                 }
-                // ⭐️ 어제 missed && 오늘 todayTaken/takenTooEarly (1알만 복용)
+                // 어제 missed && 오늘 todayTaken/takenTooEarly (1알만 복용)
                 else if case .missed = yesterdayStatus,
                         (todayStatus == .todayTaken ||
                          todayStatus == .takenTooEarly) {
-                    return .pilledTwo  // "한알을 더 먹어야 해요"
+                    return .oneMorePill  // "한알을 더 먹어야 해요"
                 }
                 // 어제 missed (아직 오늘 복용 안 함)
                 else if case .missed = yesterdayStatus {
-                    return .pilledTwo  // "오늘은 두알을 복용하세요"
+                    return .yesterdayMissed
                 }
             }
         }
@@ -171,7 +171,7 @@ final class WidgetCalculateMessageUseCase {
     private func calculateStatus(for record: PillRecord, at date: Date) -> PillStatus {
         let calendar = timeProvider.calendar
         
-        // ⭐️ takenDouble은 그대로 유지
+        // takenDouble은 그대로 유지
         if record.status == .takenDouble {
             return .takenDouble
         }

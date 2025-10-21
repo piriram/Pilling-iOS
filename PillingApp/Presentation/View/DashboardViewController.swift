@@ -654,14 +654,26 @@ final class DashboardViewController: UIViewController {
     
     private func presentCalendarSheet(for index: Int, item: DayItem) {
         guard let cycle = viewModel.currentCycle.value else { return }
-        if #available(iOS 16.0, *) {
-            CalendarSheetPresenter.present(from: self,
-                                           selectedIndex: index,
-                                           item: item,
-                                           cycle: cycle) { [weak self] idx, status, memo in
-                self?.viewModel.updateState(at: idx, to: status, memo: memo)
+        
+        let calendar = Calendar.current
+        let daysSinceStart = max(0, calendar.dateComponents([.day], from: cycle.startDate, to: item.date).day ?? 0)
+        let currentDay = min(daysSinceStart + 1, cycle.totalDays)
+        let dayText = "\(currentDay)일차/\(cycle.totalDays)"
+        
+        let existingMemo = cycle.records[safe: index]?.memo ?? ""
+        
+        let viewController = CalendarSheetViewController(
+            selectedDate: item.date,
+            initialMemo: existingMemo,
+            onSelectStatus: { [weak self] chosenStatus, memo in
+                self?.viewModel.updateState(at: index, to: chosenStatus, memo: memo)
             }
-        }
+        )
+        
+        viewController.titleText = dayText
+        viewController.setInitialSelection(for: item.status)
+        
+        present(viewController, animated: false)
     }
     
     private func presentInfoFloatingView() {
@@ -784,4 +796,11 @@ final class DashboardViewController: UIViewController {
     }
     
     
+}
+
+// Array safe subscript extension
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
 }
