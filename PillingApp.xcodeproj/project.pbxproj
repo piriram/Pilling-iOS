@@ -73,6 +73,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Extension/AppColor.swift,
+				"Extension/Date+.swift",
 				"Extension/PillCycleEntity+Extension.swift",
 				"Extension/PillRecordEntity+Extension..swift",
 				Extension/TimeProvider.swift,

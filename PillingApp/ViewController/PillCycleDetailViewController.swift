@@ -175,24 +175,15 @@ final class PillCycleDetailViewController: UIViewController {
     // MARK: - Helpers
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "yyyy.MM.dd"
-        return formatter.string(from: date)
+        return date.formatted(style: .yearMonthDayPoint)
     }
     
     private func formatDateTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "MM.dd HH:mm"
-        return formatter.string(from: date)
+        return date.formatted(style: .noYear)
     }
     
     private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
+        return date.formatted(style: .time24Hour)
     }
     
     private func getStatusText(_ status: PillStatus) -> String {
