@@ -93,7 +93,10 @@ final class DashboardViewController: UIViewController {
         extendedLayoutIncludesOpaqueBars = true
         edgesForExtendedLayout = [.top, .left, .right, .bottom]
         
-        // 화면 진입 시 현재 날짜 기준으로 isToday 재평가
+        // 설정 변경사항 반영
+        viewModel.refreshSettings()
+        
+        // 화면 진입 시 현재 날짜 기준으로 UI를 갱신
         viewModel.refreshForCurrentDate()
     }
     
