@@ -49,7 +49,7 @@ enum WidgetMessageType {
         case .yesterdayMissed:
             return "오늘은 두알"
         case .oneMorePill:
-            return "하나더"
+            return "하나 더"
         case .success:
             return "오늘 복용 완료."
         }

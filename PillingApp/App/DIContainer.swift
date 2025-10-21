@@ -74,9 +74,15 @@ final class DIContainer {
         )
     }
     
+    // DIContainer.swift에 추가
+    func makePillStatusEvaluator() -> PillStatusEvaluator {
+        return PillStatusEvaluator(timeProvider: timeProvider)
+    }
+    
     func makeCalculateDashboardMessageUseCase() -> CalculateDashboardMessageUseCaseProtocol {
         return CalculateDashboardMessageUseCase(
-            timeProvider: timeProvider  // 추가
+            statusEvaluator: makePillStatusEvaluator(),
+            timeProvider: timeProvider
         )
     }
     

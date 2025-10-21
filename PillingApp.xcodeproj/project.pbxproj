@@ -75,11 +75,14 @@
 		2124F7942EA25622001578C9 /* Exceptions for "PillingApp" folder in "DaillyWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				App/Localizable.xcstrings,
 				Common/Constants/AppColor.swift,
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillCycleEntity+Extension.swift",
 				"Common/Extension/PillRecordEntity+Extension..swift",
 				Domain/Entity/CoreDataError.swift,
+				Domain/Entity/DashboardMessage.swift,
+				Domain/Entity/DayItem.swift,
 				Domain/Entity/NotificationError.swift,
 				Domain/Entity/PillCycle.swift,
 				Domain/Entity/PillCycleError.swift,
@@ -87,7 +90,10 @@
 				Domain/Entity/PillRecord.swift,
 				Domain/Entity/PillStatus.swift,
 				Domain/Entity/SetupError.swift,
+				Domain/Protocol/PillStatusItem.swift,
+				Infra/PillStatusEvaluator.swift,
 				Infra/SystemTimeProvider.swift,
+				Presentation/View/DashboardUI.swift,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
 		};
@@ -256,6 +262,7 @@
 			knownRegions = (
 				Base,
 				ko,
+				en,
 			);
 			mainGroup = 218AFB112E996BF7008A77DB;
 			minimizedProjectReferenceProxies = 1;
@@ -542,6 +549,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -600,6 +608,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

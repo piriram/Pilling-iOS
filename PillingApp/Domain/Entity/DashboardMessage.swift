@@ -7,8 +7,6 @@
 
 import RxSwift
 
-// MARK: - Domain/Entities/DashboardMessage.swift
-
 struct DashboardMessage {
     let text: String
     let imageName: DashboardUI.CharacterImage
