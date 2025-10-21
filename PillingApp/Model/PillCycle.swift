@@ -14,7 +14,7 @@ struct PillCycle {
     let startDate: Date
     let activeDays: Int
     let breakDays: Int
-    let scheduledTime: String
+    var scheduledTime: String
     var records: [PillRecord]
     let createdAt: Date
     

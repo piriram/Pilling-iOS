@@ -18,6 +18,7 @@ final class DashboardViewModel {
     private let updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol
     private let calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
+    private let settingsRepository: UserSettingsRepositoryProtocol
     
     private let disposeBag = DisposeBag()
     private let calendar = Calendar.current
@@ -38,19 +39,39 @@ final class DashboardViewModel {
         takePillUseCase: TakePillUseCaseProtocol,
         updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol,
         calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,
-        userDefaultsManager: UserDefaultsManagerProtocol
+        userDefaultsManager: UserDefaultsManagerProtocol,
+        settingsRepository: UserSettingsRepositoryProtocol
     ) {
         self.fetchDashboardDataUseCase = fetchDashboardDataUseCase
         self.takePillUseCase = takePillUseCase
         self.updatePillStatusUseCase = updatePillStatusUseCase
         self.calculateDashboardMessageUseCase = calculateDashboardMessageUseCase
         self.userDefaultsManager = userDefaultsManager
+        self.settingsRepository = settingsRepository
         
         loadPillInfo()
         loadDashboardData()
     }
     
     // MARK: - Private Methods
+    
+    private func reloadSettings() {
+        settingsRepository.fetchSettings()
+            .subscribe(onNext: { [weak self] settings in
+                guard let self = self else { return }
+                self.settings.accept(settings)
+                
+                // 현재 사이클의 scheduledTime도 업데이트
+                if var cycle = self.currentCycle.value {
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "HH:mm"
+                    cycle.scheduledTime = formatter.string(from: settings.scheduledTime)
+                    self.currentCycle.accept(cycle)
+                    self.updateItems()
+                }
+            })
+            .disposed(by: disposeBag)
+    }
     
     private func autoMarkPastScheduledAsMissed() {
         guard let cycle = currentCycle.value else { return }
@@ -173,6 +194,11 @@ final class DashboardViewModel {
     
     // MARK: - Public Methods (Inputs)
     
+    /// 설정 변경 후 UI 업데이트 (설정값만 다시 로드)
+    func refreshSettings() {
+        reloadSettings()
+    }
+    
     /// Dashboard 화면 진입 시 현재 날짜 기준으로 UI를 갱신
     func refreshForCurrentDate() {
         updateItems()
@@ -230,3 +256,4 @@ final class DashboardViewModel {
         .disposed(by: disposeBag)
     }
 }
+
