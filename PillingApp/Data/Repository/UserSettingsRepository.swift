@@ -8,8 +8,6 @@
 import Foundation
 import RxSwift
 
-// MARK: - Data/Repositories/UserDefaultsUserSettingsRepository.swift
-
 final class UserDefaultsUserSettingsRepository: UserSettingsRepositoryProtocol {
     private let userDefaults: UserDefaults
     
@@ -18,6 +16,19 @@ final class UserDefaultsUserSettingsRepository: UserSettingsRepositoryProtocol {
         static let notificationEnabled = "notificationEnabled"
         static let delayThresholdMinutes = "delayThresholdMinutes"
         static let notificationMessage = "notificationMessage"
+    }
+    
+    // 기본값을 Repository에서 직접 정의
+    private enum DefaultValues {
+        static let scheduledTime: Date = {
+            var components = DateComponents()
+            components.hour = 9
+            components.minute = 0
+            return Calendar.current.date(from: components) ?? Date()
+        }()
+        static let notificationEnabled = true
+        static let delayThresholdMinutes = 30
+        static let notificationMessage = "알약 복용 시간입니다"
     }
     
     init(userDefaults: UserDefaults = .standard) {
@@ -29,15 +40,15 @@ final class UserDefaultsUserSettingsRepository: UserSettingsRepositoryProtocol {
         if let timeInterval = userDefaults.object(forKey: Keys.scheduledTime) as? TimeInterval {
             scheduledTime = Date(timeIntervalSince1970: timeInterval)
         } else {
-            scheduledTime = UserSettings.default.scheduledTime
+            scheduledTime = DefaultValues.scheduledTime
         }
         
         let notificationEnabled = userDefaults.object(forKey: Keys.notificationEnabled) as? Bool
-            ?? UserSettings.default.notificationEnabled
+            ?? DefaultValues.notificationEnabled
         let delayThresholdMinutes = userDefaults.object(forKey: Keys.delayThresholdMinutes) as? Int
-            ?? UserSettings.default.delayThresholdMinutes
+            ?? DefaultValues.delayThresholdMinutes
         let notificationMessage = userDefaults.string(forKey: Keys.notificationMessage)
-            ?? UserSettings.default.notificationMessage
+            ?? DefaultValues.notificationMessage
         
         let settings = UserSettings(
             scheduledTime: scheduledTime,

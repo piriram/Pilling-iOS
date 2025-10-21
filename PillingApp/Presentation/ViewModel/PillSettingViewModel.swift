@@ -37,7 +37,7 @@ final class PillSettingViewModel {
     let output: Output
     
     private let userDefaultsManager: UserDefaultsManagerProtocol
-    
+    private let timeProvider: TimeProvider
     private let pillTypeButtonTappedSubject = PublishSubject<Void>()
     private let startDateButtonTappedSubject = PublishSubject<Void>()
     private let dateSelectedSubject = PublishSubject<Date>()
@@ -52,8 +52,9 @@ final class PillSettingViewModel {
     
     // MARK: - Initialization
     
-    init(userDefaultsManager: UserDefaultsManagerProtocol) {
+    init(userDefaultsManager: UserDefaultsManagerProtocol, timeProvider: TimeProvider = SystemTimeProvider()) {
         self.userDefaultsManager = userDefaultsManager
+        self.timeProvider = timeProvider
         
         // Input 초기화
         self.input = Input(
@@ -84,7 +85,26 @@ final class PillSettingViewModel {
         let selectedStartDateText = selectedStartDateRelay
             .map { date -> String? in
                 guard let date = date else { return nil }
-                return PillSettingViewModel.formatDateWithDayInfo(date: date)
+                // Use a local helper that relies only on timeProvider to avoid capturing self
+                let dateText = timeProvider.format(date, style: .monthDay)
+                let cal = timeProvider.calendar
+                let todayStart = timeProvider.startOfDay(for: timeProvider.now)
+                let selectedStart = timeProvider.startOfDay(for: date)
+                if selectedStart < todayStart {
+                    let days = {
+                        let cal = timeProvider.calendar
+                        let today = timeProvider.startOfDay(for: timeProvider.now)
+                        let start = timeProvider.startOfDay(for: date)
+                        let diff = cal.dateComponents([.day], from: start, to: today).day ?? 0
+                        return diff + 1
+                    }()
+                    return "\(dateText) (\(days)일째)"
+                } else if cal.isDate(selectedStart, inSameDayAs: todayStart) {
+                    return "\(dateText) (오늘)"
+                } else {
+                    let remain = cal.dateComponents([.day], from: todayStart, to: selectedStart).day ?? 0
+                    return "\(dateText) (\(remain)일 남음)"
+                }
             }
         
         // userDefaultsManager를 캡처하여 사용
@@ -147,26 +167,29 @@ final class PillSettingViewModel {
     
     // MARK: - Private Methods
     
-    private static func calculateDaysSinceStart(from startDate: Date) -> Int {
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.day], from: startDate, to: Date())
-        return (components.day ?? 0) + 1 // 1일차부터 시작
+    private func calculateDaysSinceStart(from startDate: Date) -> Int {
+        let cal = timeProvider.calendar
+        let today = timeProvider.startOfDay(for: timeProvider.now)
+        let start = timeProvider.startOfDay(for: startDate)
+        let days = cal.dateComponents([.day], from: start, to: today).day ?? 0
+        return days + 1 // 1일차부터
     }
-    
-    private static func formatDateWithDayInfo(date: Date) -> String {
-        let dateText = date.formatted(style: .monthDay)
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let selectedDay = calendar.startOfDay(for: date)
-        if selectedDay < today {
+
+    private func formatDateWithDayInfo(date: Date) -> String {
+        let dateText = timeProvider.format(date, style: .monthDay) // "M월 d일"
+        let cal = timeProvider.calendar
+
+        let todayStart = timeProvider.startOfDay(for: timeProvider.now)
+        let selectedStart = timeProvider.startOfDay(for: date)
+
+        if selectedStart < todayStart {
             let days = calculateDaysSinceStart(from: date)
             return "\(dateText) (\(days)일째)"
-        } else if selectedDay == today {
+        } else if cal.isDate(selectedStart, inSameDayAs: todayStart) {
             return "\(dateText) (오늘)"
         } else {
-            let components = calendar.dateComponents([.day], from: today, to: selectedDay)
-            let daysRemaining = components.day ?? 0
-            return "\(dateText) (\(daysRemaining)일 남음)"
+            let remain = cal.dateComponents([.day], from: todayStart, to: selectedStart).day ?? 0
+            return "\(dateText) (\(remain)일 남음)"
         }
     }
 }

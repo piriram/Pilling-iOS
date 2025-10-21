@@ -49,7 +49,7 @@ final class SharedCoreDataManager {
     
     // MARK: - Fetch Methods
     
-    func fetchCurrentCycle() -> PillCycle? {
+    func fetchCurrentCycle(timeProvider: TimeProvider = SystemTimeProvider()) -> PillCycle? {
         let fetchRequest: NSFetchRequest<PillCycleEntity> = PillCycleEntity.fetchRequest()
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "createdAt", ascending: false),
@@ -62,22 +62,20 @@ final class SharedCoreDataManager {
             
             guard !cycles.isEmpty else { return nil }
             
-            let now = Date()
-            let calendar = Calendar.current
+            let now = timeProvider.now
+            let cal = timeProvider.calendar
             
-            // 진행 중인 사이클 찾기
-            if let ongoingCycle = cycles.first(where: { cycle in
+            if let ongoing = cycles.first(where: { cycle in
                 let start = cycle.startDate
-                let totalDays = cycle.activeDays + cycle.breakDays
-                guard let end = calendar.date(byAdding: .day, value: totalDays - 1, to: start) else {
-                    return false
-                }
-                return (start...end).contains(now)
+                let total = cycle.activeDays + cycle.breakDays
+                let startOfStart = timeProvider.startOfDay(for: start)
+                guard let endStart = cal.date(byAdding: .day, value: total - 1, to: startOfStart) else { return false }
+                // 필요하면 하루 끝(23:59:59)까지 포함
+                let end = cal.date(byAdding: .second, value: 86399, to: endStart) ?? endStart
+                return (startOfStart...end).contains(now)
             }) {
-                return ongoingCycle
+                return ongoing
             }
-            
-            // 진행 중인 사이클이 없으면 가장 최신 사이클 반환
             return cycles.first
         } catch {
             print("Failed to fetch current cycle: \(error)")

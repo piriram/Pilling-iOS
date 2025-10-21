@@ -183,9 +183,3 @@ final class TimeSettingViewModel {
     }
 }
 
-// MARK: - SetupError
-
-enum SetupError: Error {
-    case missingPillInfo
-}
-

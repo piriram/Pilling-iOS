@@ -96,8 +96,14 @@ final class DIContainer {
             updatePillStatusUseCase: makeUpdatePillStatusUseCase(),
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase(),
             userDefaultsManager: makeUserDefaultsManager(),
-            settingsRepository: makeUserSettingsRepository()  // 추가
+            settingsRepository: makeUserSettingsRepository(),
+            timeProvider: timeProvider
         )
+    }
+    
+    func makeDashboardViewController() -> DashboardViewController {
+        let vm = makeDashboardViewModel()
+        return DashboardViewController(viewModel: vm, timeProvider: timeProvider)
     }
     
     func makePillSettingViewModel() -> PillSettingViewModel {

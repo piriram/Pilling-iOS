@@ -4,7 +4,6 @@
 //
 //  Created by 잠만보김쥬디 on 10/13/25.
 //
-
 import Foundation
 import RxSwift
 
@@ -43,32 +42,42 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
                 return .error(PillCycleError.deallocated)
             }
             
-            let cycle = self.createCycle(
-                pillInfo: pillInfo,
-                startDate: startDate,
-                scheduledTime: scheduledTime
-            )
-            
-            return self.cycleRepository.saveCycle(cycle)
-                .map { cycle }
+            do {
+                let cycle = try self.createCycle(
+                    pillInfo: pillInfo,
+                    startDate: startDate,
+                    scheduledTime: scheduledTime
+                )
+                return self.cycleRepository
+                    .saveCycle(cycle)
+                    .map { cycle }
+            } catch {
+                return .error(error)
+            }
         }
     }
     
-    // MARK: - Private Methods
+    // MARK: - Private
     
     private func createCycle(
         pillInfo: PillInfo,
         startDate: Date,
         scheduledTime: String
-    ) -> PillCycle {
+    ) throws -> PillCycle {
         let now = timeProvider.now
-        let today = timeProvider.startOfDay(for: now)
+        let todayStart = timeProvider.startOfDay(for: now)
+        let cal = timeProvider.calendar
         
         let activeDays = pillInfo.takingDays
         let breakDays = pillInfo.breakDays
         let totalDays = activeDays + breakDays
         
+        guard totalDays > 0 else {
+            throw PillCycleError.invalidDateRange
+        }
+        
         var records: [PillRecord] = []
+        records.reserveCapacity(totalDays)
         
         for day in 1...totalDays {
             let dayOffset = day - 1
@@ -76,21 +85,28 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
                 continue
             }
             
-            let scheduledDateTime = combineDateAndTime(
-                date: dayDate,
-                timeString: scheduledTime
-            )
+            // 날짜+시각 결합 (HH:mm 포맷)
+            guard let scheduledDateTime = Date.combine(
+                dayDate,
+                with: scheduledTime,
+                using: .time24Hour,
+                calendar: cal,
+                timeZone: timeProvider.timeZone
+            ) else {
+                throw PillCycleError.invalidTimeFormat
+            }
             
-            let dayDateStartOfDay = timeProvider.startOfDay(for: dayDate)
+            let dayStart = timeProvider.startOfDay(for: dayDate)
             
             let status: PillStatus
             if day > activeDays {
                 status = .rest
-            } else if dayDateStartOfDay > today {
+            } else if dayStart > todayStart {
                 status = .scheduled
-            } else if dayDateStartOfDay == today {
+            } else if cal.isDate(dayStart, inSameDayAs: todayStart) {
                 status = .todayNotTaken
             } else {
+                // 과거 일자: 기본값을 복용 완료로 표기 (도메인 정책에 맞게 조정 가능)
                 status = .taken
             }
             
@@ -109,60 +125,15 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
             records.append(record)
         }
         
-        // timeZoneIdentifier 제거 (기존 PillCycle 구조 유지)
         return PillCycle(
             id: UUID(),
-            cycleNumber: 1,
+            cycleNumber: 1,                 // 필요 시 외부에서 주입/증분
             startDate: startDate,
             activeDays: activeDays,
             breakDays: breakDays,
-            scheduledTime: scheduledTime,
+            scheduledTime: scheduledTime,   // 문자열 그대로 보존 (표시/편집용)
             records: records,
             createdAt: now
         )
-    }
-    
-    private func combineDateAndTime(date: Date, timeString: String) -> Date {
-        let calendar = timeProvider.calendar
-        let dateComponents = calendar.dateComponents([.year, .month, .day], from: date)
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        timeFormatter.timeZone = timeProvider.timeZone
-        
-        guard let timeDate = timeFormatter.date(from: timeString) else {
-            return date
-        }
-        
-        let timeComponents = calendar.dateComponents([.hour, .minute], from: timeDate)
-        
-        var combined = DateComponents()
-        combined.year = dateComponents.year
-        combined.month = dateComponents.month
-        combined.day = dateComponents.day
-        combined.hour = timeComponents.hour
-        combined.minute = timeComponents.minute
-        combined.timeZone = timeProvider.timeZone
-        
-        return calendar.date(from: combined) ?? date
-    }
-}
-
-// MARK: - PillCycleError
-
-enum PillCycleError: Error {
-    case deallocated
-    case invalidTimeFormat
-    case invalidDateRange
-    
-    var localizedDescription: String {
-        switch self {
-        case .deallocated:
-            return "UseCase가 해제되었습니다"
-        case .invalidTimeFormat:
-            return "시간 형식이 올바르지 않습니다"
-        case .invalidDateRange:
-            return "날짜 범위가 유효하지 않습니다"
-        }
     }
 }

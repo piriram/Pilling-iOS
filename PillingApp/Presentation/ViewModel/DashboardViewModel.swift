@@ -19,13 +19,13 @@ final class DashboardViewModel {
     private let calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let settingsRepository: UserSettingsRepositoryProtocol
+    private let timeProvider: TimeProvider
     
     private let disposeBag = DisposeBag()
-    private let calendar = Calendar.current
     
     // MARK: - Outputs
     
-    let settings = BehaviorRelay<UserSettings>(value: .default)
+    let settings: BehaviorRelay<UserSettings>
     let currentCycle = BehaviorRelay<PillCycle?>(value: nil)
     let items = BehaviorRelay<[DayItem]>(value: [])
     let dashboardMessage = BehaviorRelay<DashboardMessage?>(value: nil)
@@ -40,7 +40,8 @@ final class DashboardViewModel {
         updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol,
         calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
-        settingsRepository: UserSettingsRepositoryProtocol
+        settingsRepository: UserSettingsRepositoryProtocol,
+        timeProvider: TimeProvider
     ) {
         self.fetchDashboardDataUseCase = fetchDashboardDataUseCase
         self.takePillUseCase = takePillUseCase
@@ -48,6 +49,9 @@ final class DashboardViewModel {
         self.calculateDashboardMessageUseCase = calculateDashboardMessageUseCase
         self.userDefaultsManager = userDefaultsManager
         self.settingsRepository = settingsRepository
+        self.timeProvider = timeProvider
+        
+        self.settings = BehaviorRelay<UserSettings>(value: UserSettings.makeDefault(using: timeProvider))
         
         loadPillInfo()
         loadDashboardData()
@@ -57,8 +61,9 @@ final class DashboardViewModel {
     
     private func autoMarkPastScheduledAsMissed() {
         guard let cycle = currentCycle.value else { return }
-        let now = Date()
-        let startOfToday = calendar.startOfDay(for: now)
+        let now = timeProvider.now
+        let startOfToday = timeProvider.startOfDay(for: now)
+        let calendar = timeProvider.calendar
         
         for (index, record) in cycle.records.enumerated() {
             if record.scheduledDateTime < startOfToday {
@@ -107,11 +112,10 @@ final class DashboardViewModel {
                 guard let self = self else { return }
                 self.settings.accept(settings)
                 
-                // 현재 사이클의 scheduledTime도 업데이트
+                // 현재 사이클의 scheduledTime도 업데이트 (포맷은 TimeProvider를 고려)
                 if var cycle = self.currentCycle.value {
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "HH:mm"
-                    cycle.scheduledTime = formatter.string(from: settings.scheduledTime)
+                    
+                    cycle.scheduledTime = timeProvider.format(settings.scheduledTime, style: .time24Hour)
                     self.currentCycle.accept(cycle)
                     self.updateItems()
                 }
@@ -122,9 +126,10 @@ final class DashboardViewModel {
     private func updateItems() {
         guard let cycle = currentCycle.value else { return }
         
+        let calendar = timeProvider.calendar
         let maxItems = 28
         let visibleRecords = Array(cycle.records.prefix(maxItems))
-        let now = Date()
+        let now = timeProvider.now
         
         // 현재 설정된 복용 시간 가져오기
         let currentScheduledTime = settings.value.scheduledTime
@@ -186,7 +191,7 @@ final class DashboardViewModel {
         from scheduledTime: Date,
         calendar: Calendar
     ) -> Date {
-        let now = Date()
+        let now = timeProvider.now
         let todayComponents = calendar.dateComponents([.year, .month, .day], from: now)
         let timeComponents = calendar.dateComponents([.hour, .minute], from: scheduledTime)
         
@@ -196,6 +201,7 @@ final class DashboardViewModel {
         combined.day = todayComponents.day
         combined.hour = timeComponents.hour
         combined.minute = timeComponents.minute
+        combined.timeZone = timeProvider.timeZone
         
         return calendar.date(from: combined) ?? now
     }
@@ -236,7 +242,8 @@ final class DashboardViewModel {
             return
         }
         
-        let now = Date()
+        let calendar = timeProvider.calendar
+        let now = timeProvider.now
         
         guard let todayRecord = cycle.records.first(where: {
             calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
@@ -360,3 +367,4 @@ final class DashboardViewModel {
         .disposed(by: disposeBag)
     }
 }
+

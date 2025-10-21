@@ -15,6 +15,7 @@ import SnapKit
 final class DashboardViewController: UIViewController {
     
     private let viewModel: DashboardViewModel
+    private let timeProvider: TimeProvider
     private let disposeBag = DisposeBag()
     
     // 히스토리 버튼 숨기기용
@@ -61,8 +62,9 @@ final class DashboardViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(viewModel: DashboardViewModel) {
+    init(viewModel: DashboardViewModel, timeProvider: TimeProvider) {
         self.viewModel = viewModel
+        self.timeProvider = timeProvider
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -471,8 +473,8 @@ final class DashboardViewController: UIViewController {
     // MARK: - UI Updates
     
     private func updateCycleUI(cycle: PillCycle) {
-        let calendar = Calendar.current
-        let now = Date()
+        let calendar = timeProvider.calendar
+        let now = timeProvider.now
         
         let daysSinceStart = calendar.dateComponents([.day], from: cycle.startDate, to: now).day ?? 0
         let currentDay = daysSinceStart + 1
@@ -518,8 +520,8 @@ final class DashboardViewController: UIViewController {
     
     private func updateBackgroundForToday() {
         guard let cycle = viewModel.currentCycle.value else { return }
-        let calendar = Calendar.current
-        let now = Date()
+        let calendar = timeProvider.calendar
+        let now = timeProvider.now
         
         // Find today's record
         guard let todayRecord = cycle.records.first(where: { calendar.isDate($0.scheduledDateTime, inSameDayAs: now) }) else {
@@ -529,7 +531,7 @@ final class DashboardViewController: UIViewController {
         
         // Helper: calculate consecutive missed days before today (excluding rest)
         func consecutiveMissedDaysBeforeToday() -> Int {
-            let todayStart = calendar.startOfDay(for: now)
+            let todayStart = timeProvider.startOfDay(for: now)
             var count = 0
             // Iterate records in reverse chronological order
             for record in cycle.records.reversed() {
@@ -564,8 +566,8 @@ final class DashboardViewController: UIViewController {
     private func updateTakePillButton(canTake: Bool) {
         guard let cycle = viewModel.currentCycle.value else { return }
         
-        let calendar = Calendar.current
-        let now = Date()
+        let calendar = timeProvider.calendar
+        let now = timeProvider.now
         
         guard let todayRecord = cycle.records.first(where: {
             calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
@@ -593,7 +595,7 @@ final class DashboardViewController: UIViewController {
     }
     
     private func updateWeekdayStart(from startDate: Date) {
-        let calendar = Calendar.current
+        let calendar = timeProvider.calendar
         let weekday = calendar.component(.weekday, from: startDate)
         
         let baseWeekdays = ["월", "화", "수", "목", "금", "토", "일"]
@@ -637,15 +639,14 @@ final class DashboardViewController: UIViewController {
     // MARK: - User Interactions
     
     private func handleCellSelection(at index: Int, item: DayItem) {
+        let isToday = timeProvider.isDate(item.date, inSameDayAs: timeProvider.now)
+        
         if case .scheduled = item.status {
             return
         }
         if case .rest = item.status {
             return
         }
-        
-        let calendar = Calendar.current
-        let isToday = calendar.isDate(item.date, inSameDayAs: Date())
         
         if !isToday || item.status.isTaken {
             presentCalendarSheet(for: index, item: item)
@@ -655,7 +656,7 @@ final class DashboardViewController: UIViewController {
     private func presentCalendarSheet(for index: Int, item: DayItem) {
         guard let cycle = viewModel.currentCycle.value else { return }
         
-        let calendar = Calendar.current
+        let calendar = timeProvider.calendar
         let daysSinceStart = max(0, calendar.dateComponents([.day], from: cycle.startDate, to: item.date).day ?? 0)
         let currentDay = min(daysSinceStart + 1, cycle.totalDays)
         let dayText = "\(currentDay)일차/\(cycle.totalDays)"
@@ -715,9 +716,9 @@ final class DashboardViewController: UIViewController {
         
         let dummyItem = DayItem(
             cycleDay: 1,
-            date: Date(),
+            date: timeProvider.now,
             status: status,
-            scheduledDateTime: Date()
+            scheduledDateTime: timeProvider.now
         )
         calendarCell.configure(with: dummyItem)
         

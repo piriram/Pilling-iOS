@@ -82,9 +82,11 @@
 				Domain/Entity/CoreDataError.swift,
 				Domain/Entity/NotificationError.swift,
 				Domain/Entity/PillCycle.swift,
+				Domain/Entity/PillCycleError.swift,
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillRecord.swift,
 				Domain/Entity/PillStatus.swift,
+				Domain/Entity/SetupError.swift,
 				Infra/SystemTimeProvider.swift,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
