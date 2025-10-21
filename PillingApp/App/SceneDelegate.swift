@@ -4,7 +4,11 @@
 //
 //  Created by 잠만보김쥬디 on 10/11/25.
 //
-
+// TODO:
+//// 여행 시 안내 문구 추가
+//"현재 설정: 오전 9시 (한국 시간 기준)
+//미국에서는 전날 오후 4시에 알림이 울립니다.
+//24시간 간격 유지를 위해 이 시간에 복용해주세요."
 import UIKit
 import IQKeyboardManagerSwift
 import RxSwift

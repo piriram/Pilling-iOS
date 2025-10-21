@@ -100,10 +100,7 @@ final class TimeSettingViewModel {
             return .error(SetupError.missingPillInfo)
         }
         
-        // 2. 시간을 "HH:mm" 형식 문자열로 변환
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        let scheduledTimeString = timeFormatter.string(from: selectedTime.value)
+        let scheduledTimeString = selectedTime.value.formatted(style: .time24Hour)
         
         // 3. PillCycle 생성 및 CoreData 저장
         return createPillCycleUseCase.execute(
@@ -133,7 +130,7 @@ final class TimeSettingViewModel {
                 return self.notificationManager.scheduleDailyNotification(
                     at: self.selectedTime.value,
                     isEnabled: self.isAlarmEnabled.value,
-                    message: UserSettings.default.notificationMessage
+                    message: UserSettings.defaultNotificationMessage
                 )
             }
             .flatMap { [weak self] _ -> Observable<Void> in

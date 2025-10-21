@@ -63,7 +63,6 @@ final class DashboardViewModel {
         guard let cycle = currentCycle.value else { return }
         let now = timeProvider.now
         let startOfToday = timeProvider.startOfDay(for: now)
-        let calendar = timeProvider.calendar
         
         for (index, record) in cycle.records.enumerated() {
             if record.scheduledDateTime < startOfToday {

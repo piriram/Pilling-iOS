@@ -129,7 +129,7 @@ final class DIContainer {
             settingsRepository: makeUserSettingsRepository(),
             notificationManager: makeNotificationManager(),
             pillCycleRepository: makePillCycleRepository(),
-            userDefaultsManager: makeUserDefaultsManager()
+            userDefaultsManager: makeUserDefaultsManager(), timeProvider: timeProvider
         )
     }
     

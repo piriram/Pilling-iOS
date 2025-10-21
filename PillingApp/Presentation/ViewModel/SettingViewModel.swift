@@ -22,12 +22,12 @@ final class SettingViewModel {
         let newPillCycleTapped: Observable<Void>
         
         init(
-        viewWillAppear: Observable<Void>,
-        timeSettingTapped: Observable<Void>,
-        messageSettingTapped: Observable<Void>,
-        alarmToggleChanged: Observable<Bool>? = nil,
-        healthToggleChanged: Observable<Bool>? = nil,
-        newPillCycleTapped: Observable<Void>
+            viewWillAppear: Observable<Void>,
+            timeSettingTapped: Observable<Void>,
+            messageSettingTapped: Observable<Void>,
+            alarmToggleChanged: Observable<Bool>? = nil,
+            healthToggleChanged: Observable<Bool>? = nil,
+            newPillCycleTapped: Observable<Void>
         ) {
             self.viewWillAppear = viewWillAppear
             self.timeSettingTapped = timeSettingTapped
@@ -54,9 +54,10 @@ final class SettingViewModel {
     private let notificationManager: NotificationManagerProtocol
     private let pillCycleRepository: PillCycleRepositoryProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
+    private let timeProvider: TimeProvider
     private let disposeBag = DisposeBag()
     
-    private let currentSettingsRelay = BehaviorRelay<UserSettings>(value: .default)
+    private let currentSettingsRelay: BehaviorRelay<UserSettings>
     private let navigateToPillSettingSubject = PublishSubject<Void>()
     
     // MARK: - Initialization
@@ -65,12 +66,15 @@ final class SettingViewModel {
         settingsRepository: UserSettingsRepositoryProtocol,
         notificationManager: NotificationManagerProtocol,
         pillCycleRepository: PillCycleRepositoryProtocol,
-        userDefaultsManager: UserDefaultsManagerProtocol
+        userDefaultsManager: UserDefaultsManagerProtocol,
+        timeProvider: TimeProvider
     ) {
         self.settingsRepository = settingsRepository
         self.notificationManager = notificationManager
         self.pillCycleRepository = pillCycleRepository
         self.userDefaultsManager = userDefaultsManager
+        self.timeProvider = timeProvider
+        self.currentSettingsRelay = BehaviorRelay<UserSettings>(value: UserSettings.makeDefault(using: timeProvider))
     }
     
     // MARK: - Transform
@@ -139,7 +143,7 @@ final class SettingViewModel {
             .asDriver(onErrorJustReturn: ())
         
         let currentSettings = currentSettingsRelay
-            .asDriver(onErrorJustReturn: .default)
+            .asDriver(onErrorJustReturn: UserSettings.makeDefault(using: timeProvider))
         
         let showError = errorTracker
             .asDriver(onErrorJustReturn: "알 수 없는 오류가 발생했습니다.")
@@ -309,3 +313,4 @@ final class SettingViewModel {
         return "오류가 발생했습니다.\n다시 시도해주세요."
     }
 }
+
