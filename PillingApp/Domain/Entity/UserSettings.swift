@@ -7,7 +7,12 @@
 
 import UIKit
 import RxSwift
+// MARK: - Domain/RepositoryProtocols/UserSettingsRepositoryProtocol.swift
 
+protocol UserSettingsRepositoryProtocol {
+    func fetchSettings() -> Observable<UserSettings>
+    func saveSettings(_ settings: UserSettings) -> Observable<Void>
+}
 // MARK: - Domain/Entities/UserSettings.swift
 
 struct UserSettings {
@@ -44,10 +49,5 @@ struct UserSettings {
         )
     }
 }
-// MARK: - Domain/RepositoryProtocols/UserSettingsRepositoryProtocol.swift
 
-protocol UserSettingsRepositoryProtocol {
-    func fetchSettings() -> Observable<UserSettings>
-    func saveSettings(_ settings: UserSettings) -> Observable<Void>
-}
 

@@ -1,0 +1,94 @@
+# ============================
+# Xcode
+# ============================
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdata/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+!default.xcworkspace/contents.xcworkspacedata
+
+# ============================
+# Swift Package Manager
+# ============================
+Packages/
+.swiftpm/
+.build/
+
+# ============================
+# CocoaPods
+# ============================
+Pods/
+Podfile.lock
+# (만약 팀 단위 프로젝트라면 Podfile.lock 은 포함해도 됨)
+
+# ============================
+# Carthage
+# ============================
+Carthage/Build/
+
+# ============================
+# Fastlane
+# ============================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# ============================
+# SwiftLint / SwiftFormat
+# ============================
+.swiftlint.yml
+.swiftformat
+
+# ============================
+# User-specific files
+# ============================
+*.swp
+*.swo
+*.DS_Store
+*.idea/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcarchive
+
+# ============================
+# Playgrounds
+# ============================
+timeline.xctimeline
+playground.xcworkspace
+
+# ============================
+# Firebase / Secrets
+# ============================
+GoogleService-Info.plist
+*.pem
+*.p12
+*.key
+*.mobileprovision
+*.xcconfig
+.env
+
+# ============================
+# Temporary files
+# ============================
+*.tmp
+*.log
+*.bak
+*.orig
+
+# ============================
+# App Specific (Optional)
+# ============================
+# 만약 프로젝트 내부 테스트 DB나 캐시 디렉토리가 있다면
+# Example:
+# PillingApp/Cache/
+# PillingApp/DebugData/
+
