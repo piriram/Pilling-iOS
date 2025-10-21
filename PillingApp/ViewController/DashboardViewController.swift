@@ -315,7 +315,7 @@ final class DashboardViewController: UIViewController {
         }
         
         messageCardView.snp.makeConstraints { make in
-            make.top.equalTo(characterImageView.snp.bottom).offset(24)
+            make.top.equalTo(characterImageView.snp.bottom).offset(28)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(52)
         }
@@ -552,8 +552,9 @@ final class DashboardViewController: UIViewController {
         
         let missedStreak = consecutiveMissedDaysBeforeToday()
         
-        // Apply new condition: today is not taken (todayNotTaken) AND missed for 2+ consecutive previous days
-        if (todayRecord.status == .todayNotTaken && missedStreak >= 2) || todayRecord.status == .todayDelayedCritical || todayRecord.status == .todayTakenDelayed{
+        print("----todayRecord:\(todayRecord.status)---\(missedStreak)")
+        if (todayRecord.status == .todayNotTaken && missedStreak >= 2) || ((todayRecord.status == .todayDelayedCritical || todayRecord.status == .todayNotTaken || todayRecord.status == .scheduled) && missedStreak >= 1){
+            print("restBG")
             backgroundImageView.image = UIImage(named: "restBackground")
         } else {
             backgroundImageView.image = UIImage(named: "background")
