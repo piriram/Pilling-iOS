@@ -11,6 +11,8 @@
 		2124F7652EA23E3A001578C9 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2124F7642EA23E3A001578C9 /* SwiftUI.framework */; };
 		2124F7742EA23E3C001578C9 /* DaillyWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2124F7602EA23E3A001578C9 /* DaillyWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2124F79D2EA258F7001578C9 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2124F79C2EA258F7001578C9 /* RxSwift */; };
+		2124FC3B2EA77F14001578C9 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 2124FC3A2EA77F14001578C9 /* .gitignore */; };
+		2124FC3C2EA77F14001578C9 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 2124FC3A2EA77F14001578C9 /* .gitignore */; };
 		218AFB382E996D23008A77DB /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 218AFB372E996D23008A77DB /* Kingfisher */; };
 		218AFB3B2E996D38008A77DB /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 218AFB3A2E996D38008A77DB /* SnapKit */; };
 		218AFB3E2E996D86008A77DB /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 218AFB3D2E996D86008A77DB /* RxCocoa */; };
@@ -47,6 +49,7 @@
 		2124F7622EA23E3A001578C9 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		2124F7642EA23E3A001578C9 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		2124F79E2EA25B84001578C9 /* DaillyWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DaillyWidgetExtension.entitlements; sourceTree = "<group>"; };
+		2124FC3A2EA77F14001578C9 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		218AFB1A2E996BF7008A77DB /* PillingApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PillingApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -54,40 +57,41 @@
 		2124F7782EA23E3C001578C9 /* Exceptions for "DaillyWidget" folder in "DaillyWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				App/Info.plist,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
 		};
 		2124F7802EA25439001578C9 /* Exceptions for "DaillyWidget" folder in "PillingApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				PillingDailyWidgetEntry.swift,
-				PillingDailyWidgetProvider.swift,
-				SharedCoreDataManager.swift,
-				WidgetCalculateMessageUseCase.swift,
-				WidgetModel.swift,
+				Data/PillingDailyWidgetProvider.swift,
+				Data/SharedCoreDataManager.swift,
+				Domain/WidgetCalculateMessageUseCase.swift,
+				Domain/WidgetModel.swift,
+				Presentation/PillingDailyWidgetEntry.swift,
 			);
 			target = 218AFB192E996BF7008A77DB /* PillingApp */;
 		};
 		2124F7942EA25622001578C9 /* Exceptions for "PillingApp" folder in "DaillyWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Extension/AppColor.swift,
-				"Extension/Date+.swift",
-				"Extension/PillCycleEntity+Extension.swift",
-				"Extension/PillRecordEntity+Extension..swift",
-				Extension/TimeProvider.swift,
-				Model/PillCycle.swift,
-				Model/PillingApp.xcdatamodeld,
-				Model/PillRecord.swift,
-				Model/PillStatus.swift,
+				Common/Constants/AppColor.swift,
+				"Common/Extension/Date+.swift",
+				"Common/Extension/PillCycleEntity+Extension.swift",
+				"Common/Extension/PillRecordEntity+Extension..swift",
+				Domain/Entity/CoreDataError.swift,
+				Domain/Entity/PillCycle.swift,
+				Domain/Entity/PillingApp.xcdatamodeld,
+				Domain/Entity/PillRecord.swift,
+				Domain/Entity/PillStatus.swift,
+				Infra/SystemTimeProvider.swift,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
 		};
 		218AFB2C2E996BF9008A77DB /* Exceptions for "PillingApp" folder in "PillingApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				App/Info.plist,
 			);
 			target = 218AFB192E996BF7008A77DB /* PillingApp */;
 		};
@@ -152,6 +156,7 @@
 		218AFB112E996BF7008A77DB = {
 			isa = PBXGroup;
 			children = (
+				2124FC3A2EA77F14001578C9 /* .gitignore */,
 				2124F79E2EA25B84001578C9 /* DaillyWidgetExtension.entitlements */,
 				218AFB1C2E996BF7008A77DB /* PillingApp */,
 				2124F7662EA23E3A001578C9 /* DaillyWidget */,
@@ -273,6 +278,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2124FC3B2EA77F14001578C9 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +286,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2124FC3C2EA77F14001578C9 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,7 +329,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 557346W8SC;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = DaillyWidget/Info.plist;
+				INFOPLIST_FILE = DaillyWidget/App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DaillyWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -359,7 +366,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 557346W8SC;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = DaillyWidget/Info.plist;
+				INFOPLIST_FILE = DaillyWidget/App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DaillyWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -397,7 +404,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 557346W8SC;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = PillingApp/Info.plist;
+				INFOPLIST_FILE = PillingApp/App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "필링";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
@@ -440,7 +447,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 557346W8SC;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = PillingApp/Info.plist;
+				INFOPLIST_FILE = PillingApp/App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "필링";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.medical";
