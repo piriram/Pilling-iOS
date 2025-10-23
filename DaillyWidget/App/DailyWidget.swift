@@ -16,8 +16,9 @@ struct DaillyWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: PillingDailyWidgetProvider()) { entry in
             PillingDailyWidgetView(entry: entry)
+                .environment(\.colorScheme, .light)
         }
-        .configurationDisplayName("피임약 복용 위젯")
+        .configurationDisplayName("약 복용 위젯")
         .description("오늘의 복용 상태를 확인하세요")
         .supportedFamilies([.systemSmall])
     }
