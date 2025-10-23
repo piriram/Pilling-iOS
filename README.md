@@ -2,9 +2,6 @@
 
 > 실제 패키지 구조를 차용한 **캘린더 기반 UI**와 **지능형 알림**으로 28일 사이클 복용을 쉽고 정확하게 관리합니다.
 
-### [App Store Link](https://apps.apple.com/us/app/pilling/id6753967952) 
-### [필링 ver1 github Link](https://github.com/DeveloperAcademy-POSTECH/2024-MC2-M3-Pilltastic)
-
 
 ## 프로젝트 개요
 
@@ -89,5 +86,9 @@ View → ViewModel(Input/Output) → UseCase → Repository → (Core Data / Use
 * **Notifications**: UNUserNotificationCenter, WidgetKit
 * **Testing**: XCTest
 * **Etc.**: IQKeyboardManager
+
+
+### [App Store Link](https://apps.apple.com/us/app/pilling/id6753967952) 
+### [필링 ver1 github Link](https://github.com/DeveloperAcademy-POSTECH/2024-MC2-M3-Pilltastic)
 
 
