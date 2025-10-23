@@ -143,17 +143,6 @@ final class DatePickerBottomSheetViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        // DatePicker tap gesture - 날짜 셀 탭 감지
-        let datePickerTapGesture = UITapGestureRecognizer()
-        datePickerTapGesture.cancelsTouchesInView = false
-        datePicker.addGestureRecognizer(datePickerTapGesture)
-        
-        datePickerTapGesture.rx.event
-            .subscribe(onNext: { [weak self] _ in
-                self?.handleDateSelection()
-            })
-            .disposed(by: disposeBag)
-        
         // Container pan gesture
         let panGesture = UIPanGestureRecognizer()
         containerView.addGestureRecognizer(panGesture)
@@ -256,3 +245,4 @@ final class DatePickerBottomSheetViewController: UIViewController {
         }
     }
 }
+
