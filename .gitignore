@@ -103,3 +103,5 @@ iOSInjectionProject/
 # Example:
 # PillingApp/Cache/
 # PillingApp/DebugData/
+PillingApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+PillingApp.xcodeproj/xcuserdata/ram.xcuserdatad/xcschemes/xcschememanagement.plist
