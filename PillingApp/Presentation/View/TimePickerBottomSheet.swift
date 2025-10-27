@@ -50,7 +50,8 @@ final class TimePickerBottomSheet: UIViewController {
         let picker = UIDatePicker()
         picker.datePickerMode = .time
         picker.preferredDatePickerStyle = .wheels
-        picker.locale = Locale(identifier: "ko_KR")
+        picker.locale = Locale.current
+        picker.timeZone = TimeZone.current
         return picker
     }()
     
