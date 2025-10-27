@@ -167,7 +167,8 @@ final class TimeSettingViewController: UIViewController {
             .subscribe(onNext: { [weak self] date in
                 self?.viewModel.updateTime(date)
                 let formatter = DateFormatter()
-                formatter.locale = Locale(identifier: Locale.preferredLanguages.first ?? "ko_KR")
+                formatter.locale = Locale.current
+                formatter.timeZone = TimeZone.current
                 formatter.dateStyle = .none
                 formatter.timeStyle = .short
                 let timeString = formatter.string(from: date)

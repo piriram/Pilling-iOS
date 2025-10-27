@@ -54,11 +54,12 @@ final class DatePickerBottomSheetViewController: UIViewController {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .inline
-        picker.locale = Locale(identifier: "ko_KR")
-        picker.calendar = Calendar(identifier: .gregorian)
+        picker.locale = Locale.current // 시스템 로케일 사용
+        picker.calendar = Calendar.current // 시스템 캘린더 사용
+        picker.timeZone = TimeZone.current // 시스템 타임존 사용
         picker.tintColor = AppColor.pillGreen200
         
-        // 현재 날짜 기준 ±28일 범위 설정
+        // 현재 날짜 기준 ±28일 범위 설정 (사용자의 로컬 타임존 기준)
         let currentDate = Date()
         let calendar = Calendar.current
         picker.minimumDate = calendar.date(byAdding: .day, value: -28, to: currentDate)
