@@ -179,7 +179,7 @@ final class PillCycleDetailViewController: UIViewController {
     }
     
     private func formatDateTime(_ date: Date) -> String {
-        return date.formatted(style: .noYear)
+        return date.formatted(style: .dateTimeShort)
     }
     
     private func formatTime(_ date: Date) -> String {

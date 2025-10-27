@@ -26,7 +26,7 @@ final class PillSettingViewController: UIViewController {
         imageView.contentMode = .scaleAspectFit
         imageView.image = UIImage(named: "PillSetting")
         return imageView
-    }()
+    }() 
     
     private let mainTitleLabel: UILabel = {
         let label = UILabel()
