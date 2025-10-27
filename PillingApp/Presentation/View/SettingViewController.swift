@@ -336,7 +336,7 @@ final class SettingViewController: UIViewController {
     
     private func updateUI(with settings: UserSettings) {
         let timeLabel = timeSettingButton.viewWithTag(100) as? UILabel
-        timeLabel?.text = settings.scheduledTime.formatted(style: .koreanTimeWithPeriod)
+        timeLabel?.text = settings.scheduledTime.formatted(style: .timeShort)
         let messageLabel = messageSettingButton.viewWithTag(101) as? UILabel
         messageLabel?.text = settings.notificationMessage
     }
