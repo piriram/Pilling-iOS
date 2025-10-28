@@ -37,14 +37,14 @@ enum DashboardUI {
     }
     
     enum CharacterImage: String {
-        case todayAfter = "Property 1=TakingAfter"
-        case takingBeforeTwo = "Property 1=TakingBeforeTwo"
-        case takingBefore = "Property 1=TakingBefore"
-        case warning = "Property 1=NoTaking"
-        case rest = "Property 1=Rest"
-        case groomy = "widget_icon_groomy"
-        case fire = "widget_icon_fire"
-        case success = "widget_icon_success"
+        case todayAfter = "icon_takingAfter"
+        case takingBeforeTwo = "icon_takingBeforeTwo"
+        case takingBefore = "icon_takingBefore"
+        case warning = "icon_noTaking"
+        case rest = "icon_rest"
+        case groomy = "icon_2hour"
+        case fire = "icon_4hour"
+        case success = "icon_good"
     }
     
     enum MessageIconImage: String{

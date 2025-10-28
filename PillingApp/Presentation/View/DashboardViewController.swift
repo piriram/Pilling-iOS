@@ -19,7 +19,7 @@ final class DashboardViewController: UIViewController {
     
     // MARK: - SubViews
     
-    private let backgroundImageView = UIImageView(image: UIImage(named: "background"))
+    private let backgroundImageView = UIImageView(image: UIImage(named: "background_taken"))
     private let infoView = DashboardInfoView()
     private let calendarView = DashboardCalendarView()
     private let bottomView = DashboardBottomView()
@@ -235,19 +235,12 @@ final class DashboardViewController: UIViewController {
         guard let todayRecord = cycle.records.first(where: {
             calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
         }) else {
+            backgroundImageView.image = UIImage(named: "background")
             return
         }
         
         let adjustedStatus = todayRecord.status.adjustedForDate(todayRecord.scheduledDateTime, calendar: calendar)
-        
-        switch adjustedStatus {
-        case .todayTaken, .todayTakenDelayed, .todayTakenTooEarly:
-            backgroundImageView.image = UIImage(named: "background_taken")
-        case .todayNotTaken, .todayDelayed, .todayDelayedCritical:
-            backgroundImageView.image = UIImage(named: "background")
-        default:
-            backgroundImageView.image = UIImage(named: "background")
-        }
+        backgroundImageView.image = UIImage(named: adjustedStatus.backgroundImageName)
     }
     
     // MARK: - Presentation
@@ -267,7 +260,7 @@ final class DashboardViewController: UIViewController {
     }
     
     private func presentInfoFloatingView() {
-        let infoView = InfoFloatingView()
+        let infoView = DashboardFloatingGuideView()
         infoView.onConfirm = { [weak infoView] in
             infoView?.dismiss()
         }

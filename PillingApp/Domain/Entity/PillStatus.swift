@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum PillStatus: Int,Sendable {
+enum PillStatus: Int, Sendable {
     case taken = 0
     case takenDelayed = 1
     case takenDouble = 2
@@ -52,6 +52,17 @@ enum PillStatus: Int,Sendable {
             return true
         default:
             return false
+        }
+    }
+    
+    var backgroundImageName: String {
+        switch self {
+        case .todayTaken, .todayNotTaken, .todayTakenDelayed, .todayTakenTooEarly:
+            return "background_taken"
+        case .todayDelayed, .todayDelayedCritical,.missed:
+            return "background_rest"
+        default:
+            return "background_taken"
         }
     }
 }
