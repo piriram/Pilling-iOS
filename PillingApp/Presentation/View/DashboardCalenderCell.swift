@@ -3,7 +3,7 @@ import SnapKit
 
 // MARK: - Presentation/Dashboard/Views/CalendarCell.swift
 
-final class CalendarCell: UICollectionViewCell {
+final class DashboardCalendarCell: UICollectionViewCell {
     static let identifier = "CalendarCell"
     
     private let backgroundShapeView = UIView()

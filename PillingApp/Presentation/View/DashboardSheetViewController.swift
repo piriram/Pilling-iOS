@@ -12,7 +12,7 @@ import SnapKit
 
 // MARK: - Presentation/Dashboard/Views/CalendarSheetViewController.swift
 
-final class CalendarSheetViewController: UIViewController {
+final class DashboardSheetViewController: UIViewController {
     private let selectedDate: Date
     private let initialMemo: String
     private let onSelectStatus: (PillStatus, String) -> Void

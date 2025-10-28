@@ -27,7 +27,7 @@ final class DashboardCalendarView: UIView {
         cv.isScrollEnabled = false
         cv.showsVerticalScrollIndicator = false
         cv.showsHorizontalScrollIndicator = false
-        cv.register(CalendarCell.self, forCellWithReuseIdentifier: CalendarCell.identifier)
+        cv.register(DashboardCalendarCell.self, forCellWithReuseIdentifier: DashboardCalendarCell.identifier)
         cv.delegate = self
         return cv
     }()
@@ -97,9 +97,9 @@ final class DashboardCalendarView: UIView {
             collectionView: collectionView
         ) { collectionView, indexPath, item in
             guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: CalendarCell.identifier,
+                withReuseIdentifier: DashboardCalendarCell.identifier,
                 for: indexPath
-            ) as? CalendarCell else {
+            ) as? DashboardCalendarCell else {
                 return UICollectionViewCell()
             }
             
