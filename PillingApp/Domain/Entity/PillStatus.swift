@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum PillStatus: Int {
+enum PillStatus: Int,Sendable {
     case taken = 0
     case takenDelayed = 1
     case takenDouble = 2
