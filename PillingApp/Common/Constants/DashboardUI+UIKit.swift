@@ -1,12 +1,14 @@
 //
-//  DashboardUI.swift
+//  DashboardUI+UIKit.swift
 //  PillingApp
 //
-//  Created by 잠만보김쥬디 on 10/12/25.
+//  Created by 잠만보김쥬디 on 10/31/25.
 //
 
 import UIKit
-enum DashboardUI {
+
+extension DashboardUI {
+    
     enum Icon {
         static let info = UIImage(systemName: "info.circle.fill")
         static let gear = UIImage(systemName: "gearshape")
@@ -35,24 +37,4 @@ enum DashboardUI {
             }
         }
     }
-    
-    enum CharacterImage: String {
-        case todayAfter = "Property 1=TakingAfter"
-        case takingBeforeTwo = "Property 1=TakingBeforeTwo"
-        case takingBefore = "Property 1=TakingBefore"
-        case warning = "Property 1=NoTaking"
-        case rest = "Property 1=Rest"
-        case groomy = "widget_icon_groomy"
-        case fire = "widget_icon_fire"
-        case success = "widget_icon_success"
-    }
-    
-    enum MessageIconImage: String{
-        case notTaken = "notTaken"
-        case taken = "taken"
-        case missed = "missed"
-        case rest = "rest"
-    }
-    
 }
-

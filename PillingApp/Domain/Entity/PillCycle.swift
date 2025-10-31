@@ -4,19 +4,10 @@
 //
 //  Created by 잠만보김쥬디 on 10/12/25.
 //
-import UIKit
-import RxSwift
 
-// MARK: - Domain/RepositoryProtocols/PillCycleRepositoryProtocol.swift
+import Foundation
 
-protocol PillCycleRepositoryProtocol {
-    func fetchCurrentCycle() -> Observable<PillCycle?>
-    func saveCycle(_ cycle: PillCycle) -> Observable<Void>
-    func updateRecord(_ record: PillRecord, in cycleID: UUID) -> Observable<Void>
-    func deleteAllCycles() -> Observable<Void>
-}
-
-// MARK: - Domain/Entities/PillCycle.swift
+// MARK: - PillCycle
 
 struct PillCycle {
     let id: UUID

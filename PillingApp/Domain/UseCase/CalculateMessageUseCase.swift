@@ -1,15 +1,16 @@
 //
-//  WidgetCalculateMessageUseCase.swift
+//  CalculateMessageUseCase.swift
 //  PillingApp
 //
-//  Created by 잠만보김쥬디 on 10/17/25.
+//  Created by 잠만보김쥬디 on 10/31/25.
 //
 
 import Foundation
 
-// MARK: - WidgetCalculateMessageUseCase
+// MARK: - CalculateMessageUseCase
 
-final class WidgetCalculateMessageUseCase {
+/// 본앱과 위젯에서 공통으로 사용하는 메시지 계산 UseCase
+final class CalculateMessageUseCase {
     
     private let timeProvider: TimeProvider
     
@@ -19,9 +20,9 @@ final class WidgetCalculateMessageUseCase {
     
     // MARK: - Execute
     
-    func execute(cycle: PillCycle?, for date: Date = Date()) -> WidgetMessageType {
+    func execute(cycle: PillCycle?, for date: Date = Date()) -> MessageResult {
         guard let cycle = cycle else {
-            return .empty
+            return MessageType.empty.toResult()
         }
         
         guard let todayRecord = findRelevantRecord(in: cycle, for: date) else {
@@ -33,17 +34,17 @@ final class WidgetCalculateMessageUseCase {
                 if timeSinceScheduled >= twelveHours,
                    !yesterdayRecord.status.isTaken,
                    yesterdayRecord.status != .rest {
-                    return .pilledTwo  // "오늘은 두알을 복용하세요"
+                    return MessageType.pilledTwo.toResult()
                 }
             }
             
-            return .resting  // "오늘은 잔디도 휴식중"
+            return MessageType.resting.toResult()
         }
         
         let todayStatus = calculateStatus(for: todayRecord, at: date)
         
         if case .rest = todayStatus {
-            return .resting
+            return MessageType.resting.toResult()
         }
         
         // 오늘 관련 상태일 때만 복잡한 로직 적용
@@ -55,12 +56,12 @@ final class WidgetCalculateMessageUseCase {
                (todayStatus == .todayTaken ||
                 todayStatus == .todayTakenDelayed ||
                 todayStatus == .todayTakenTooEarly) {
-                return .success  // "꾸준히 잔디를 심어주세요"
+                return MessageType.success.toResult()
             }
             
             // 2일 이상 연속 미복용 + 오늘 미복용
             if consecutiveMissed >= 2 {
-                return .waiting  // "저를 잊었나요...?"
+                return MessageType.waiting.toResult()
             }
             
             // 어제 미복용 상황 체크
@@ -76,23 +77,23 @@ final class WidgetCalculateMessageUseCase {
                    (todayStatus == .todayTaken ||
                     todayStatus == .todayTakenDelayed ||
                     todayStatus == .todayTakenTooEarly) {
-                    return .pilledTwo  // "어제 미복용했다면 오늘은 2알!!"
+                    return MessageType.takingBeforeTwo.toResult()
                 }
                 
-                // ⭐️ 어제 missed && 오늘 takenDouble (2알 복용으로 보정 완료)
+                // 어제 missed && 오늘 takenDouble (2알 복용으로 보정 완료)
                 if case .missed = yesterdayStatus,
                    case .takenDouble = todayStatus {
-                    return .success  // "매일 2시간 이내의 같은 시간에 복용해주세요"
+                    return MessageType.takingBefore.toResult()
                 }
-                // ⭐️ 어제 missed && 오늘 todayTaken/takenTooEarly (1알만 복용)
+                // 어제 missed && 오늘 todayTaken/takenTooEarly (1알만 복용)
                 else if case .missed = yesterdayStatus,
                         (todayStatus == .todayTaken ||
                          todayStatus == .takenTooEarly) {
-                    return .pilledTwo  // "한알을 더 먹어야 해요"
+                    return MessageType.warning.toResult()
                 }
                 // 어제 missed (아직 오늘 복용 안 함)
                 else if case .missed = yesterdayStatus {
-                    return .pilledTwo  // "오늘은 두알을 복용하세요"
+                    return MessageType.pilledTwo.toResult()
                 }
             }
         }
@@ -100,35 +101,64 @@ final class WidgetCalculateMessageUseCase {
         // 개별 상태에 따른 메시지
         switch todayStatus {
         case .todayTaken:
-            return .success  // "잔디가 잘 자라고 있어요"
+            return MessageType.todayAfter.toResult()
             
         case .todayTakenDelayed:
-            return .success  // "2시간 지났지만 괜찮아요!"
+            return customMessage(
+                text: "2시간 지났지만 괜찮아요!",
+                characterImage: "icon_takingAfter",
+                icon: "taken",
+                background: "widget_background_normal"
+            )
             
         case .todayTakenTooEarly:
-            return .success  // "예정보다 2시간 이상 일찍 복용했어요"
+            return customMessage(
+                text: "예정보다 2시간 이상 일찍 복용했어요",
+                characterImage: "icon_takingAfter",
+                icon: "taken",
+                background: "widget_background_normal"
+            )
             
         case .todayDelayed:
-            return .groomy  // "잔디는 2시간을 초과하지 않게 심어주세요!"
+            return MessageType.groomy.toResult()
             
         case .todayDelayedCritical:
-            return .fire  // "복용 시간이 4시간 이상 지났어요"
+            return MessageType.fire.toResult()
             
         case .takenDouble:
-            return .success  // "내일의 잔디도 부탁해요"
+            return customMessage(
+                text: "내일의 잔디도 부탁해요.",
+                characterImage: "icon_takingAfter",
+                icon: "taken",
+                background: "widget_background_normal"
+            )
             
         case .todayNotTaken:
-            return .plantingSeed  // "오늘의 잔디를 심어주세요"
+            return MessageType.plantingSeed.toResult()
             
         case .taken, .takenDelayed, .missed, .scheduled, .takenTooEarly:
-            return .resting  // "..."
+            return MessageType.resting.toResult()
             
         case .rest:
-            return .resting  // "오늘은 잔디도 휴식중"
+            return MessageType.resting.toResult()
         }
     }
     
     // MARK: - Private Methods
+    
+    private func customMessage(
+        text: String,
+        characterImage: String,
+        icon: String,
+        background: String
+    ) -> MessageResult {
+        return MessageResult(
+            text: text,
+            characterImageName: characterImage,
+            iconImageName: icon,
+            backgroundImageName: background
+        )
+    }
     
     private func findRelevantRecord(in cycle: PillCycle, for date: Date) -> PillRecord? {
         // 1. 오늘 날짜의 레코드 찾기
@@ -171,7 +201,7 @@ final class WidgetCalculateMessageUseCase {
     private func calculateStatus(for record: PillRecord, at date: Date) -> PillStatus {
         let calendar = timeProvider.calendar
         
-        // ⭐️ takenDouble은 그대로 유지
+        // takenDouble은 그대로 유지
         if record.status == .takenDouble {
             return .takenDouble
         }
