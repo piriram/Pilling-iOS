@@ -35,6 +35,7 @@ struct PillingDailyWidgetView: View {
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
+                .minimumScaleFactor(0.5)
             
         }
         .containerBackground(for: .widget) {
@@ -45,104 +46,4 @@ struct PillingDailyWidgetView: View {
         .widgetURL(URL(string: "pillingapp://widget"))
         
     }
-}
-
-// MARK: - Preview Provider
-
-#Preview("잔디를 심어보세요 - Small", as: .systemSmall) {
-    DaillyWidget()
-} timeline: {
-    PillingDailyWidgetEntry(
-        date: Date(),
-        displayData: WidgetDisplayData(
-            cycleDay: 3,
-            message: "잔디를 심어보세요!",
-            iconImageName: "widget_icon_plant",
-            backgroundImageName: "widget_background_normal"
-        )
-    )
-}
-
-#Preview("잔디가 기다려요 - Small", as: .systemSmall) {
-    DaillyWidget()
-} timeline: {
-    PillingDailyWidgetEntry(
-        date: Date(),
-        displayData: WidgetDisplayData(
-            cycleDay: 5,
-            message: "잔디가 기다려요",
-            iconImageName: "widget_icon_waiting",
-            backgroundImageName: "widget_background_warning"
-        )
-    )
-}
-
-#Preview("잔디 심기 완료 - Small", as: .systemSmall) {
-    DaillyWidget()
-} timeline: {
-    PillingDailyWidgetEntry(
-        date: Date(),
-        displayData: WidgetDisplayData(
-            cycleDay: 10,
-            message: "잔디 심기 완료",
-            iconImageName: "widget_icon_completed",
-            backgroundImageName: "widget_background_normal"
-        )
-    )
-}
-
-#Preview("지금은 쉬는 시간 - Small", as: .systemSmall) {
-    DaillyWidget()
-} timeline: {
-    PillingDailyWidgetEntry(
-        date: Date(),
-        displayData: WidgetDisplayData(
-            cycleDay: 25,
-            message: "지금은 쉬는 시간",
-            iconImageName: "widget_icon_rest",
-            backgroundImageName: "widget_background_normal"
-        )
-    )
-}
-
-#Preview("잔디를 심어보세요 - Medium", as: .systemMedium) {
-    DaillyWidget()
-} timeline: {
-    PillingDailyWidgetEntry(
-        date: Date(),
-        displayData: WidgetDisplayData(
-            cycleDay: 7,
-            message: "잔디를 심어보세요!",
-            iconImageName: "widget_icon_plant",
-            backgroundImageName: "widget_background_normal"
-        )
-    )
-}
-
-#Preview("잔디가 기다려요 - Medium", as: .systemMedium) {
-    DaillyWidget()
-} timeline: {
-    PillingDailyWidgetEntry(
-        date: Date(),
-        displayData: WidgetDisplayData(
-            cycleDay: 12,
-            message: "잔디가 기다려요",
-            iconImageName: "widget_icon_waiting",
-            backgroundImageName: "widget_background_warning"
-        )
-    )
-}
-
-#Preview("잔디 심기 완료 - Large", as: .systemLarge) {
-    DaillyWidget()
-} timeline: {
-    PillingDailyWidgetEntry(
-        date: Date(),
-        displayData: WidgetDisplayData(
-            cycleDay: 15,
-            message: "잔디 심기 완료",
-            iconImageName: "widget_icon_completed",
-            backgroundImageName: "widget_background_normal"
-        )
-    )
 }

@@ -66,7 +66,6 @@
 			membershipExceptions = (
 				Data/PillingDailyWidgetProvider.swift,
 				Data/SharedCoreDataManager.swift,
-				Domain/WidgetCalculateMessageUseCase.swift,
 				Domain/WidgetModel.swift,
 				Presentation/PillingDailyWidgetEntry.swift,
 			);
@@ -75,15 +74,17 @@
 		2124F7942EA25622001578C9 /* Exceptions for "PillingApp" folder in "DaillyWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Common/Constants/AppColor.swift,
+				App/Assets.xcassets,
+				Common/Constants/DashboardUI.swift,
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillCycleEntity+Extension.swift",
 				"Common/Extension/PillRecordEntity+Extension..swift",
-				Domain/Entity/CoreDataError.swift,
+				Domain/Entity/MessageResult.swift,
 				Domain/Entity/PillCycle.swift,
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillRecord.swift,
 				Domain/Entity/PillStatus.swift,
+				Domain/UseCase/CalculateMessageUseCase.swift,
 				Infra/SystemTimeProvider.swift,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
@@ -427,7 +428,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -470,7 +471,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -539,7 +540,11 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_GLOBAL_CONCURRENCY = NO;
+				SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES = NO;
+				SWIFT_UPCOMING_FEATURE_NONISOLATED_NONSENDING_BY_DEFAULT = NO;
 			};
 			name = Debug;
 		};
@@ -597,6 +602,10 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_UPCOMING_FEATURE_GLOBAL_CONCURRENCY = NO;
+				SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES = NO;
+				SWIFT_UPCOMING_FEATURE_NONISOLATED_NONSENDING_BY_DEFAULT = NO;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

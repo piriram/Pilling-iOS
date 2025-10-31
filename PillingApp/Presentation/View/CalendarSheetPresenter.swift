@@ -23,7 +23,7 @@ final class CalendarSheetPresenter {
         // 기존 메모 가져오기
         let existingMemo = cycle.records[safe: selectedIndex]?.memo ?? ""
         
-        let viewController = CalendarSheetViewController(
+        let viewController = DashboardSheetViewController(
             selectedDate: item.date,
             initialMemo: existingMemo,
             onSelectStatus: { chosenStatus, memo in

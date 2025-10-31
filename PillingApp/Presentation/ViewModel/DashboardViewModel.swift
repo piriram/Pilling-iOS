@@ -9,7 +9,7 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-// MARK: - Presentation/Dashboard/ViewModels/DashboardViewModel.swift
+// MARK: - DashboardViewModel
 
 final class DashboardViewModel {
     
@@ -142,7 +142,7 @@ final class DashboardViewModel {
                 
                 // 휴약 기간이 아닌 경우
                 if adjustedStatus != .rest {
-                    // ⭐️ takenDouble은 재계산하지 않고 그대로 유지
+                    // takenDouble은 재계산하지 않고 그대로 유지
                     if record.status == .takenDouble {
                         adjustedStatus = .takenDouble
                     }
@@ -223,10 +223,7 @@ final class DashboardViewModel {
     }
     
     private func updateDashboardMessage() {
-        let message = calculateDashboardMessageUseCase.execute(
-            cycle: currentCycle.value,
-            items: items.value
-        )
+        let message = calculateDashboardMessageUseCase.execute(cycle: currentCycle.value)
         dashboardMessage.accept(message)
     }
     
@@ -309,8 +306,6 @@ final class DashboardViewModel {
         })
         .disposed(by: disposeBag)
     }
-    
-    // DashboardViewModel의 updateState 메서드
     
     func updateState(at index: Int, to newStatus: PillStatus, memo: String?) {
         guard let cycle = currentCycle.value else {

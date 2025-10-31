@@ -12,7 +12,7 @@ import WidgetKit
 struct PillingDailyWidgetProvider: TimelineProvider {
     
     private let coreDataManager = SharedCoreDataManager.shared
-    private let calculateMessageUseCase = WidgetCalculateMessageUseCase()
+    private let calculateMessageUseCase = CalculateMessageUseCase()
     
     // MARK: - TimelineProvider
     
@@ -113,14 +113,16 @@ struct PillingDailyWidgetProvider: TimelineProvider {
     }
     
     private func createEntry(for date: Date, cycle: PillCycle) -> PillingDailyWidgetEntry {
-        let messageType = calculateMessageUseCase.execute(cycle: cycle, for: date)
+        // 공통 UseCase 사용
+        let messageResult = calculateMessageUseCase.execute(cycle: cycle, for: date)
         let cycleDay = calculateCycleDay(from: cycle, for: date)
         
+        // MessageResult를 WidgetDisplayData로 변환
         let displayData = WidgetDisplayData(
             cycleDay: cycleDay,
-            message: messageType.message,
-            iconImageName: messageType.iconImageName,
-            backgroundImageName: messageType.backgroundImageName
+            message: messageResult.text,
+            iconImageName: messageResult.characterImageName,
+            backgroundImageName: messageResult.backgroundImageName
         )
         
         return PillingDailyWidgetEntry(date: date, displayData: displayData)

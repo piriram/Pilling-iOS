@@ -55,23 +55,23 @@ enum WidgetMessageType {
     var iconImageName: String {
         switch self {
         case .waiting:
-            return "widget_icon_waiting"
+            return "icon_noTaking"
         case .plantingSeed:
-            return "widget_icon_plant"
+            return "icon_takingBefore"
         case .completed:
-            return "widget_icon_completed"
+            return "icon_takingAfter"
         case .resting:
-            return "widget_icon_rest"
+            return "icon_rest"
         case .groomy:
-            return "widget_icon_groomy"
+            return "icon_2hour"
         case .fire:
-            return "widget_icon_fire"
+            return "icon_4hour"
         case .success:
-            return "widget_icon_success"
+            return "icon_good"
         case .empty:
-            return "widget_icon_rest"
+            return "icon_plant"
         case .pilledTwo:
-            return "widget_icon_two"
+            return "icon_takingBeforeTwo"
         }
     }
     

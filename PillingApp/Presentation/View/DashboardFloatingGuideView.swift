@@ -3,7 +3,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-final class InfoFloatingView: UIView {
+final class DashboardFloatingGuideView: UIView {
     // MARK: - Constants
     private let commonHorizontalInset: CGFloat = 30
     
@@ -151,7 +151,7 @@ final class InfoFloatingView: UIView {
     private func makeGuideItemWithCalendarCell(status: PillStatus, text: String) -> UIView {
         let containerView = UIView()
         
-        let calendarCell = CalendarCell()
+        let calendarCell = DashboardCalendarCell()
         
         let textLabel = UILabel()
         textLabel.text = text
