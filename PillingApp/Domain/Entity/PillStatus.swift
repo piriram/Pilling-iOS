@@ -5,7 +5,9 @@
 //  Created by 잠만보김쥬디 on 10/16/25.
 //
 
-import UIKit
+import Foundation
+
+// MARK: - PillStatus
 
 enum PillStatus: Int, Sendable {
     case taken = 0
@@ -21,21 +23,6 @@ enum PillStatus: Int, Sendable {
     case todayTakenTooEarly = 10
     case takenTooEarly = 11
     case todayDelayedCritical = 12
-    
-    var backgroundColor: UIColor {
-        switch self {
-        case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed, .todayTakenTooEarly, .takenTooEarly:
-            return AppColor.pillGreen800
-        case .takenDouble:
-            return AppColor.pillWhite
-        case .missed:
-            return AppColor.pillBrown
-        case .scheduled, .todayNotTaken, .todayDelayed, .todayDelayedCritical:
-            return AppColor.notYetGray
-        case .rest:
-            return AppColor.pillWhite
-        }
-    }
     
     var isToday: Bool {
         switch self {
@@ -59,13 +46,15 @@ enum PillStatus: Int, Sendable {
         switch self {
         case .todayTaken, .todayNotTaken, .todayTakenDelayed, .todayTakenTooEarly:
             return "background_taken"
-        case .todayDelayed, .todayDelayedCritical,.missed:
+        case .todayDelayed, .todayDelayedCritical, .missed:
             return "background_rest"
         default:
             return "background_taken"
         }
     }
 }
+
+// MARK: - Status Conversion
 
 extension PillStatus {
     
