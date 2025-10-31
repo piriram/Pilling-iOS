@@ -66,7 +66,6 @@
 			membershipExceptions = (
 				Data/PillingDailyWidgetProvider.swift,
 				Data/SharedCoreDataManager.swift,
-				Domain/WidgetCalculateMessageUseCase.swift,
 				Domain/WidgetModel.swift,
 				Presentation/PillingDailyWidgetEntry.swift,
 			);
@@ -75,15 +74,17 @@
 		2124F7942EA25622001578C9 /* Exceptions for "PillingApp" folder in "DaillyWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Common/Constants/AppColor.swift,
+				App/Assets.xcassets,
+				Common/Constants/DashboardUI.swift,
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillCycleEntity+Extension.swift",
 				"Common/Extension/PillRecordEntity+Extension..swift",
-				Domain/Entity/CoreDataError.swift,
+				Domain/Entity/MessageResult.swift,
 				Domain/Entity/PillCycle.swift,
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillRecord.swift,
 				Domain/Entity/PillStatus.swift,
+				Domain/UseCase/CalculateMessageUseCase.swift,
 				Infra/SystemTimeProvider.swift,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
