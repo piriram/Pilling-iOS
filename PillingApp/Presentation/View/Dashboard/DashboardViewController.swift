@@ -26,7 +26,7 @@ final class DashboardViewController: UIViewController {
     
     // MARK: - Properties
     
-    var shouldHideHistoryButton: Bool = true {
+    var shouldHideHistoryButton: Bool = false {
         didSet {
             infoView.historyButton.isHidden = shouldHideHistoryButton
             infoView.historyButton.isEnabled = !shouldHideHistoryButton
@@ -260,7 +260,7 @@ final class DashboardViewController: UIViewController {
     }
     
     private func presentInfoFloatingView() {
-        let infoView = DashboardFloatingGuideView()
+        let infoView = DashboardGuideView()
         infoView.onConfirm = { [weak infoView] in
             infoView?.dismiss()
         }
