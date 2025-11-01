@@ -3,7 +3,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-final class DashboardFloatingGuideView: UIView {
+final class DashboardGuideView: UIView {
     // MARK: - Constants
     private let commonHorizontalInset: CGFloat = 30
     
