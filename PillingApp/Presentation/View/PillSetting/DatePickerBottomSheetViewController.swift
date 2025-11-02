@@ -3,7 +3,7 @@
 //  PillingApp
 //
 //  Created by 잠만보김쥬디 on 10/13/25.
-//
+
 
 import UIKit
 import RxSwift
@@ -63,7 +63,11 @@ final class DatePickerBottomSheetViewController: UIViewController {
         picker.tintColor = DatePickerConfiguration.Colors.pickerTint
         picker.minimumDate = configuration.minimumDate
         picker.maximumDate = configuration.maximumDate
-        picker.date = Date()
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        picker.date = today
+        
         return picker
     }()
     
@@ -153,6 +157,18 @@ final class DatePickerBottomSheetViewController: UIViewController {
         panGesture.rx.event
             .subscribe(onNext: { [weak self] recognizer in
                 self?.handlePanGesture(recognizer)
+            })
+            .disposed(by: disposeBag)
+        
+        let datePickerTapGesture = UITapGestureRecognizer()
+        datePickerTapGesture.cancelsTouchesInView = false
+        datePicker.addGestureRecognizer(datePickerTapGesture)
+        
+        datePickerTapGesture.rx.event
+            .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.viewModel.input.dateChanged.onNext(self.datePicker.date)
             })
             .disposed(by: disposeBag)
     }
@@ -260,7 +276,7 @@ final class DatePickerBottomSheetViewController: UIViewController {
     
     private func handlePanEnded(translation: CGPoint, velocity: CGPoint) {
         if translation.y > DatePickerConfiguration.Gesture.dismissThreshold ||
-            velocity.y > DatePickerConfiguration.Gesture.dismissVelocity {
+           velocity.y > DatePickerConfiguration.Gesture.dismissVelocity {
             dismissBottomSheet()
         } else {
             UIView.animate(
