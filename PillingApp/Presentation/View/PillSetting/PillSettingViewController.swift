@@ -202,12 +202,12 @@ final class PillSettingViewController: UIViewController {
     }
     
     // MARK: - Private Methods
-    
     private func presentDatePickerBottomSheet() {
         let datePickerVC = DatePickerBottomSheetViewController()
         
+        // Signal은 emit(to:) 사용
         datePickerVC.selectedDate
-            .bind(to: viewModel.input.dateSelected)
+            .emit(to: viewModel.input.dateSelected)
             .disposed(by: disposeBag)
         
         present(datePickerVC, animated: false)
