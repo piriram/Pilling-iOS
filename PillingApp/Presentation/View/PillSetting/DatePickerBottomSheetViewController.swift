@@ -10,17 +10,20 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
-// MARK: - DatePickerBottomSheetViewController
-
 final class DatePickerBottomSheetViewController: UIViewController {
     
     // MARK: - Properties
     
+    private let viewModel: DatePickerBottomSheetViewModel
+    private let configuration: DatePickerConfiguration.DateRange
     private let disposeBag = DisposeBag()
-    private let selectedDateSubject = PublishSubject<Date>()
     
-    var selectedDate: Observable<Date> {
-        return selectedDateSubject.asObservable()
+    var selectedDate: Signal<Date> {
+        return viewModel.output.selectedDate
+    }
+    
+    var selectedDateObserver: AnyObserver<Date> {
+        return viewModel.input.dateChanged
     }
     
     // MARK: - UI Components
@@ -33,45 +36,48 @@ final class DatePickerBottomSheetViewController: UIViewController {
     
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 20
+        view.backgroundColor = DatePickerConfiguration.Colors.containerBackground
+        view.layer.cornerRadius = DatePickerConfiguration.Metrics.cornerRadius
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.1
-        view.layer.shadowOffset = CGSize(width: 0, height: -2)
-        view.layer.shadowRadius = 10
+        view.layer.shadowOpacity = DatePickerConfiguration.Metrics.shadowOpacity
+        view.layer.shadowOffset = DatePickerConfiguration.Metrics.shadowOffset
+        view.layer.shadowRadius = DatePickerConfiguration.Metrics.shadowRadius
         return view
     }()
     
     private let handleBar: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(white: 0.85, alpha: 1.0)
-        view.layer.cornerRadius = 2.5
+        view.backgroundColor = DatePickerConfiguration.Colors.handleBar
+        view.layer.cornerRadius = DatePickerConfiguration.Metrics.handleBarHeight / 2
         return view
     }()
     
-    private let datePicker: UIDatePicker = {
+    private lazy var datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
         picker.preferredDatePickerStyle = .inline
-        picker.locale = Locale.current // 시스템 로케일 사용
-        picker.calendar = Calendar.current // 시스템 캘린더 사용
-        picker.timeZone = TimeZone.current // 시스템 타임존 사용
-        picker.tintColor = AppColor.pillGreen200
-        
-        // 현재 날짜 기준 ±28일 범위 설정 (사용자의 로컬 타임존 기준)
-        let currentDate = Date()
-        let calendar = Calendar.current
-        picker.minimumDate = calendar.date(byAdding: .day, value: -28, to: currentDate)
-        picker.maximumDate = calendar.date(byAdding: .day, value: 28, to: currentDate)
-        picker.date = currentDate
-        
+        picker.locale = Locale.current
+        picker.calendar = Calendar.current
+        picker.timeZone = TimeZone.current
+        picker.tintColor = DatePickerConfiguration.Colors.pickerTint
+        picker.minimumDate = configuration.minimumDate
+        picker.maximumDate = configuration.maximumDate
+        picker.date = Date()
         return picker
     }()
     
     // MARK: - Initialization
     
-    init() {
+    init(
+        configuration: DatePickerConfiguration.DateRange = .defaultRange,
+        viewModel: DatePickerBottomSheetViewModel? = nil
+    ) {
+        self.configuration = configuration
+        self.viewModel = viewModel ?? DatePickerBottomSheetViewModel(
+            initialDate: Date(),
+            dateRange: configuration
+        )
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
@@ -115,35 +121,32 @@ final class DatePickerBottomSheetViewController: UIViewController {
         
         containerView.snp.makeConstraints {
             $0.leading.trailing.bottom.equalToSuperview()
-            $0.height.equalTo(500)
+            $0.height.equalTo(DatePickerConfiguration.Metrics.containerHeight)
         }
         
         handleBar.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(12)
+            $0.top.equalToSuperview().offset(DatePickerConfiguration.Metrics.handleBarTopOffset)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(40)
-            $0.height.equalTo(5)
+            $0.width.equalTo(DatePickerConfiguration.Metrics.handleBarWidth)
+            $0.height.equalTo(DatePickerConfiguration.Metrics.handleBarHeight)
         }
         
         datePicker.snp.makeConstraints {
-            $0.top.equalTo(handleBar.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-20)
+            $0.top.equalTo(handleBar.snp.bottom).offset(DatePickerConfiguration.Metrics.pickerTopOffset)
+            $0.leading.trailing.equalToSuperview().inset(DatePickerConfiguration.Metrics.horizontalInset)
+            $0.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide).offset(-DatePickerConfiguration.Metrics.bottomInset)
         }
     }
     
     private func setupGestures() {
-        // Dimmed view tap gesture
         let dimmedTapGesture = UITapGestureRecognizer()
         dimmedView.addGestureRecognizer(dimmedTapGesture)
         
         dimmedTapGesture.rx.event
-            .subscribe(onNext: { [weak self] _ in
-                self?.dismissBottomSheet()
-            })
+            .map { _ in () }
+            .bind(to: viewModel.input.dismissRequested)
             .disposed(by: disposeBag)
         
-        // Container pan gesture
         let panGesture = UIPanGestureRecognizer()
         containerView.addGestureRecognizer(panGesture)
         
@@ -156,24 +159,39 @@ final class DatePickerBottomSheetViewController: UIViewController {
     
     private func bind() {
         datePicker.rx.controlEvent(.valueChanged)
-            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] in
-                self?.handleDateSelection()
+            .debounce(
+                .milliseconds(DatePickerConfiguration.Animation.debounceMilliseconds),
+                scheduler: MainScheduler.instance
+            )
+            .map { [weak self] in self?.datePicker.date ?? Date() }
+            .bind(to: viewModel.input.dateChanged)
+            .disposed(by: disposeBag)
+        
+        viewModel.output.selectedDate
+            .emit(onNext: { [weak self] _ in
+                self?.triggerHapticFeedback()
+                self?.scheduleDismiss()
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.output.shouldDismiss
+            .emit(onNext: { [weak self] in
+                self?.dismissBottomSheet()
             })
             .disposed(by: disposeBag)
     }
     
-    // MARK: - Date Selection
+    // MARK: - Private Methods
     
-    private func handleDateSelection() {
-        selectedDateSubject.onNext(datePicker.date)
-        
-        // 햅틱 피드백
+    private func triggerHapticFeedback() {
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
-        
-        // 딜레이 후 시트 닫기
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+    }
+    
+    private func scheduleDismiss() {
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + DatePickerConfiguration.Animation.dismissDelay
+        ) { [weak self] in
             self?.dismissBottomSheet()
         }
     }
@@ -181,23 +199,26 @@ final class DatePickerBottomSheetViewController: UIViewController {
     // MARK: - Animation
     
     private func animatePresentation() {
-        containerView.transform = CGAffineTransform(translationX: 0, y: containerView.frame.height)
+        containerView.transform = CGAffineTransform(
+            translationX: 0,
+            y: containerView.frame.height
+        )
         
         UIView.animate(
-            withDuration: 0.35,
+            withDuration: DatePickerConfiguration.Animation.presentationDuration,
             delay: 0,
-            usingSpringWithDamping: 0.85,
-            initialSpringVelocity: 0.5,
+            usingSpringWithDamping: DatePickerConfiguration.Animation.springDamping,
+            initialSpringVelocity: DatePickerConfiguration.Animation.springVelocity,
             options: .curveEaseOut
         ) {
             self.containerView.transform = .identity
-            self.dimmedView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+            self.dimmedView.backgroundColor = DatePickerConfiguration.Colors.dimmedBackground
         }
     }
     
     private func dismissBottomSheet() {
         UIView.animate(
-            withDuration: 0.25,
+            withDuration: DatePickerConfiguration.Animation.dismissalDuration,
             delay: 0,
             options: .curveEaseIn,
             animations: {
@@ -221,28 +242,36 @@ final class DatePickerBottomSheetViewController: UIViewController {
         
         switch gesture.state {
         case .changed:
-            if translation.y > 0 {
-                containerView.transform = CGAffineTransform(translationX: 0, y: translation.y)
-            }
+            handlePanChanged(translation: translation)
             
         case .ended:
-            if translation.y > 100 || velocity.y > 800 {
-                dismissBottomSheet()
-            } else {
-                UIView.animate(
-                    withDuration: 0.25,
-                    delay: 0,
-                    usingSpringWithDamping: 0.8,
-                    initialSpringVelocity: 0.5,
-                    options: .curveEaseOut
-                ) {
-                    self.containerView.transform = .identity
-                }
-            }
+            handlePanEnded(translation: translation, velocity: velocity)
             
         default:
             break
         }
     }
+    
+    private func handlePanChanged(translation: CGPoint) {
+        if translation.y > 0 {
+            containerView.transform = CGAffineTransform(translationX: 0, y: translation.y)
+        }
+    }
+    
+    private func handlePanEnded(translation: CGPoint, velocity: CGPoint) {
+        if translation.y > DatePickerConfiguration.Gesture.dismissThreshold ||
+            velocity.y > DatePickerConfiguration.Gesture.dismissVelocity {
+            dismissBottomSheet()
+        } else {
+            UIView.animate(
+                withDuration: DatePickerConfiguration.Gesture.panSpringDuration,
+                delay: 0,
+                usingSpringWithDamping: DatePickerConfiguration.Gesture.panSpringDamping,
+                initialSpringVelocity: DatePickerConfiguration.Gesture.panSpringVelocity,
+                options: .curveEaseOut
+            ) {
+                self.containerView.transform = .identity
+            }
+        }
+    }
 }
-
