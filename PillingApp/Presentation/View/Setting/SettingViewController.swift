@@ -13,7 +13,7 @@ import SnapKit
 final class SettingViewController: UIViewController {
     
     // MARK: - Properties
-    
+    private typealias str = AppStrings.Setting
     private let viewModel: SettingViewModel
     private let disposeBag = DisposeBag()
     private let contentInset: CGFloat = 16
@@ -25,7 +25,7 @@ final class SettingViewController: UIViewController {
     
     private let pillSectionLabel: UILabel = {
         let label = UILabel()
-        label.text = "약 설정"
+        label.text = str.sectionLabel
         label.font = Typography.headline3(.bold)
         label.textColor = AppColor.textBlack
         return label
@@ -35,7 +35,7 @@ final class SettingViewController: UIViewController {
         let button = UIButton()
         button.backgroundColor = AppColor.pillGreen200
         button.layer.cornerRadius = 12
-        button.setTitle("새 약 복용 시작하기", for: .normal)
+        button.setTitle(str.newPillBtn, for: .normal)
         button.setTitleColor(.label, for: .normal)
         button.titleLabel?.font = Typography.body1(.bold)
         return button
@@ -43,7 +43,7 @@ final class SettingViewController: UIViewController {
     
     private let alarmSectionLabel: UILabel = {
         let label = UILabel()
-        label.text = "알림 설정"
+        label.text = str.alarmSectionTitle
         label.font = Typography.headline3(.bold)
         label.textColor = AppColor.textBlack
         return label
@@ -60,13 +60,13 @@ final class SettingViewController: UIViewController {
         iconImageView.contentMode = .scaleAspectFit
         
         let titleLabel = UILabel()
-        titleLabel.text = "복용 시간"
+        titleLabel.text = str.timeSettingTitle
         titleLabel.font = Typography.body2(.medium)
         titleLabel.textColor = AppColor.textGray
         
         let timeLabel = UILabel()
         timeLabel.tag = 100
-        timeLabel.text = "오전 9:00"
+        timeLabel.text = str.timeSettingDefault
         timeLabel.font = Typography.body2(.regular)
         timeLabel.textColor = AppColor.textBlack
         
@@ -115,13 +115,13 @@ final class SettingViewController: UIViewController {
         iconImageView.contentMode = .scaleAspectFit
         
         let titleLabel = UILabel()
-        titleLabel.text = "알림 메시지"
+        titleLabel.text = str.messageSettingTitle
         titleLabel.font = Typography.body2(.medium)
         titleLabel.textColor = AppColor.textGray
         
         let messageLabel = UILabel()
         messageLabel.tag = 101
-        messageLabel.text = "건강한 하루를 위해..."
+        messageLabel.text = str.messageSettingDefault
         messageLabel.font = Typography.body2(.regular)
         messageLabel.textColor = AppColor.textBlack
         messageLabel.textAlignment = .right
@@ -215,7 +215,7 @@ final class SettingViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        navigationItem.title = "설정"
+        navigationItem.title = str.navigationTitle
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
@@ -353,10 +353,10 @@ final class SettingViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(
                 onNext: { [weak self] in
-                    self?.showToast(message: "복용 시간이 변경되었습니다")
+                    self?.showToast(message: str.messageEditorTitle)
                 },
                 onError: { [weak self] error in
-                    self?.showAlert(title: "오류", message: "시간 변경에 실패했습니다", isError: true)
+                    self?.showAlert(title: AppStrings.Common.errorTitle, message: str.errorTimeUpdateFailed, isError: true)
                 }
             )
             .disposed(by: disposeBag)
@@ -366,20 +366,20 @@ final class SettingViewController: UIViewController {
     
     private func showMessageEditor(currentMessage: String) {
         let alert = UIAlertController(
-            title: "알림 메시지 수정",
-            message: "받고 싶은 알림 메시지를 입력해주세요",
+            title: str.messageEditorTitle,
+            message: str.messageEditorDescription,
             preferredStyle: .alert
         )
         
         alert.addTextField { textField in
             textField.text = currentMessage
-            textField.placeholder = "알림 메시지 입력"
+            textField.placeholder = str.messageEditorPlaceholder
             textField.clearButtonMode = .whileEditing
         }
         
-        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        let cancelAction = UIAlertAction(title: AppStrings.Common.cancelTitle, style: .cancel)
         
-        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self, weak alert] _ in
+        let confirmAction = UIAlertAction(title: AppStrings.Common.okBtnTitle, style: .default) { [weak self, weak alert] _ in
             guard let self = self,
                   let textField = alert?.textFields?.first,
                   let newMessage = textField.text,
@@ -391,10 +391,10 @@ final class SettingViewController: UIViewController {
                 .observe(on: MainScheduler.instance)
                 .subscribe(
                     onNext: { [weak self] in
-                        self?.showToast(message: "알림 메시지가 변경되었습니다")
+                        self?.showToast(message: str.successMessageUpdated)
                     },
                     onError: { [weak self] error in
-                        self?.showAlert(title: "오류", message: "메시지 변경에 실패했습니다", isError: true)
+                        self?.showAlert(title: AppStrings.Common.errorTitle, message: str.errorMessageUpdateFailed, isError: true)
                     }
                 )
                 .disposed(by: self.disposeBag)
@@ -408,19 +408,19 @@ final class SettingViewController: UIViewController {
     
     private func showNewPillCycleConfirmation() {
         let alert = UIAlertController(
-            title: "새 약 복용 시작",
-            message: "현재 기록된 복용 정보가 모두 삭제됩니다.\n정말로 새로운 약 복용을 시작하시겠습니까?",
+            title: str.newPillCycleTitle,
+            message: str.newPillCycleMessage,
             preferredStyle: .alert
         )
         
-        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        let cancelAction = UIAlertAction(title: AppStrings.Common.cancelTitle, style: .cancel)
         
-        let confirmAction = UIAlertAction(title: "시작하기", style: .destructive) { [weak self] _ in
+        let confirmAction = UIAlertAction(title: str.newPillCycleConfirm, style: .destructive) { [weak self] _ in
             self?.viewModel.startNewPillCycle()
                 .observe(on: MainScheduler.instance)
                 .subscribe(
                     onError: { [weak self] error in
-                        self?.showAlert(title: "오류", message: "초기화에 실패했습니다", isError: true)
+                        self?.showAlert(title: AppStrings.Common.errorTitle, message: str.errorResetFailed, isError: true)
                     }
                 )
                 .disposed(by: self?.disposeBag ?? DisposeBag())
@@ -457,7 +457,7 @@ final class SettingViewController: UIViewController {
             alert.addAction(settingsAction)
         }
         
-        let confirmAction = UIAlertAction(title: "확인", style: .default)
+        let confirmAction = UIAlertAction(title: AppStrings.Common.okBtnTitle, style: .default)
         alert.addAction(confirmAction)
         
         present(alert, animated: true)

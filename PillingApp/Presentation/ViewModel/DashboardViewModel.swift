@@ -313,15 +313,6 @@ final class DashboardViewModel {
             return
         }
         
-        print("🔄 updateState 시작: index=\(index), newStatus=\(newStatus), memo=\(memo ?? "없음")")
-        print("📦 현재 cycle.records 개수: \(cycle.records.count)")
-        
-        if index < cycle.records.count {
-            print("📝 변경 전 상태: \(cycle.records[index].status)")
-        } else {
-            print("⚠️ index가 범위를 벗어남: \(index) >= \(cycle.records.count)")
-        }
-        
         updatePillStatusUseCase.execute(
             cycle: cycle,
             recordIndex: index,
@@ -330,23 +321,17 @@ final class DashboardViewModel {
         )
         .subscribe(
             onNext: { [weak self] updatedCycle in
-                print("✅ UseCase 완료: updatedCycle 수신")
                 
                 if index < updatedCycle.records.count {
-                    print("📝 변경 후 상태: \(updatedCycle.records[index].status)")
                 }
                 
                 self?.currentCycle.accept(updatedCycle)
-                print("🔄 currentCycle 업데이트 완료")
                 
                 self?.updateItems()
-                print("🔄 updateItems 완료")
                 
                 self?.updateDashboardMessage()
-                print("🔄 updateDashboardMessage 완료")
                 
                 self?.updateCanTakePill()
-                print("🔄 updateCanTakePill 완료")
             },
             onError: { error in
                 print("❌ UseCase 에러: \(error)")
