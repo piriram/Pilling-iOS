@@ -20,7 +20,7 @@ final class DashboardSheetViewController: UIViewController {
     
     private var currentStatus: PillStatus?
     var titleText: String?
-    
+    private typealias str = AppStrings.Dashboard
     // MARK: - Bottom Sheet Properties
     
     private let sheetHeight: CGFloat = 350
@@ -105,9 +105,9 @@ final class DashboardSheetViewController: UIViewController {
         return stack
     }()
     
-    private lazy var notTakenButton = createStatusButton(title: "미복용", tag: 0)
-    private lazy var takenButton = createStatusButton(title: "복용", tag: 1)
-    private lazy var takenDoubleButton = createStatusButton(title: "2알 복용", tag: 2)
+    private lazy var notTakenButton = createStatusButton(title: str.guideMissed, tag: 0)
+    private lazy var takenButton = createStatusButton(title: str.taken, tag: 1)
+    private lazy var takenDoubleButton = createStatusButton(title: str.takenDouble, tag: 2)
     
     private var selectedButtonTag: Int = -1
     
