@@ -134,9 +134,10 @@ struct PillingDailyWidgetProvider: TimelineProvider {
         let targetDate = calendar.startOfDay(for: date)
         
         guard let days = calendar.dateComponents([.day], from: startDate, to: targetDate).day else {
-            return 1
+           print("day 없음")
+            return 0
         }
-        
+        print("days:\(days)")
         return days + 1 // 1일차부터 시작
     }
 }

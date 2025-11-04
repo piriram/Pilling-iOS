@@ -15,7 +15,7 @@ import SnapKit
 final class PillSettingViewController: UIViewController {
     
     // MARK: - Properties
-    
+    private typealias str = AppStrings.PillSetting
     private let viewModel: PillSettingViewModel
     private let disposeBag = DisposeBag()
     
@@ -30,7 +30,7 @@ final class PillSettingViewController: UIViewController {
     
     private let mainTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "복용하고 계신 약을 알려주세요!"
+        label.text = str.mainTitle
         label.font = Typography.headline3(.bold)
         label.textColor = AppColor.textBlack
         label.textAlignment = .left
@@ -39,7 +39,7 @@ final class PillSettingViewController: UIViewController {
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "설정은 추후에 변경가능합니다."
+        label.text = str.subtitle
         label.font = Typography.body2(.regular)
         label.textColor = .gray
         label.textAlignment = .left
@@ -48,19 +48,19 @@ final class PillSettingViewController: UIViewController {
     
     private let pillTypeButton: SettingItemButton = {
         let button = SettingItemButton()
-        button.configure(title: "약 종류", iconSystemName: "pills")
+        button.configure(title: str.btnTitle, iconSystemName: "pills")
         return button
     }()
     
     private let currentDaysButton: SettingItemButton = {
         let button = SettingItemButton()
-        button.configure(title: "복용 시작 날짜", iconSystemName: "calendar")
+        button.configure(title: str.ctnBtnTitle, iconSystemName: "calendar")
         return button
     }()
     
     private let nextButton: PrimaryActionButton = {
         let button = PrimaryActionButton()
-        button.setTitle("다음으로", for: .normal)
+        button.setTitle(str.nextBtnTitle, for: .normal)
         button.isEnabled = false
         return button
     }()
@@ -135,7 +135,7 @@ final class PillSettingViewController: UIViewController {
     }
     
     private func configureNavigationBar() {
-        navigationItem.title = "약 설정"
+        navigationItem.title = str.navTitle
         navigationItem.hidesBackButton = false
         navigationItem.backButtonDisplayMode = .default
     }
@@ -202,12 +202,12 @@ final class PillSettingViewController: UIViewController {
     }
     
     // MARK: - Private Methods
-    
     private func presentDatePickerBottomSheet() {
         let datePickerVC = DatePickerBottomSheetViewController()
         
+        // Signal은 emit(to:) 사용
         datePickerVC.selectedDate
-            .bind(to: viewModel.input.dateSelected)
+            .emit(to: viewModel.input.dateSelected)
             .disposed(by: disposeBag)
         
         present(datePickerVC, animated: false)
@@ -224,8 +224,10 @@ final class PillSettingViewController: UIViewController {
     }
     
     private func presentAlert(message: String) {
-        let alert = UIAlertController(title: "알림", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        let alert = UIAlertController(title: AppStrings.Common.alertTitle, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: AppStrings.Common.okBtnTitle, style: .default, handler: nil))
         present(alert, animated: true)
+        
+        
     }
 }

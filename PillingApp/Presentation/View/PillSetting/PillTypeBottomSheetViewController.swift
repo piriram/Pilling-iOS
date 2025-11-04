@@ -19,7 +19,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
     private let selectedPillInfo = PublishSubject<PillInfo>()
-    
+    private typealias str = AppStrings.PillSetting
     var pillInfoSelected: Observable<PillInfo> {
         return selectedPillInfo.asObservable()
     }
@@ -59,7 +59,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "복용 정보 입력"
+        label.text = str.titleLabel
         label.font = .systemFont(ofSize: 20, weight: .bold)
         label.textColor = .black
         return label
@@ -67,7 +67,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let pillNameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "약 이름"
+        textField.placeholder = str.nameTitle
         textField.font = .systemFont(ofSize: 16, weight: .regular)
         textField.borderStyle = .none
         textField.backgroundColor = UIColor(white: 0.97, alpha: 1.0)
@@ -81,7 +81,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let takingDaysLabel: UILabel = {
         let label = UILabel()
-        label.text = "복용일"
+        label.text = str.takingDays
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .black
         return label
@@ -89,7 +89,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let takingDaysButton: UIButton = {
         let button = UIButton()
-        button.setTitle("24일", for: .normal)
+        button.setTitle(str.takingBtn, for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
         button.backgroundColor = UIColor(white: 0.97, alpha: 1.0)
@@ -100,7 +100,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let breakDaysLabel: UILabel = {
         let label = UILabel()
-        label.text = "휴약일"
+        label.text = str.breakLabel
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .black
         return label
@@ -108,7 +108,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let breakDaysButton: UIButton = {
         let button = UIButton()
-        button.setTitle("4일", for: .normal)
+        button.setTitle(str.breakDay, for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
         button.backgroundColor = UIColor(white: 0.97, alpha: 1.0)
@@ -119,7 +119,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     
     private let warningLabel: UILabel = {
         let label = UILabel()
-        label.text = "복용일과 휴약일의 합은 28일 이하여야 해요."
+        label.text = str.warningLabel
         label.font = .systemFont(ofSize: 13, weight: .regular)
         label.textColor = .systemRed
         label.numberOfLines = 0
@@ -204,7 +204,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
         containerView.addSubview(breakDaysButton)
         containerView.addSubview(warningLabel)
         containerView.addSubview(confirmButton)
-        confirmButton.setTitle("설정 완료", for: .normal)
+        confirmButton.setTitle(str.settingComplete, for: .normal)
         
         selectedTakingDaysRelay.accept(selectedTakingDays)
         selectedBreakDaysRelay.accept(selectedBreakDays)
@@ -307,13 +307,13 @@ final class PillTypeBottomSheetViewController: UIViewController {
         }
         
         let doneButton = UIBarButtonItem(
-            title: "완료",
+            title: AppStrings.Common.confirmTitle,
             style: .done,
             target: self,
             action: #selector(pickerDoneButtonTapped)
         )
         let cancelButton = UIBarButtonItem(
-            title: "취소",
+            title: AppStrings.Common.cancelTitle,
             style: .plain,
             target: self,
             action: #selector(pickerCancelButtonTapped)

@@ -49,8 +49,9 @@ final class DashboardViewModel {
         self.userDefaultsManager = userDefaultsManager
         self.settingsRepository = settingsRepository
         
-        loadPillInfo()
+        
         loadDashboardData()
+        loadPillInfo()
     }
     
     // MARK: - Private Methods
@@ -85,6 +86,8 @@ final class DashboardViewModel {
     private func loadPillInfo() {
         if let info = userDefaultsManager.loadPillInfo() {
             pillInfo.accept(info)
+        } else{
+            print("pillInfo 불로오기 실패")
         }
     }
     
@@ -109,9 +112,7 @@ final class DashboardViewModel {
                 
                 // 현재 사이클의 scheduledTime도 업데이트
                 if var cycle = self.currentCycle.value {
-                    let formatter = DateFormatter()
-                    formatter.dateFormat = "HH:mm"
-                    cycle.scheduledTime = formatter.string(from: settings.scheduledTime)
+                    cycle.scheduledTime = settings.scheduledTime.formatted(style: .time24Hour)
                     self.currentCycle.accept(cycle)
                     self.updateItems()
                 }
@@ -260,20 +261,43 @@ final class DashboardViewModel {
     
     /// Dashboard 화면 진입 시 현재 날짜 기준으로 UI를 갱신
     func refreshForCurrentDate() {
-        updateItems()
-        updateDashboardMessage()
-        updateCanTakePill()
-        autoMarkPastScheduledAsMissed()
+        guard let cycle = currentCycle.value else {
+            updateItems()
+            updateDashboardMessage()
+            updateCanTakePill()
+            return
+        }
+        
+        let now = Date()
+        let startOfToday = calendar.startOfDay(for: now)
+        
+        // 과거에 scheduled 상태인 레코드가 있는지 확인
+        let hasPastScheduled = cycle.records.contains { record in
+            record.scheduledDateTime < startOfToday && record.status == .scheduled
+        }
+        
+        if hasPastScheduled {
+            // 과거 scheduled를 먼저 missed로 변환
+            // UI 업데이트는 autoMarkPastScheduledAsMissed의 subscribe에서 자동으로 처리됨
+            autoMarkPastScheduledAsMissed()
+        } else {
+            // 과거 scheduled가 없으면 바로 UI 업데이트
+            updateItems()
+            updateDashboardMessage()
+            updateCanTakePill()
+        }
     }
     
     /// 설정 변경 후 화면 복귀 시 최신 설정 및 사이클 데이터 다시 로드
     func reloadData() {
         loadDashboardData()
+//        loadPillInfo()
     }
     
     /// 설정 변경 후 UI 업데이트 (설정값만 다시 로드)
     func refreshSettings() {
         reloadSettings()
+        
     }
     
     func takePill() {
@@ -313,15 +337,6 @@ final class DashboardViewModel {
             return
         }
         
-        print("🔄 updateState 시작: index=\(index), newStatus=\(newStatus), memo=\(memo ?? "없음")")
-        print("📦 현재 cycle.records 개수: \(cycle.records.count)")
-        
-        if index < cycle.records.count {
-            print("📝 변경 전 상태: \(cycle.records[index].status)")
-        } else {
-            print("⚠️ index가 범위를 벗어남: \(index) >= \(cycle.records.count)")
-        }
-        
         updatePillStatusUseCase.execute(
             cycle: cycle,
             recordIndex: index,
@@ -330,23 +345,17 @@ final class DashboardViewModel {
         )
         .subscribe(
             onNext: { [weak self] updatedCycle in
-                print("✅ UseCase 완료: updatedCycle 수신")
                 
                 if index < updatedCycle.records.count {
-                    print("📝 변경 후 상태: \(updatedCycle.records[index].status)")
                 }
                 
                 self?.currentCycle.accept(updatedCycle)
-                print("🔄 currentCycle 업데이트 완료")
                 
                 self?.updateItems()
-                print("🔄 updateItems 완료")
                 
                 self?.updateDashboardMessage()
-                print("🔄 updateDashboardMessage 완료")
                 
                 self?.updateCanTakePill()
-                print("🔄 updateCanTakePill 완료")
             },
             onError: { error in
                 print("❌ UseCase 에러: \(error)")

@@ -205,7 +205,7 @@ final class DashboardInfoView: UIView {
         let daysSinceStart = calendar.dateComponents([.day], from: cycle.startDate, to: now).day ?? 0
         let currentDay = daysSinceStart + 1
         
-        progressLabel.text = "\(currentDay)일차"
+        progressLabel.text = daysSinceStart < 0 ? "시작전": "\(currentDay)일차"
         progressLabel.textColor = AppColor.textBlack
         totalLabel.text = "/\(cycle.totalDays)"
         timeLabel.text = cycle.scheduledTime
@@ -213,6 +213,7 @@ final class DashboardInfoView: UIView {
     
     func configure(with pillInfo: PillInfo) {
         dateLabel.text = "\(pillInfo.takingDays)/\(pillInfo.breakDays)"
+        print("pillInfo:\(pillInfo.takingDays)")
     }
     
     func configure(with message: DashboardMessage) {

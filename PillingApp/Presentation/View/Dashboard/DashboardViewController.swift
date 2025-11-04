@@ -66,9 +66,7 @@ final class DashboardViewController: UIViewController {
         extendedLayoutIncludesOpaqueBars = true
         edgesForExtendedLayout = [.top, .left, .right, .bottom]
         
-        viewModel.refreshSettings()
-        viewModel.refreshForCurrentDate()
-    }
+        viewModel.reloadData()    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -260,7 +258,7 @@ final class DashboardViewController: UIViewController {
     }
     
     private func presentInfoFloatingView() {
-        let infoView = DashboardFloatingGuideView()
+        let infoView = DashboardGuideView()
         infoView.onConfirm = { [weak infoView] in
             infoView?.dismiss()
         }
