@@ -161,7 +161,6 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
     func deleteAllCycles() -> Observable<Void> {
         return coreDataManager.deleteAll(entityType: PillCycleEntity.self)
             .do(onNext: {
-                // ⭐️ 위젯 업데이트
                 WidgetCenter.shared.reloadAllTimelines()
                 print("🗑️ 모든 사이클 삭제 완료 - 위젯 업데이트")
             })
@@ -179,5 +178,29 @@ final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
             .map { entities in
                 return entities.map { $0.toDomain() }
             }
+    }
+    
+    func fetchCycle(by id: UUID) -> Observable<PillCycle?> {
+        return Observable.create { [weak self] observer in
+            guard let self = self else {
+                observer.onError(CoreDataError.contextNotAvailable)
+                return Disposables.create()
+            }
+            
+            let context = self.coreDataManager.viewContext
+            let fetchRequest: NSFetchRequest<PillCycleEntity> = NSFetchRequest(entityName: "PillCycleEntity")
+            fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+            
+            do {
+                let results = try context.fetch(fetchRequest)
+                let cycle = results.first?.toDomain()
+                observer.onNext(cycle)
+                observer.onCompleted()
+            } catch {
+                observer.onError(CoreDataError.fetchFailed(error))
+            }
+            
+            return Disposables.create()
+        }
     }
 }
