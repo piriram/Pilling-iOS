@@ -63,10 +63,11 @@ final class TimePickerBottomSheet: UIViewController {
     
     // MARK: - Initialization
     
-    init() {
+    init(initialTime: Date = Date()) {
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
+        datePicker.date = initialTime
     }
     
     required init?(coder: NSCoder) {
@@ -201,4 +202,3 @@ final class TimePickerBottomSheet: UIViewController {
         }
     }
 }
-

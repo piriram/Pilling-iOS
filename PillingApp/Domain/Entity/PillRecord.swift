@@ -8,7 +8,7 @@
 import Foundation
 // MARK: - PillInfo
 
-struct PillInfo {
+struct PillInfo: Codable{
     let name: String
     let takingDays: Int
     let breakDays: Int

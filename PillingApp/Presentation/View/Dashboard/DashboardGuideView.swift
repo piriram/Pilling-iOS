@@ -3,10 +3,10 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-final class DashboardFloatingGuideView: UIView {
+final class DashboardGuideView: UIView {
     // MARK: - Constants
     private let commonHorizontalInset: CGFloat = 30
-    
+    private typealias str = AppStrings.Dashboard
     // Public
     var onConfirm: (() -> Void)?
     
@@ -64,11 +64,11 @@ final class DashboardFloatingGuideView: UIView {
         floatingCardView.layer.cornerRadius = 30
         floatingCardView.layer.masksToBounds = true
         
-        titleLabel.text = "필링 가이드"
+        titleLabel.text = str.guideTitle
         titleLabel.font = Typography.body1(.bold)
         titleLabel.textColor = AppColor.textBlack
         
-        subtitleLabel.text = "피임약 복용 상태를 잔디로 알려드려요!"
+        subtitleLabel.text = str.guideSubtitle
         subtitleLabel.font = Typography.body2(.regular)
         subtitleLabel.textColor = AppColor.secondary
         
@@ -76,14 +76,14 @@ final class DashboardFloatingGuideView: UIView {
         guideStackView.spacing = 16
         guideStackView.alignment = .leading
         
-        let guideItem1 = makeGuideItemWithCalendarCell(status: .taken, text: "피임약 복용")
-        let guideItem2 = makeGuideItemWithCalendarCell(status: .takenDouble, text: "피임약 2알 복용")
-        let guideItem3 = makeGuideItemWithCalendarCell(status: .missed, text: "미복용")
-        let guideItem4 = makeGuideItemWithCalendarCell(status: .todayNotTaken, text: "현재")
+        let guideItem1 = makeGuideItemWithCalendarCell(status: .taken, text: str.guideTaken)
+        let guideItem2 = makeGuideItemWithCalendarCell(status: .takenDouble, text: str.guideTakenDouble)
+        let guideItem3 = makeGuideItemWithCalendarCell(status: .missed, text: str.guideMissed)
+        let guideItem4 = makeGuideItemWithCalendarCell(status: .todayNotTaken, text: str.guideToday)
         
         [guideItem1, guideItem2, guideItem3, guideItem4].forEach { guideStackView.addArrangedSubview($0) }
         
-        confirmButton.setTitle("확인", for: .normal)
+        confirmButton.setTitle(str.guideConfirmButton, for: .normal)
         confirmButton.setTitleColor(AppColor.secondary, for: .normal)
         confirmButton.backgroundColor = .clear
         confirmButton.layer.cornerRadius = 12
