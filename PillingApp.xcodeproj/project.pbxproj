@@ -84,6 +84,7 @@
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillRecord.swift,
 				Domain/Entity/PillStatus.swift,
+				Domain/Entity/SetupError.swift,
 				Domain/UseCase/CalculateMessageUseCase.swift,
 				Infra/SystemTimeProvider.swift,
 			);
