@@ -14,6 +14,7 @@ enum AppStrings{
         static let okBtnTitle = "확인"
         static let errorTitle = "오류"
         static let cancelTitle = "취소"
+        static let confirmTitle = "완료"
     }
     
     enum PillSetting{
@@ -23,6 +24,14 @@ enum AppStrings{
         static let ctnBtnTitle = "복용 시작 날짜"
         static let nextBtnTitle = "다음으로"
         static let navTitle = "약 설정"
+        static let nameTitle = "약 이름(선택 사항)"
+        static let takingDays = "복용일"
+        static let takingBtn = "24일" 
+        static let breakLabel = "휴약일"
+        static let breakDay = "4일"
+        static let warningLabel = "복용일과 휴약일의 합은 28일 이하여야 해요."
+        static let settingComplete = "설정 완료"
+        static let titleLabel = "복용 정보 입력"
     }
     enum SettingFloating{
         static let titleLabel = "설정 완료!"

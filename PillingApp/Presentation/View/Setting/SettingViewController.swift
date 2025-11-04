@@ -17,6 +17,7 @@ final class SettingViewController: UIViewController {
     private let viewModel: SettingViewModel
     private let disposeBag = DisposeBag()
     private let contentInset: CGFloat = 16
+    private var currentScheduledTime: Date = Date()
     
     // MARK: - UI Components
     
@@ -184,7 +185,7 @@ final class SettingViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: false)
-
+        
         // Configure white navigation bar appearance
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -192,7 +193,7 @@ final class SettingViewController: UIViewController {
         appearance.backgroundColor = .white
         appearance.titleTextAttributes = [.foregroundColor: UIColor.black]
         appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
-
+        
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
@@ -201,7 +202,7 @@ final class SettingViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-
+        
         // Restore default appearance (system background) so other screens are unaffected
         let defaultAppearance = UINavigationBarAppearance()
         defaultAppearance.configureWithDefaultBackground()
@@ -335,6 +336,7 @@ final class SettingViewController: UIViewController {
     // MARK: - Private Methods
     
     private func updateUI(with settings: UserSettings) {
+        currentScheduledTime = settings.scheduledTime
         let timeLabel = timeSettingButton.viewWithTag(100) as? UILabel
         timeLabel?.text = settings.scheduledTime.formatted(style: .timeShort)
         let messageLabel = messageSettingButton.viewWithTag(101) as? UILabel
@@ -342,7 +344,7 @@ final class SettingViewController: UIViewController {
     }
     
     private func showTimePicker() {
-        let bottomSheet = TimePickerBottomSheet()
+        let bottomSheet = TimePickerBottomSheet(initialTime: currentScheduledTime)
         
         bottomSheet.selectedTime
             .take(1)
@@ -494,4 +496,3 @@ final class SettingViewController: UIViewController {
         }
     }
 }
-
