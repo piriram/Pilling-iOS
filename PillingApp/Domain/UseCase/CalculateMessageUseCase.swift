@@ -25,6 +25,11 @@ final class CalculateMessageUseCase {
             return MessageType.empty.toResult()
         }
         
+        // 복용 시작일 이전 체크
+        if date < cycle.startDate {
+            return makeBeforeStartMessage(startDate: cycle.startDate, currentDate: date)
+        }
+        
         guard let todayRecord = findRelevantRecord(in: cycle, for: date) else {
             // 오늘 레코드가 없는데 어제 레코드가 12시간 초과한 경우 체크
             if let yesterdayRecord = findYesterdayRecord(in: cycle, from: date) {
@@ -145,6 +150,36 @@ final class CalculateMessageUseCase {
     }
     
     // MARK: - Private Methods
+    
+    private func makeBeforeStartMessage(startDate: Date, currentDate: Date) -> MessageResult {
+        let calendar = timeProvider.calendar
+        let components = calendar.dateComponents([.day], from: currentDate, to: startDate)
+        
+        guard let daysUntilStart = components.day else {
+            return customMessage(
+                text: "복용 시작일이 다가오고 있어요",
+                characterImage: "icon_plant",
+                icon: "rest",
+                background: "widget_background_normal"
+            )
+        }
+        
+        let messageText: String
+        if daysUntilStart == 0 {
+            messageText = "오늘부터 복용을 시작해요"
+        } else if daysUntilStart == 1 {
+            messageText = "내일부터 복용을 시작해요"
+        } else {
+            messageText = "복용 시작까지 \(daysUntilStart)일 남았어요"
+        }
+        
+        return customMessage(
+            text: messageText,
+            characterImage: "icon_plant",
+            icon: "rest",
+            background: "widget_background_normal"
+        )
+    }
     
     private func customMessage(
         text: String,

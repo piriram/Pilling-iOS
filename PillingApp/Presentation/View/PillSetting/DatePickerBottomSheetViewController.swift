@@ -165,10 +165,9 @@ final class DatePickerBottomSheetViewController: UIViewController {
         datePicker.addGestureRecognizer(datePickerTapGesture)
         
         datePickerTapGesture.rx.event
-            .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] _ in
-                guard let self = self else { return }
-                self.viewModel.input.dateChanged.onNext(self.datePicker.date)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] gesture in
+                self?.handleDatePickerTap(gesture)
             })
             .disposed(by: disposeBag)
     }
@@ -251,6 +250,13 @@ final class DatePickerBottomSheetViewController: UIViewController {
     }
     
     // MARK: - Gesture Handling
+
+    private func isDateCellButton(_ view: UIView) -> Bool {
+        let viewClassName = String(describing: type(of: view))
+        return viewClassName.contains("Button") &&
+               !viewClassName.contains("Month") &&
+               !viewClassName.contains("Year")
+    }
     
     private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
@@ -289,5 +295,21 @@ final class DatePickerBottomSheetViewController: UIViewController {
                 self.containerView.transform = .identity
             }
         }
+    }
+    
+    private func handleDatePickerTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: datePicker)
+        
+        // datePicker 내부의 뷰 계층을 탐색하여 날짜 셀이 탭되었는지 확인
+        guard let tappedView = datePicker.hitTest(location, with: nil) else { return }
+        
+        // 월 변경 버튼(UIButton) 제외 - 날짜 셀만 선택으로 처리
+        let viewDescription = String(describing: type(of: tappedView))
+        if viewDescription.contains("Button") {
+            return
+        }
+        
+        // 날짜가 선택되었을 때만 dismiss
+        viewModel.input.dateChanged.onNext(datePicker.date)
     }
 }
