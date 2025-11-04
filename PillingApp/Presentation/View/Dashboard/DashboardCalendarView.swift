@@ -11,7 +11,7 @@ import SnapKit
 final class DashboardCalendarView: UIView {
     
     // MARK: - Properties
-    
+    private typealias str = AppStrings.Dashboard
     private var dataSource: UICollectionViewDiffableDataSource<Int, DayItem>!
     var onCellSelected: ((Int, DayItem) -> Void)?
     
@@ -60,7 +60,7 @@ final class DashboardCalendarView: UIView {
         weekdayStackView.distribution = .fillEqually
         weekdayStackView.spacing = 0
         
-        ["월", "화", "수", "목", "금", "토", "일"].forEach { weekdayText in
+        str.weekdays.forEach { weekdayText in
             let containerView = UIView()
             let label = UILabel()
             label.text = weekdayText
@@ -121,7 +121,7 @@ final class DashboardCalendarView: UIView {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: startDate)
         
-        let baseWeekdays = ["월", "화", "수", "목", "금", "토", "일"]
+        let baseWeekdays = str.weekdays
         
         let startIndex: Int = {
             switch weekday {

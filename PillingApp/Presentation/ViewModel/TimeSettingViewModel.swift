@@ -94,18 +94,13 @@ final class TimeSettingViewModel {
     // MARK: - Private Methods
     
     private func completeSetup() -> Observable<Void> {
-        // 1. UserDefaults에서 약 정보 로드
         guard let pillInfo = userDefaultsManager.loadPillInfo(),
               let startDate = userDefaultsManager.loadPillStartDate() else {
             return .error(SetupError.missingPillInfo)
         }
         
-        // 2. 시간을 "HH:mm" 형식 문자열로 변환
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        let scheduledTimeString = timeFormatter.string(from: selectedTime.value)
+        let scheduledTimeString = selectedTime.value.formatted(style: .time24Hour)
         
-        // 3. PillCycle 생성 및 CoreData 저장
         return createPillCycleUseCase.execute(
             pillInfo: pillInfo,
             startDate: startDate,
@@ -113,7 +108,6 @@ final class TimeSettingViewModel {
         )
         .flatMap { [weak self] _ -> Observable<Void> in
             guard let self = self else { return .empty() }
-            // 4. 알림 설정 및 UserSettings 저장
             return self.setupNotificationAndSaveSettings()
         }
     }
@@ -181,11 +175,5 @@ final class TimeSettingViewModel {
         
         return "오류가 발생했습니다.\n다시 시도해주세요."
     }
-}
-
-// MARK: - SetupError
-
-enum SetupError: Error {
-    case missingPillInfo
 }
 

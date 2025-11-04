@@ -11,7 +11,7 @@ import SnapKit
 final class DashboardBottomView: UIView {
     
     // MARK: - UI Components
-    
+    private typealias str = AppStrings.Dashboard
     let pageControl = UIPageControl()
     let takePillButton = UIButton(type: .system)
     
@@ -36,7 +36,7 @@ final class DashboardBottomView: UIView {
         pageControl.isUserInteractionEnabled = false
         pageControl.hidesForSinglePage = true
         
-        takePillButton.setTitle("잔디 심기", for: .normal)
+        takePillButton.setTitle(str.takePillButton, for: .normal)
         takePillButton.setTitleColor(.label, for: .normal)
         takePillButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
         takePillButton.backgroundColor = AppColor.pillGreen200
@@ -86,19 +86,19 @@ final class DashboardBottomView: UIView {
         }
         
         if case .rest = todayRecord.status {
-            takePillButton.setTitle("휴약 기간", for: .normal)
+            takePillButton.setTitle(str.restPeriod, for: .normal)
             takePillButton.backgroundColor = AppColor.pillWhite
             takePillButton.isEnabled = false
         } else if todayRecord.status.isTaken {
-            takePillButton.setTitle("심기 완료!", for: .normal)
+            takePillButton.setTitle(str.takePillCompleted, for: .normal)
             takePillButton.backgroundColor = AppColor.notYetGray
             takePillButton.isEnabled = false
         } else if canTake {
-            takePillButton.setTitle("잔디 심기", for: .normal)
+            takePillButton.setTitle(str.takePillButton, for: .normal)
             takePillButton.backgroundColor = AppColor.pillGreen200
             takePillButton.isEnabled = true
         } else {
-            takePillButton.setTitle("잔디 심기", for: .normal)
+            takePillButton.setTitle(str.takePillButton, for: .normal)
             takePillButton.backgroundColor = AppColor.pillGreen200
             takePillButton.isEnabled = true
         }

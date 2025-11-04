@@ -13,7 +13,7 @@ import RxCocoa
 final class SettingCompleteFloatingView: UIView {
     
     // MARK: - Properties
-    
+    private typealias str = AppStrings.SettingFloating
     var onAutoDismiss: (() -> Void)?
     
     private let disposeBag = DisposeBag()
@@ -44,7 +44,7 @@ final class SettingCompleteFloatingView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "설정 완료!"
+        label.text = str.titleLabel
         label.font = Typography.headline2(.bold)
         label.textColor = AppColor.textBlack
         label.textAlignment = .center
@@ -53,7 +53,7 @@ final class SettingCompleteFloatingView: UIView {
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "매일 알림을 보내드릴게요"
+        label.text = str.subTitleLabel
         label.font = Typography.body2(.regular)
         label.textColor = AppColor.secondary
         label.textAlignment = .center

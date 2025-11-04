@@ -18,65 +18,67 @@ final class DIContainer {
         return CoreDataManager.shared
     }()
     
-    // MARK: - Time Provider (추가)
+    // MARK: - Time Provider
     
     lazy var timeProvider: TimeProvider = {
         SystemTimeProvider()
     }()
     
-    // MARK: - Managers
+    // MARK: - Managers (⭐️ Singleton으로 변경)
     
-    func makeNotificationManager() -> NotificationManagerProtocol {
-        return LocalNotificationManager()
-    }
-    
-    func makeUserDefaultsManager() -> UserDefaultsManagerProtocol {
+    private lazy var userDefaultsManager: UserDefaultsManagerProtocol = {
         return UserDefaultsManager()
-    }
+    }()
     
-    // MARK: - Repositories
+    private lazy var notificationManager: NotificationManagerProtocol = {
+        return LocalNotificationManager()
+    }()
     
-    func makePillCycleRepository() -> PillCycleRepositoryProtocol {
+    // MARK: - Repositories (⭐️ Singleton으로 변경)
+    
+    private lazy var cycleRepository: PillCycleRepositoryProtocol = {
         return CoreDataPillCycleRepository(coreDataManager: coreDataManager)
-    }
+    }()
     
-    func makeUserSettingsRepository() -> UserSettingsRepositoryProtocol {
+    private lazy var settingsRepository: UserSettingsRepositoryProtocol = {
         return UserDefaultsUserSettingsRepository()
-    }
+    }()
     
     // MARK: - UseCases
     
     func makeFetchDashboardDataUseCase() -> FetchDashboardDataUseCaseProtocol {
         return FetchDashboardDataUseCase(
-            cycleRepository: makePillCycleRepository(),
-            settingsRepository: makeUserSettingsRepository()
+            cycleRepository: cycleRepository,
+            settingsRepository: settingsRepository,
+            userDefaultsManager: userDefaultsManager
         )
     }
     
     func makeTakePillUseCase() -> TakePillUseCaseProtocol {
         return TakePillUseCase(
-            cycleRepository: makePillCycleRepository(),
-            timeProvider: timeProvider  // 추가
+            cycleRepository: cycleRepository,
+            timeProvider: timeProvider
         )
     }
     
     func makeUpdatePillStatusUseCase() -> UpdatePillStatusUseCaseProtocol {
         return UpdatePillStatusUseCase(
-            cycleRepository: makePillCycleRepository(),
-            timeProvider: timeProvider  // 추가
+            cycleRepository: cycleRepository,
+            timeProvider: timeProvider
         )
     }
     
     func makeCalculateDashboardMessageUseCase() -> CalculateDashboardMessageUseCaseProtocol {
         return CalculateDashboardMessageUseCase(
-            timeProvider: timeProvider  // 추가
+            timeProvider: timeProvider
         )
     }
     
     func makeCreatePillCycleUseCase() -> CreatePillCycleUseCaseProtocol {
         return CreatePillCycleUseCase(
-            cycleRepository: makePillCycleRepository(),
-            timeProvider: timeProvider  // 추가
+            cycleRepository: cycleRepository,
+            timeProvider: timeProvider,
+            userDefaultsManager: userDefaultsManager
         )
     }
     
@@ -88,20 +90,20 @@ final class DIContainer {
             takePillUseCase: makeTakePillUseCase(),
             updatePillStatusUseCase: makeUpdatePillStatusUseCase(),
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase(),
-            userDefaultsManager: makeUserDefaultsManager(),
-            settingsRepository: makeUserSettingsRepository()  // 추가
+            userDefaultsManager: userDefaultsManager,
+            settingsRepository: settingsRepository
         )
     }
     
     func makePillSettingViewModel() -> PillSettingViewModel {
-        return PillSettingViewModel(userDefaultsManager: makeUserDefaultsManager())
+        return PillSettingViewModel(userDefaultsManager: userDefaultsManager)
     }
     
     func makeTimeSettingViewModel() -> TimeSettingViewModel {
         return TimeSettingViewModel(
-            settingsRepository: makeUserSettingsRepository(),
-            notificationManager: makeNotificationManager(),
-            userDefaultsManager: makeUserDefaultsManager(),
+            settingsRepository: settingsRepository,
+            notificationManager: notificationManager,
+            userDefaultsManager: userDefaultsManager,
             createPillCycleUseCase: makeCreatePillCycleUseCase()
         )
     }
@@ -113,10 +115,10 @@ final class DIContainer {
     
     func makeSettingViewModel() -> SettingViewModel {
         return SettingViewModel(
-            settingsRepository: makeUserSettingsRepository(),
-            notificationManager: makeNotificationManager(),
-            pillCycleRepository: makePillCycleRepository(),
-            userDefaultsManager: makeUserDefaultsManager()
+            settingsRepository: settingsRepository,
+            notificationManager: notificationManager,
+            pillCycleRepository: cycleRepository,
+            userDefaultsManager: userDefaultsManager
         )
     }
     
@@ -130,5 +132,12 @@ final class DIContainer {
     func makePillCycleHistoryViewModel() -> PillCycleHistoryViewModel {
         return PillCycleHistoryViewModel(context: coreDataManager.viewContext)
     }
+    
+    func getPillCycleRepository() -> PillCycleRepositoryProtocol {
+           return cycleRepository
+       }
+       
+       func getUserDefaultsManager() -> UserDefaultsManagerProtocol {
+           return userDefaultsManager
+       }
 }
-
