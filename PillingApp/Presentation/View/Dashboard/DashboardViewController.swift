@@ -26,7 +26,7 @@ final class DashboardViewController: UIViewController {
     
     // MARK: - Properties
     
-    var shouldHideHistoryButton: Bool = false {
+    var shouldHideHistoryButton: Bool = true {
         didSet {
             infoView.historyButton.isHidden = shouldHideHistoryButton
             infoView.historyButton.isEnabled = !shouldHideHistoryButton
@@ -66,9 +66,7 @@ final class DashboardViewController: UIViewController {
         extendedLayoutIncludesOpaqueBars = true
         edgesForExtendedLayout = [.top, .left, .right, .bottom]
         
-        viewModel.refreshSettings()
-        viewModel.refreshForCurrentDate()
-    }
+        viewModel.reloadData()    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)

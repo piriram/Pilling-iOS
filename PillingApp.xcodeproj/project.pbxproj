@@ -81,6 +81,7 @@
 				"Common/Extension/PillRecordEntity+.swift",
 				Domain/Entity/MessageResult.swift,
 				Domain/Entity/PillCycle.swift,
+				Domain/Entity/PillCycleError.swift,
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillRecord.swift,
 				Domain/Entity/PillStatus.swift,

@@ -45,7 +45,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func checkExistingCycle(completion: @escaping (Bool) -> Void) {
-        let repository = DIContainer.shared.makePillCycleRepository()
+        let repository = DIContainer.shared.getPillCycleRepository()
         
         repository.fetchCurrentCycle()
             .subscribe(onNext: { cycle in

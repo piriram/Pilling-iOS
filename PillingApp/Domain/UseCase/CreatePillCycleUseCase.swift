@@ -24,13 +24,16 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
     
     private let cycleRepository: PillCycleRepositoryProtocol
     private let timeProvider: TimeProvider
+    private let userDefaultsManager: UserDefaultsManagerProtocol
     
     init(
         cycleRepository: PillCycleRepositoryProtocol,
-        timeProvider: TimeProvider
+        timeProvider: TimeProvider,
+        userDefaultsManager: UserDefaultsManagerProtocol
     ) {
         self.cycleRepository = cycleRepository
         self.timeProvider = timeProvider
+        self.userDefaultsManager = userDefaultsManager
     }
     
     func execute(
@@ -49,7 +52,16 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
                 scheduledTime: scheduledTime
             )
             
+            print("🆕 새 사이클 생성 - ID: \(cycle.id), StartDate: \(startDate)")
+            
+            // 새 사이클 ID 저장
+            self.userDefaultsManager.saveCurrentCycleID(cycle.id)
+            print("💾 currentCycleID 저장: \(cycle.id)")
+            
             return self.cycleRepository.saveCycle(cycle)
+                .do(onNext: { _ in
+                    print("✅ 새 사이클 저장 완료")
+                })
                 .map { cycle }
         }
     }
@@ -109,7 +121,6 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
             records.append(record)
         }
         
-        // timeZoneIdentifier 제거 (기존 PillCycle 구조 유지)
         return PillCycle(
             id: UUID(),
             cycleNumber: 1,
@@ -148,21 +159,3 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
     }
 }
 
-// MARK: - PillCycleError
-
-enum PillCycleError: Error {
-    case deallocated
-    case invalidTimeFormat
-    case invalidDateRange
-    
-    var localizedDescription: String {
-        switch self {
-        case .deallocated:
-            return "UseCase가 해제되었습니다"
-        case .invalidTimeFormat:
-            return "시간 형식이 올바르지 않습니다"
-        case .invalidDateRange:
-            return "날짜 범위가 유효하지 않습니다"
-        }
-    }
-}

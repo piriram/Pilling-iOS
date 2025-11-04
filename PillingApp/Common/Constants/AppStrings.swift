@@ -24,7 +24,7 @@ enum AppStrings{
         static let ctnBtnTitle = "복용 시작 날짜"
         static let nextBtnTitle = "다음으로"
         static let navTitle = "약 설정"
-        static let nameTitle = "약 이름(선택 사항)"
+        static let nameTitle = "약 이름 (선택 사항)"
         static let takingDays = "복용일"
         static let takingBtn = "24일" 
         static let breakLabel = "휴약일"
@@ -76,7 +76,7 @@ enum AppStrings{
         static let guideTakenDouble = "피임약 2알 복용"
         static let guideMissed = "미복용"
         static let taken = "복용"
-        static let takenDouble = "미복용"
+        static let takenDouble = "2알 복용"
         static let guideToday = "현재"
         
         static let takePillButton = "잔디 심기"

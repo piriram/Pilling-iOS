@@ -68,7 +68,7 @@ final class DashboardGuideView: UIView {
         titleLabel.font = Typography.body1(.bold)
         titleLabel.textColor = AppColor.textBlack
         
-        subtitleLabel.text = str.guideTitle
+        subtitleLabel.text = str.guideSubtitle
         subtitleLabel.font = Typography.body2(.regular)
         subtitleLabel.textColor = AppColor.secondary
         
