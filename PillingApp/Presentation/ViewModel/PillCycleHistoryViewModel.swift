@@ -16,7 +16,7 @@ final class PillCycleHistoryViewModel {
     private let repository: PillCycleHistoryRepository
     
     init(context: NSManagedObjectContext?) {
-        self.repository = CoreDataPillCycleHistoryRepository(context: context)
+        self.repository = PillCycleHistoryRepository(context: context)
     }
     
     func loadData() {

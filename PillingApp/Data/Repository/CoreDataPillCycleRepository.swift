@@ -11,7 +11,7 @@ import WidgetKit
 
 // MARK: - CoreDataPillCycleRepository
 
-final class CoreDataPillCycleRepository: PillCycleRepositoryProtocol {
+final class PillCycleRepository: PillCycleRepositoryProtocol {
     
     private let coreDataManager: CoreDataManager
     

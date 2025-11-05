@@ -37,7 +37,7 @@ final class DIContainer {
     // MARK: - Repositories (⭐️ Singleton으로 변경)
     
     private lazy var cycleRepository: PillCycleRepositoryProtocol = {
-        return CoreDataPillCycleRepository(coreDataManager: coreDataManager)
+        return PillCycleRepository(coreDataManager: coreDataManager)
     }()
     
     private lazy var settingsRepository: UserSettingsRepositoryProtocol = {
