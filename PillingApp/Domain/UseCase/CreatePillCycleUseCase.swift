@@ -43,7 +43,7 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
     ) -> Observable<Cycle> {
         return Observable.deferred { [weak self] in
             guard let self = self else {
-                return .error(PillCycleError.deallocated)
+                return .error(CycleError.deallocated)
             }
             
             let cycle = self.createCycle(
