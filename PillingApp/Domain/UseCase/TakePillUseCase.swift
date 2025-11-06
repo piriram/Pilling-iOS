@@ -38,7 +38,7 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
         }
         
         var updatedCycle = cycle
-        var record = updatedCycle.records[todayIndex]
+        let record = updatedCycle.records[todayIndex]
         
         guard !record.status.isTaken else {
             return .just(cycle)
