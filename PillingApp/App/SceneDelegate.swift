@@ -73,7 +73,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     private func showTest() {
         
-        let pillSettingVC = RecordChartViewController(viewModel: RecordChartViewModel())
+        let pillSettingVC = StasticsViewController(viewModel: StasticsViewModel())
         let navigationController = UINavigationController(rootViewController: pillSettingVC)
         navigationController.navigationBar.isHidden = false
         window?.rootViewController = navigationController

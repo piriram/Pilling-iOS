@@ -1,33 +1,19 @@
+//
+//  StasticsViewController.swift
+//  PillingApp
+//
+//  Created by 잠만보김쥬디 on 11/6/25.
+//
+
 import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
 
-// MARK: - DTO
-struct RecordItemDTO {
-    let category: String
-    let percentage: Int
-    let days: Int
-    let colorHex: String
-}
-
-struct PeriodRecordDTO {
-    let startDate: String
-    let endDate: String
-    let completionRate: Int
-    let medicineName: String
-    let records: [RecordItemDTO]
-    let skippedCount: Int
-    let isEmpty: Bool
-}
-
-
-
-
 // MARK: - ViewController
-final class RecordChartViewController: UIViewController {
+final class StasticsViewController: UIViewController {
     
-    private let viewModel: RecordChartViewModel
+    private let viewModel: StasticsViewModel
     private let disposeBag = DisposeBag()
     
     private let viewDidLoadSubject = PublishSubject<Void>()
@@ -73,7 +59,7 @@ final class RecordChartViewController: UIViewController {
     }()
     
     // MARK: - Initialization
-    init(viewModel: RecordChartViewModel) {
+    init(viewModel: StasticsViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -145,7 +131,7 @@ final class RecordChartViewController: UIViewController {
     }
     
     private func bindViewModel() {
-        let input = RecordChartViewModel.Input(
+        let input = StasticsViewModel.Input(
             viewDidLoad: viewDidLoadSubject.asObservable(),
             leftArrowTapped: leftArrowTappedSubject.asObservable(),
             rightArrowTapped: rightArrowTappedSubject.asObservable(),
