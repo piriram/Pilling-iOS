@@ -7,8 +7,27 @@
 
 import RxSwift
 import RxCocoa
+
+// MARK: - DTO
+struct RecordItemDTO {
+    let category: String
+    let percentage: Int
+    let days: Int
+    let colorHex: String
+}
+
+struct PeriodRecordDTO {
+    let startDate: String
+    let endDate: String
+    let completionRate: Int
+    let medicineName: String
+    let records: [RecordItemDTO]
+    let skippedCount: Int
+    let isEmpty: Bool
+}
+
 // MARK: - ViewModel
-final class RecordChartViewModel {
+final class StasticsViewModel {
     
     struct Input {
         let viewDidLoad: Observable<Void>
@@ -31,7 +50,7 @@ final class RecordChartViewModel {
             startDate: "9월 1일",
             endDate: "10월 1일",
             completionRate: 85,
-            medicineName: "아조",
+            medicineName: "야즈",
             records: [
                 RecordItemDTO(category: "정시에 복용했어요", percentage: 45, days: 10, colorHex: "#99D94C"),
                 RecordItemDTO(category: "조금 늦었어요", percentage: 40, days: 9, colorHex: "#4C8033"),
@@ -44,7 +63,7 @@ final class RecordChartViewModel {
             startDate: "10월 1일",
             endDate: "11월 1일",
             completionRate: 0,
-            medicineName: "아조",
+            medicineName: "야즈",
             records: [],
             skippedCount: 0,
             isEmpty: true
