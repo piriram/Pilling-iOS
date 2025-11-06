@@ -11,21 +11,21 @@ import RxSwift
 
 protocol UpdatePillStatusUseCaseProtocol {
     func execute(
-        cycle: PillCycle,
+        cycle: Cycle,
         recordIndex: Int,
         newStatus: PillStatus,
         memo: String?
-    ) -> Observable<PillCycle>
+    ) -> Observable<Cycle>
 }
 
 // MARK: - UpdatePillStatusUseCase
 
 final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
-    private let cycleRepository: PillCycleRepositoryProtocol
+    private let cycleRepository: CycleRepositoryProtocol
     private let timeProvider: TimeProvider
     
     init(
-        cycleRepository: PillCycleRepositoryProtocol,
+        cycleRepository: CycleRepositoryProtocol,
         timeProvider: TimeProvider
     ) {
         self.cycleRepository = cycleRepository
@@ -33,11 +33,11 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
     }
     
     func execute(
-        cycle: PillCycle,
+        cycle: Cycle,
         recordIndex: Int,
         newStatus: PillStatus,
         memo: String?
-    ) -> Observable<PillCycle> {
+    ) -> Observable<Cycle> {
         guard cycle.records.indices.contains(recordIndex) else {
             return .just(cycle)
         }

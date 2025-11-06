@@ -12,7 +12,7 @@ import UIKit
 // MARK: - CalculateDashboardMessageUseCaseProtocol
 
 protocol CalculateDashboardMessageUseCaseProtocol {
-    func execute(cycle: PillCycle?) -> DashboardMessage
+    func execute(cycle: Cycle?) -> DashboardMessage
 }
 
 // MARK: - CalculateDashboardMessageUseCase
@@ -27,7 +27,7 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
         self.calculateMessageUseCase = CalculateMessageUseCase(timeProvider: timeProvider)
     }
     
-    func execute(cycle: PillCycle?) -> DashboardMessage {
+    func execute(cycle: Cycle?) -> DashboardMessage {
         // 공통 UseCase 사용
         let result = calculateMessageUseCase.execute(cycle: cycle, for: timeProvider.now)
         

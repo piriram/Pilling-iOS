@@ -26,7 +26,7 @@ final class DashboardViewModel {
     // MARK: - Outputs
     
     let settings = BehaviorRelay<UserSettings>(value: .default)
-    let currentCycle = BehaviorRelay<PillCycle?>(value: nil)
+    let currentCycle = BehaviorRelay<Cycle?>(value: nil)
     let items = BehaviorRelay<[DayItem]>(value: [])
     let dashboardMessage = BehaviorRelay<DashboardMessage?>(value: nil)
     let canTakePill = BehaviorRelay<Bool>(value: false)

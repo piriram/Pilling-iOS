@@ -1,17 +1,16 @@
 //
-//  CoreDataPillCycleRepository.swift
+//  CoreDataCycleRepository.swift
 //  PillingApp
 //
 //  Created by 잠만보김쥬디 on 10/12/25.
 //
-
+// MARK: - 복용 사이클 데이터를 rx로 다룸 & 위젯 갱신까지 책임
+// TODO: - 위젯에 새약 설정해야하는 것도 설정하기
 import CoreData
 import RxSwift
 import WidgetKit
 
-// MARK: - CoreDataPillCycleRepository
-
-final class PillCycleRepository: PillCycleRepositoryProtocol {
+final class CycleRepository: CycleRepositoryProtocol {
     
     private let coreDataManager: CoreDataManager
     
@@ -19,9 +18,8 @@ final class PillCycleRepository: PillCycleRepositoryProtocol {
         self.coreDataManager = coreDataManager
     }
     
-    // MARK: - PillCycleRepositoryProtocol
-    
-    func fetchCurrentCycle() -> Observable<PillCycle?> {
+    // MARK: - 현재 사이클 조회
+    func fetchCurrentCycle() -> Observable<Cycle?> {
         return coreDataManager
             .fetch(
                 entityType: PillCycleEntity.self,
@@ -58,7 +56,7 @@ final class PillCycleRepository: PillCycleRepositoryProtocol {
             }
     }
     
-    func saveCycle(_ cycle: PillCycle) -> Observable<Void> {
+    func saveCycle(_ cycle: Cycle) -> Observable<Void> {
         return Observable.create { [weak self] observer in
             guard let self = self else {
                 observer.onError(CoreDataError.contextNotAvailable)
@@ -94,7 +92,6 @@ final class PillCycleRepository: PillCycleRepositoryProtocol {
                 
                 try context.save()
                 
-                // ⭐️ 위젯 업데이트
                 WidgetCenter.shared.reloadAllTimelines()
                 print("💊 사이클 저장 완료 - 위젯 업데이트")
                 
@@ -122,7 +119,7 @@ final class PillCycleRepository: PillCycleRepositoryProtocol {
             cycleFetchRequest.predicate = NSPredicate(format: "id == %@", cycleID as CVarArg)
             
             do {
-                guard let cycleEntity = try context.fetch(cycleFetchRequest).first else {
+                guard let PillCycleEntity = try context.fetch(cycleFetchRequest).first else {
                     observer.onError(CoreDataError.invalidData)
                     return Disposables.create()
                 }
@@ -137,7 +134,7 @@ final class PillCycleRepository: PillCycleRepositoryProtocol {
                 } else {
                     // 새로 생성
                     let newRecordEntity = PillRecordEntity.from(domain: record, context: context)
-                    newRecordEntity.cycle = cycleEntity
+                    newRecordEntity.cycle = PillCycleEntity
                 }
                 
                 try context.save()
@@ -166,7 +163,7 @@ final class PillCycleRepository: PillCycleRepositoryProtocol {
             })
     }
     
-    func fetchAllCycles() -> Observable<[PillCycle]> {
+    func fetchAllCycles() -> Observable<[Cycle]> {
         return coreDataManager
             .fetch(
                 entityType: PillCycleEntity.self,
@@ -180,7 +177,7 @@ final class PillCycleRepository: PillCycleRepositoryProtocol {
             }
     }
     
-    func fetchCycle(by id: UUID) -> Observable<PillCycle?> {
+    func fetchCycle(by id: UUID) -> Observable<Cycle?> {
         return Observable.create { [weak self] observer in
             guard let self = self else {
                 observer.onError(CoreDataError.contextNotAvailable)

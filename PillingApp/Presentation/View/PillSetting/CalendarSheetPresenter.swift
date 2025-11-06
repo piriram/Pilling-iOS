@@ -12,7 +12,7 @@ final class CalendarSheetPresenter {
         from presenter: UIViewController,
         selectedIndex: Int,
         item: DayItem,
-        cycle: PillCycle,
+        cycle: Cycle,
         update: @escaping (Int, PillStatus, String) -> Void
     ) {
         let calendar = Calendar.current

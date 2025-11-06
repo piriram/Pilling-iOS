@@ -1,8 +1,8 @@
 import UIKit
 import SnapKit
 
-final class PillCycleHistoryCell: UITableViewCell {
-    static let reuseID = "PillCycleHistoryCell"
+final class CycleHistoryCell: UITableViewCell {
+    static let reuseID = "CycleHistoryCell"
     
     private let titleLabel = UILabel()
     private let subLabel = UILabel()
@@ -34,7 +34,7 @@ final class PillCycleHistoryCell: UITableViewCell {
         metaLabel.numberOfLines = 0
     }
     
-    func configure(with cycle: PillCycle) {
+    func configure(with cycle: Cycle) {
         titleLabel.text = "Cycle #\(cycle.cycleNumber) · 총 \(cycle.totalDays)일"
         let start = cycle.startDate.formatted(style: .yearMonthDayPoint)
         let created = cycle.createdAt.formatted(style: .yearMonthDayPoint)

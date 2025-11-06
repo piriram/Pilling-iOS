@@ -9,15 +9,15 @@ import RxSwift
 // MARK: - Domain/UseCases/FetchDashboardDataUseCase.swift
 
 protocol FetchDashboardDataUseCaseProtocol {
-    func execute() -> Observable<(cycle: PillCycle?, settings: UserSettings)>
+    func execute() -> Observable<(cycle: Cycle?, settings: UserSettings)>
 }
 final class FetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol {
-    private let cycleRepository: PillCycleRepositoryProtocol
+    private let cycleRepository: CycleRepositoryProtocol
     private let settingsRepository: UserSettingsRepositoryProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     
     init(
-        cycleRepository: PillCycleRepositoryProtocol,
+        cycleRepository: CycleRepositoryProtocol,
         settingsRepository: UserSettingsRepositoryProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol
     ) {
@@ -26,8 +26,8 @@ final class FetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol {
         self.userDefaultsManager = userDefaultsManager
     }
     
-    func execute() -> Observable<(cycle: PillCycle?, settings: UserSettings)> {
-        let cycleObservable: Observable<PillCycle?>
+    func execute() -> Observable<(cycle: Cycle?, settings: UserSettings)> {
+        let cycleObservable: Observable<Cycle?>
         
         if let currentCycleID = userDefaultsManager.loadCurrentCycleID() {
             print("📌 저장된 currentCycleID로 사이클 로드: \(currentCycleID)")

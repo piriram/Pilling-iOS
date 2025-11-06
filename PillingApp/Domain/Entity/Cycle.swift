@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - PillCycle
 
-struct PillCycle {
+struct Cycle {
     let id: UUID
     let cycleNumber: Int
     let startDate: Date

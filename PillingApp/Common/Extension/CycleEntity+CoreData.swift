@@ -21,10 +21,10 @@ extension PillCycleEntity {
 
 extension PillCycleEntity {
     
-    func toDomain() -> PillCycle {
+    func toDomain() -> Cycle {
         let domainRecords = recordsArray.map { $0.toDomain() }
         
-        return PillCycle(
+        return Cycle(
             id: id ?? UUID(),
             cycleNumber: Int(cycleNumber),
             startDate: startDate ?? Date(),
@@ -37,7 +37,7 @@ extension PillCycleEntity {
     }
     
     static func from(
-        domain: PillCycle,
+        domain: Cycle,
         context: NSManagedObjectContext
     ) -> PillCycleEntity {
         let entity = PillCycleEntity(context: context)
@@ -57,7 +57,7 @@ extension PillCycleEntity {
         return entity
     }
     
-    func update(from domain: PillCycle) {
+    func update(from domain: Cycle) {
         cycleNumber = Int16(domain.cycleNumber)
         startDate = domain.startDate
         activeDays = Int16(domain.activeDays)

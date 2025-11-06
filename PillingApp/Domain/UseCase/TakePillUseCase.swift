@@ -11,24 +11,24 @@ import RxSwift
 // MARK: - TakePillUseCaseProtocol
 
 protocol TakePillUseCaseProtocol {
-    func execute(cycle: PillCycle, settings: UserSettings) -> Observable<PillCycle>
+    func execute(cycle: Cycle, settings: UserSettings) -> Observable<Cycle>
 }
 
 // MARK: - TakePillUseCase
 
 final class TakePillUseCase: TakePillUseCaseProtocol {
-    private let cycleRepository: PillCycleRepositoryProtocol
+    private let cycleRepository: CycleRepositoryProtocol
     private let timeProvider: TimeProvider
     
     init(
-        cycleRepository: PillCycleRepositoryProtocol,
+        cycleRepository: CycleRepositoryProtocol,
         timeProvider: TimeProvider
     ) {
         self.cycleRepository = cycleRepository
         self.timeProvider = timeProvider
     }
     
-    func execute(cycle: PillCycle, settings: UserSettings) -> Observable<PillCycle> {
+    func execute(cycle: Cycle, settings: UserSettings) -> Observable<Cycle> {
         let now = timeProvider.now
         
         guard let todayIndex = cycle.records.firstIndex(where: {

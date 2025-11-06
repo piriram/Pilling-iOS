@@ -5,14 +5,14 @@ import CoreData
 
 // MARK: - Repository
 protocol CycleHistoryProtocol {
-    func fetchAllCycles() throws -> [PillCycle]
+    func fetchAllCycles() throws -> [Cycle]
 }
 
 final class PillCycleHistoryRepository: CycleHistoryProtocol {
     private let context: NSManagedObjectContext?
     init(context: NSManagedObjectContext?) { self.context = context }
     
-    func fetchAllCycles() throws -> [PillCycle] {
+    func fetchAllCycles() throws -> [Cycle] {
         guard let ctx = context else { return [] }
         let request = NSFetchRequest<PillCycleEntity>(entityName: "PillCycleEntity")
         request.sortDescriptors = [
