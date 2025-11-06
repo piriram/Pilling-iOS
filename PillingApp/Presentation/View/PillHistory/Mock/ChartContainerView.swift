@@ -34,7 +34,6 @@ private enum ChartLayoutConstants {
     enum Empty {
         static let closeIconSize: CGFloat = 24
         static let closeIconOffset: CGFloat = 8
-        static let animationDuration: Double = 0.6
     }
     
     // Arrow 버튼
@@ -263,12 +262,6 @@ private final class DonutChartView: UIView {
         
         let data = PieChartData(dataSet: set)
         pieChartView.data = data
-        
-        pieChartView.animate(
-            xAxisDuration: ChartLayoutConstants.Empty.animationDuration,
-            yAxisDuration: ChartLayoutConstants.Empty.animationDuration,
-            easingOption: .easeOutCubic
-        )
     }
     
     private func showDataState(records: [RecordItemDTO], completionRate: Int) {
