@@ -141,7 +141,7 @@ final class DashboardViewController: UIViewController {
         // Current cycle
         viewModel.currentCycle
             .compactMap { $0 }
-            .asDriver(onErrorJustReturn: PillCycle(
+            .asDriver(onErrorJustReturn: Cycle(
                 id: UUID(),
                 cycleNumber: 1,
                 startDate: Date(),
@@ -204,7 +204,7 @@ final class DashboardViewController: UIViewController {
             .bind { [weak self] in
                 guard let self = self else { return }
                 let vm = DIContainer.shared.makePillCycleHistoryViewModel()
-                let vc = PillCycleHistoryViewController(viewModel: vm)
+                let vc = CycleHistoryViewController(viewModel: vm)
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)

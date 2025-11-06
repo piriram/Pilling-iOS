@@ -73,7 +73,7 @@ final class DashboardBottomView: UIView {
         pageControl.currentPage = 0
     }
     
-    func updateButton(canTake: Bool, cycle: PillCycle?) {
+    func updateButton(canTake: Bool, cycle: Cycle?) {
         guard let cycle = cycle else { return }
         
         let calendar = Calendar.current

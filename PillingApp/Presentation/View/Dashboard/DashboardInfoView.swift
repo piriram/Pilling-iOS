@@ -198,7 +198,7 @@ final class DashboardInfoView: UIView {
     
     // MARK: - Public Methods
     
-    func configure(with cycle: PillCycle) {
+    func configure(with cycle: Cycle) {
         let calendar = Calendar.current
         let now = Date()
         

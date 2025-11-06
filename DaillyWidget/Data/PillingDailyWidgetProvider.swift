@@ -96,7 +96,7 @@ struct PillingDailyWidgetProvider: TimelineProvider {
     
     // MARK: - Private Methods
     
-    private func getScheduledTime(for date: Date, cycle: PillCycle, calendar: Calendar) -> Date? {
+    private func getScheduledTime(for date: Date, cycle: Cycle, calendar: Calendar) -> Date? {
         // 해당 날짜의 레코드 찾기
         guard let record = cycle.records.first(where: { record in
             calendar.isDate(record.scheduledDateTime, inSameDayAs: date)
@@ -112,7 +112,7 @@ struct PillingDailyWidgetProvider: TimelineProvider {
         return record.scheduledDateTime
     }
     
-    private func createEntry(for date: Date, cycle: PillCycle) -> PillingDailyWidgetEntry {
+    private func createEntry(for date: Date, cycle: Cycle) -> PillingDailyWidgetEntry {
         // 공통 UseCase 사용
         let messageResult = calculateMessageUseCase.execute(cycle: cycle, for: date)
         let cycleDay = calculateCycleDay(from: cycle, for: date)
@@ -128,7 +128,7 @@ struct PillingDailyWidgetProvider: TimelineProvider {
         return PillingDailyWidgetEntry(date: date, displayData: displayData)
     }
     
-    private func calculateCycleDay(from cycle: PillCycle, for date: Date) -> Int {
+    private func calculateCycleDay(from cycle: Cycle, for date: Date) -> Int {
         let calendar = Calendar.current
         let startDate = calendar.startOfDay(for: cycle.startDate)
         let targetDate = calendar.startOfDay(for: date)

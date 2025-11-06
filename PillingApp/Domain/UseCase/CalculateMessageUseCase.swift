@@ -20,7 +20,7 @@ final class CalculateMessageUseCase {
     
     // MARK: - Execute
     
-    func execute(cycle: PillCycle?, for date: Date = Date()) -> MessageResult {
+    func execute(cycle: Cycle?, for date: Date = Date()) -> MessageResult {
         guard let cycle = cycle else {
             return MessageType.empty.toResult()
         }
@@ -195,7 +195,7 @@ final class CalculateMessageUseCase {
         )
     }
     
-    private func findRelevantRecord(in cycle: PillCycle, for date: Date) -> PillRecord? {
+    private func findRelevantRecord(in cycle: Cycle, for date: Date) -> PillRecord? {
         // 1. 오늘 날짜의 레코드 찾기
         if let todayRecord = cycle.records.first(where: { record in
             timeProvider.isDate(record.scheduledDateTime, inSameDayAs: date)
@@ -224,7 +224,7 @@ final class CalculateMessageUseCase {
         return nil
     }
     
-    private func findYesterdayRecord(in cycle: PillCycle, from date: Date) -> PillRecord? {
+    private func findYesterdayRecord(in cycle: Cycle, from date: Date) -> PillRecord? {
         guard let yesterday = timeProvider.date(byAdding: .day, value: -1, to: date) else {
             return nil
         }
@@ -273,7 +273,7 @@ final class CalculateMessageUseCase {
         }
     }
     
-    private func calculateConsecutiveMissedDays(cycle: PillCycle, upTo targetDate: Date) -> Int {
+    private func calculateConsecutiveMissedDays(cycle: Cycle, upTo targetDate: Date) -> Int {
         let today = timeProvider.startOfDay(for: targetDate)
         var count = 0
         

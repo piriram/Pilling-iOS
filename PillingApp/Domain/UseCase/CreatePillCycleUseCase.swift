@@ -1,5 +1,5 @@
 //
-//  CreatePillCycleUseCase.swift
+//  CreateCycleUseCase.swift
 //  PillingApp
 //
 //  Created by 잠만보김쥬디 on 10/13/25.
@@ -8,26 +8,26 @@
 import Foundation
 import RxSwift
 
-// MARK: - CreatePillCycleUseCaseProtocol
+// MARK: - CreateCycleUseCaseProtocol
 
-protocol CreatePillCycleUseCaseProtocol {
+protocol CreateCycleUseCaseProtocol {
     func execute(
         pillInfo: PillInfo,
         startDate: Date,
         scheduledTime: String
-    ) -> Observable<PillCycle>
+    ) -> Observable<Cycle>
 }
 
-// MARK: - CreatePillCycleUseCase
+// MARK: - CreateCycleUseCase
 
-final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
+final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
     
-    private let cycleRepository: PillCycleRepositoryProtocol
+    private let cycleRepository: CycleRepositoryProtocol
     private let timeProvider: TimeProvider
     private let userDefaultsManager: UserDefaultsManagerProtocol
     
     init(
-        cycleRepository: PillCycleRepositoryProtocol,
+        cycleRepository: CycleRepositoryProtocol,
         timeProvider: TimeProvider,
         userDefaultsManager: UserDefaultsManagerProtocol
     ) {
@@ -40,7 +40,7 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
         pillInfo: PillInfo,
         startDate: Date,
         scheduledTime: String
-    ) -> Observable<PillCycle> {
+    ) -> Observable<Cycle> {
         return Observable.deferred { [weak self] in
             guard let self = self else {
                 return .error(PillCycleError.deallocated)
@@ -72,7 +72,7 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
         pillInfo: PillInfo,
         startDate: Date,
         scheduledTime: String
-    ) -> PillCycle {
+    ) -> Cycle {
         let now = timeProvider.now
         let today = timeProvider.startOfDay(for: now)
         
@@ -121,7 +121,7 @@ final class CreatePillCycleUseCase: CreatePillCycleUseCaseProtocol {
             records.append(record)
         }
         
-        return PillCycle(
+        return Cycle(
             id: UUID(),
             cycleNumber: 1,
             startDate: startDate,

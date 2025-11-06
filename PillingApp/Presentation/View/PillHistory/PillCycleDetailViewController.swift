@@ -1,12 +1,12 @@
 import UIKit
 import SnapKit
 
-final class PillCycleDetailViewController: UIViewController {
-    private let cycle: PillCycle
+final class CycleDetailViewController: UIViewController {
+    private let cycle: Cycle
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var records: [PillRecord] { cycle.records }
     
-    init(cycle: PillCycle) {
+    init(cycle: Cycle) {
         self.cycle = cycle
         super.init(nibName: nil, bundle: nil)
     }
@@ -34,7 +34,7 @@ final class PillCycleDetailViewController: UIViewController {
     private func makeCycleHeader() -> UIView {
         let container = UIView()
         let titleLabel = UILabel()
-        titleLabel.text = "PillCycle Attributes"
+        titleLabel.text = "Cycle Attributes"
         titleLabel.font = Typography.headline3(.bold)
         titleLabel.textColor = AppColor.textBlack
         
@@ -85,7 +85,7 @@ final class PillCycleDetailViewController: UIViewController {
     }
 }
 
-extension PillCycleDetailViewController: UITableViewDataSource, UITableViewDelegate {
+extension CycleDetailViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         records.count
     }

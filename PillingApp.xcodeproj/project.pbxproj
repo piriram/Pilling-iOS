@@ -77,11 +77,11 @@
 			membershipExceptions = (
 				App/Assets.xcassets,
 				Common/Constants/DashboardUI.swift,
+				"Common/Extension/CycleEntity+CoreData.swift",
 				"Common/Extension/Date+.swift",
-				"Common/Extension/PillCycleEntity+.swift",
 				"Common/Extension/PillRecordEntity+.swift",
+				Domain/Entity/Cycle.swift,
 				Domain/Entity/MessageResult.swift,
-				Domain/Entity/PillCycle.swift,
 				Domain/Entity/PillCycleError.swift,
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillRecord.swift,

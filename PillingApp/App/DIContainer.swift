@@ -36,8 +36,8 @@ final class DIContainer {
     
     // MARK: - Repositories (⭐️ Singleton으로 변경)
     
-    private lazy var cycleRepository: PillCycleRepositoryProtocol = {
-        return PillCycleRepository(coreDataManager: coreDataManager)
+    private lazy var cycleRepository: CycleRepositoryProtocol = {
+        return CycleRepository(coreDataManager: coreDataManager)
     }()
     
     private lazy var settingsRepository: UserSettingsRepositoryProtocol = {
@@ -74,8 +74,8 @@ final class DIContainer {
         )
     }
     
-    func makeCreatePillCycleUseCase() -> CreatePillCycleUseCaseProtocol {
-        return CreatePillCycleUseCase(
+    func makeCreatePillCycleUseCase() -> CreateCycleUseCaseProtocol {
+        return CreateCycleUseCase(
             cycleRepository: cycleRepository,
             timeProvider: timeProvider,
             userDefaultsManager: userDefaultsManager
@@ -129,11 +129,11 @@ final class DIContainer {
     
     // MARK: - History
     
-    func makePillCycleHistoryViewModel() -> PillCycleHistoryViewModel {
-        return PillCycleHistoryViewModel(context: coreDataManager.viewContext)
+    func makePillCycleHistoryViewModel() -> CycleHistoryViewModel {
+        return CycleHistoryViewModel(context: coreDataManager.viewContext)
     }
     
-    func getPillCycleRepository() -> PillCycleRepositoryProtocol {
+    func getPillCycleRepository() -> CycleRepositoryProtocol {
            return cycleRepository
        }
        

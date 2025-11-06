@@ -52,7 +52,7 @@ final class SettingViewModel {
     
     private let settingsRepository: UserSettingsRepositoryProtocol
     private let notificationManager: NotificationManagerProtocol
-    private let pillCycleRepository: PillCycleRepositoryProtocol
+    private let pillCycleRepository: CycleRepositoryProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let disposeBag = DisposeBag()
     
@@ -64,7 +64,7 @@ final class SettingViewModel {
     init(
         settingsRepository: UserSettingsRepositoryProtocol,
         notificationManager: NotificationManagerProtocol,
-        pillCycleRepository: PillCycleRepositoryProtocol,
+        pillCycleRepository: CycleRepositoryProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol
     ) {
         self.settingsRepository = settingsRepository
