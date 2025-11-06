@@ -18,7 +18,22 @@ final class CycleRepository: CycleRepositoryProtocol {
         self.coreDataManager = coreDataManager
     }
     
-    // MARK: - 현재 사이클 조회
+    
+    // 주어진 날짜가 시작일과 종료일 사이인지 판별
+    private func isOngoingCycle(_ cycle: Cycle, at date: Date) -> Bool {
+        let calendar = Calendar.current
+        let startDate = cycle.startDate
+        let endDate = calendar.date(
+            byAdding: .day,
+            value: cycle.totalDays - 1,
+            to: startDate
+        ) ?? startDate
+        
+        return startDate <= date && date <= endDate
+    }
+    
+    
+    // MARK: - 현재 사이클 조회(DB 조회 비용 있음)
     func fetchCurrentCycle() -> Observable<Cycle?> {
         return coreDataManager
             .fetch(
@@ -28,30 +43,18 @@ final class CycleRepository: CycleRepositoryProtocol {
                     NSSortDescriptor(key: "startDate", ascending: false)
                 ]
             )
-            .map { entities in
+            .map { [weak self] entities in
                 let cycles = entities.map { $0.toDomain() }
-                guard !cycles.isEmpty else { return nil }
-                
                 let now = Date()
-                let cal = Calendar.current
                 
-                // 1) 진행 중(오늘 포함) 사이클 우선
-                if let ongoing = cycles.first(where: { cycle in
-                    let start = cycle.startDate
-                    let totalDays: Int = {
-                        if let mirrorVal = Mirror(reflecting: cycle).children.first(where: { $0.label == "totalDays" })?.value as? Int {
-                            return mirrorVal
-                        } else {
-                            return cycle.activeDays + cycle.breakDays
-                        }
-                    }()
-                    let end = cal.date(byAdding: .day, value: max(totalDays - 1, 0), to: start) ?? start
-                    return (start ... end).contains(now)
+                // 진행 중 사이클 우선
+                if let ongoingCycle = cycles.first(where: {
+                    self?.isOngoingCycle($0, at: now) ?? false
                 }) {
-                    return ongoing
+                    return ongoingCycle
                 }
                 
-                // 2) 없으면 createdAt 최신 반환
+                // 없으면 최신 사이클
                 return cycles.first
             }
     }
@@ -66,7 +69,7 @@ final class CycleRepository: CycleRepositoryProtocol {
             let context = self.coreDataManager.viewContext
             
             // 기존 사이클이 있는지 확인
-            let fetchRequest: NSFetchRequest<PillCycleEntity> = NSFetchRequest(entityName: "PillCycleEntity")
+            let fetchRequest: NSFetchRequest<PillCycleEntity> = NSFetchRequest(entityName: CoreDataEntity.cycle)
             fetchRequest.predicate = NSPredicate(format: "id == %@", cycle.id as CVarArg)
             
             do {
@@ -201,3 +204,5 @@ final class CycleRepository: CycleRepositoryProtocol {
         }
     }
 }
+
+
