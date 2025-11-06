@@ -4,11 +4,8 @@
 //
 //  Created by 잠만보김쥬디 on 10/12/25.
 //
-
 import CoreData
 import RxSwift
-
-// MARK: - CoreDataManager
 
 final class CoreDataManager {
     static let shared = CoreDataManager()
@@ -17,16 +14,16 @@ final class CoreDataManager {
     
     private init() {}
     
-    // MARK: - Core Data Stack
-    
+    // MARK: - 코어데이터 스택
     private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "PillingApp")
         
-        // App Group을 위한 URL 설정
+        /// 앱과 위젯이 같은 DB를 공유하도록 같은 앱그룹을 공유함
         if let storeURL = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: appGroupIdentifier
         )?.appendingPathComponent("PillingApp.sqlite") {
             let description = NSPersistentStoreDescription(url: storeURL)
+            /// 자동 마이그레이션 옵션
             description.setOption(true as NSNumber, forKey: NSMigratePersistentStoresAutomaticallyOption)
             description.setOption(true as NSNumber, forKey: NSInferMappingModelAutomaticallyOption)
             container.persistentStoreDescriptions = [description]
@@ -50,7 +47,7 @@ final class CoreDataManager {
         return persistentContainer.newBackgroundContext()
     }
     
-    // MARK: - CRUD Operations
+    // MARK: - CRUD 함수들
     
     func save() -> Observable<Void> {
         return Observable.create { [weak self] observer in
@@ -61,18 +58,20 @@ final class CoreDataManager {
             
             let context = self.viewContext
             
-            guard context.hasChanges else {
-                observer.onNext(())
-                observer.onCompleted()
-                return Disposables.create()
-            }
-            
-            do {
-                try context.save()
-                observer.onNext(())
-                observer.onCompleted()
-            } catch {
-                observer.onError(CoreDataError.saveFailed(error))
+            context.perform {
+                guard context.hasChanges else {
+                    observer.onNext(())
+                    observer.onCompleted()
+                    return
+                }
+                
+                do {
+                    try context.save()
+                    observer.onNext(())
+                    observer.onCompleted()
+                } catch {
+                    observer.onError(CoreDataError.saveFailed(error))
+                }
             }
             
             return Disposables.create()
@@ -91,16 +90,19 @@ final class CoreDataManager {
             }
             
             let context = self.viewContext
-            let fetchRequest = NSFetchRequest<T>(entityName: String(describing: entityType))
-            fetchRequest.predicate = predicate
-            fetchRequest.sortDescriptors = sortDescriptors
             
-            do {
-                let results = try context.fetch(fetchRequest)
-                observer.onNext(results)
-                observer.onCompleted()
-            } catch {
-                observer.onError(CoreDataError.fetchFailed(error))
+            context.perform {
+                let fetchRequest = NSFetchRequest<T>(entityName: String(describing: entityType))
+                fetchRequest.predicate = predicate
+                fetchRequest.sortDescriptors = sortDescriptors
+                
+                do {
+                    let results = try context.fetch(fetchRequest)
+                    observer.onNext(results)
+                    observer.onCompleted()
+                } catch {
+                    observer.onError(CoreDataError.fetchFailed(error))
+                }
             }
             
             return Disposables.create()
@@ -115,14 +117,17 @@ final class CoreDataManager {
             }
             
             let context = self.viewContext
-            context.delete(object)
             
-            do {
-                try context.save()
-                observer.onNext(())
-                observer.onCompleted()
-            } catch {
-                observer.onError(CoreDataError.deleteFailed(error))
+            context.perform {
+                context.delete(object)
+                
+                do {
+                    try context.save()
+                    observer.onNext(())
+                    observer.onCompleted()
+                } catch {
+                    observer.onError(CoreDataError.deleteFailed(error))
+                }
             }
             
             return Disposables.create()
@@ -137,16 +142,19 @@ final class CoreDataManager {
             }
             
             let context = self.viewContext
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: String(describing: entityType))
-            let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
             
-            do {
-                try context.execute(deleteRequest)
-                try context.save()
-                observer.onNext(())
-                observer.onCompleted()
-            } catch {
-                observer.onError(CoreDataError.deleteFailed(error))
+            context.perform {
+                let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: String(describing: entityType))
+                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+                
+                do {
+                    try context.execute(deleteRequest)
+                    try context.save()
+                    observer.onNext(())
+                    observer.onCompleted()
+                } catch {
+                    observer.onError(CoreDataError.deleteFailed(error))
+                }
             }
             
             return Disposables.create()

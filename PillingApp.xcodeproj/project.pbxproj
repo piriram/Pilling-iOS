@@ -80,6 +80,7 @@
 				"Common/Extension/CycleEntity+CoreData.swift",
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillRecordEntity+.swift",
+				Domain/Entity/CoreDataEntity.swift,
 				Domain/Entity/Cycle.swift,
 				Domain/Entity/CycleError.swift,
 				Domain/Entity/DayRecord.swift,
