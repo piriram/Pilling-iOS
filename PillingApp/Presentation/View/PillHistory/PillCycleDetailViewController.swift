@@ -4,7 +4,7 @@ import SnapKit
 final class CycleDetailViewController: UIViewController {
     private let cycle: Cycle
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-    private var records: [PillRecord] { cycle.records }
+    private var records: [DayRecord] { cycle.records }
     
     init(cycle: Cycle) {
         self.cycle = cycle
@@ -24,7 +24,7 @@ final class CycleDetailViewController: UIViewController {
     private func setupTable() {
         view.addSubview(tableView)
         tableView.snp.makeConstraints { $0.edges.equalTo(view.safeAreaLayoutGuide) }
-        tableView.register(PillRecordCell.self, forCellReuseIdentifier: PillRecordCell.reuseID)
+        tableView.register(DayRecordCell.self, forCellReuseIdentifier: DayRecordCell.reuseID)
         tableView.dataSource = self
         tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
@@ -90,7 +90,7 @@ extension CycleDetailViewController: UITableViewDataSource, UITableViewDelegate 
         records.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: PillRecordCell.reuseID, for: indexPath) as! PillRecordCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: DayRecordCell.reuseID, for: indexPath) as! DayRecordCell
         cell.configure(with: records[indexPath.row])
         return cell
     }

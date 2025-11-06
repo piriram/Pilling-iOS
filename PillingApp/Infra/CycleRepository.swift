@@ -105,7 +105,7 @@ final class CycleRepository: CycleRepositoryProtocol {
         }
     }
     
-    func updateRecord(_ record: PillRecord, in cycleID: UUID) -> Observable<Void> {
+    func updateRecord(_ record: DayRecord, in cycleID: UUID) -> Observable<Void> {
         return Observable.create { [weak self] observer in
             guard let self = self else {
                 observer.onError(CoreDataError.contextNotAvailable)

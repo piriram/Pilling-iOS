@@ -16,7 +16,7 @@ struct PillInfo: Codable{
 
 // MARK: - Domain/Entities/PillRecord.swift
 
-struct PillRecord {
+struct DayRecord {
     let id: UUID
     let cycleDay: Int
     let status: PillStatus

@@ -1,8 +1,8 @@
 import UIKit
 import SnapKit
 
-final class PillRecordCell: UITableViewCell {
-    static let reuseID = "PillRecordCell"
+final class DayRecordCell: UITableViewCell {
+    static let reuseID = "DayRecordCell"
     
     private let titleLabel = UILabel()
     private let stack = UIStackView()
@@ -28,7 +28,7 @@ final class PillRecordCell: UITableViewCell {
         v.snp.makeConstraints { $0.edges.equalToSuperview().inset(16) }
     }
     
-    func configure(with record: PillRecord) {
+    func configure(with record: DayRecord) {
         titleLabel.text = "Record Day \(record.cycleDay) · \(record.status)"
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         

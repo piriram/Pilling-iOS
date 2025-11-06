@@ -80,7 +80,7 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
         let breakDays = pillInfo.breakDays
         let totalDays = activeDays + breakDays
         
-        var records: [PillRecord] = []
+        var records: [DayRecord] = []
         
         for day in 1...totalDays {
             let dayOffset = day - 1
@@ -108,7 +108,7 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
             
             let takenAt: Date? = (status == .taken) ? scheduledDateTime : nil
             
-            let record = PillRecord(
+            let record = DayRecord(
                 id: UUID(),
                 cycleDay: day,
                 status: status,

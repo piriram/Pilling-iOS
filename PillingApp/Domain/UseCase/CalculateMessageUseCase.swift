@@ -195,7 +195,7 @@ final class CalculateMessageUseCase {
         )
     }
     
-    private func findRelevantRecord(in cycle: Cycle, for date: Date) -> PillRecord? {
+    private func findRelevantRecord(in cycle: Cycle, for date: Date) -> DayRecord? {
         // 1. 오늘 날짜의 레코드 찾기
         if let todayRecord = cycle.records.first(where: { record in
             timeProvider.isDate(record.scheduledDateTime, inSameDayAs: date)
@@ -224,7 +224,7 @@ final class CalculateMessageUseCase {
         return nil
     }
     
-    private func findYesterdayRecord(in cycle: Cycle, from date: Date) -> PillRecord? {
+    private func findYesterdayRecord(in cycle: Cycle, from date: Date) -> DayRecord? {
         guard let yesterday = timeProvider.date(byAdding: .day, value: -1, to: date) else {
             return nil
         }
@@ -233,7 +233,7 @@ final class CalculateMessageUseCase {
         }
     }
     
-    private func calculateStatus(for record: PillRecord, at date: Date) -> PillStatus {
+    private func calculateStatus(for record: DayRecord, at date: Date) -> PillStatus {
         let calendar = timeProvider.calendar
         
         // takenDouble은 그대로 유지

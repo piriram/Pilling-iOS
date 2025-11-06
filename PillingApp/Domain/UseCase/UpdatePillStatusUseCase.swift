@@ -48,7 +48,7 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         
         let takenAt: Date? = newStatus.isTaken ? (record.takenAt ?? now) : nil
         
-        let updatedRecord = PillRecord(
+        let updatedRecord = DayRecord(
             id: record.id,
             cycleDay: record.cycleDay,
             status: newStatus,
