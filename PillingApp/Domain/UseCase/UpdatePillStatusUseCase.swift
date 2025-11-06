@@ -43,7 +43,7 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         }
         
         var updatedCycle = cycle
-        var record = updatedCycle.records[recordIndex]
+        let record = updatedCycle.records[recordIndex]
         let now = timeProvider.now
         
         let takenAt: Date? = newStatus.isTaken ? (record.takenAt ?? now) : nil
