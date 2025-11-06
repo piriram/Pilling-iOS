@@ -60,7 +60,7 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
             }
         }()
         
-        let updatedRecord = PillRecord(
+        let updatedRecord = DayRecord(
             id: record.id,
             cycleDay: record.cycleDay,
             status: newStatus,

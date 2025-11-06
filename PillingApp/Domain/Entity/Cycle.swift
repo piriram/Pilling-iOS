@@ -16,7 +16,7 @@ struct Cycle {
     let activeDays: Int
     let breakDays: Int
     var scheduledTime: String
-    var records: [PillRecord]
+    var records: [DayRecord]
     let createdAt: Date
     
     var totalDays: Int { activeDays + breakDays }
