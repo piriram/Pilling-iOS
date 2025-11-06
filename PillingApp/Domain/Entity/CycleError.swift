@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - PillCycleError
 
-enum PillCycleError: Error {
+enum CycleError: Error {
     case deallocated
     case invalidTimeFormat
     case invalidDateRange
