@@ -22,21 +22,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Window 생성
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        
-        // 기록 중인 사이클이 있는지 확인
-        checkExistingCycle { hasExistingCycle in
-            DispatchQueue.main.async {
-                if hasExistingCycle {
-                    // 기록 중인 사이클이 있으면 DashboardViewController
-                    self.showDashboard()
-                } else {
-                    // 기록 중인 사이클이 없으면 PillSettingViewController
-                    self.showPillSetting()
-                }
-                
-                window.makeKeyAndVisible()
-            }
-        }
+        self.showTest()
+        window.makeKeyAndVisible()
+//        // 기록 중인 사이클이 있는지 확인
+//        checkExistingCycle { hasExistingCycle in
+//            DispatchQueue.main.async {
+//                if hasExistingCycle {
+//                    // 기록 중인 사이클이 있으면 DashboardViewController
+//                    self.showDashboard()
+//                } else {
+//                    // 기록 중인 사이클이 없으면 PillSettingViewController
+//                    self.showPillSetting()
+//                }
+//                
+//                window.makeKeyAndVisible()
+//            }
+//        }
     }
     
     private func configureIQKeyboardManager() {
@@ -66,6 +67,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func showPillSetting() {
         let viewModel = DIContainer.shared.makePillSettingViewModel()
         let pillSettingVC = PillSettingViewController(viewModel: viewModel)
+        let navigationController = UINavigationController(rootViewController: pillSettingVC)
+        navigationController.navigationBar.isHidden = false
+        window?.rootViewController = navigationController
+    }
+    private func showTest() {
+        
+        let pillSettingVC = RecordChartViewController(viewModel: RecordChartViewModel())
         let navigationController = UINavigationController(rootViewController: pillSettingVC)
         navigationController.navigationBar.isHidden = false
         window?.rootViewController = navigationController

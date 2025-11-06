@@ -35,7 +35,7 @@ final class PillCycleHistoryViewController: UIViewController {
     
     private func setupTable() {
         tableView.register(PillCycleHistoryCell.self, forCellReuseIdentifier: PillCycleHistoryCell.reuseID)
-        tableView.rowHeight = 72
+        tableView.rowHeight = 200
         tableView.separatorStyle = .singleLine
         tableView.tableFooterView = UIView()
         view.addSubview(tableView)
