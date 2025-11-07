@@ -320,7 +320,17 @@ final class SettingViewController: UIViewController {
         // 에러 표시
         output.showError
             .drive(onNext: { [weak self] message in
-                self?.showAlert(title: "오류", message: message, isError: true)
+                let includeSettings = message.contains("권한")
+                self?.presentError(
+                    title: "오류",
+                    message: message,
+                    includeSettingsOption: includeSettings,
+                    settingsHandler: includeSettings ? {
+                        if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(settingsURL)
+                        }
+                    } : nil
+                )
             })
             .disposed(by: disposeBag)
         
@@ -358,7 +368,9 @@ final class SettingViewController: UIViewController {
                     self?.showToast(message: str.messageEditorTitle)
                 },
                 onError: { [weak self] error in
-                    self?.showAlert(title: AppStrings.Common.errorTitle, message: str.errorTimeUpdateFailed, isError: true)
+                    self?.presentError(
+                        message: str.errorTimeUpdateFailed
+                    )
                 }
             )
             .disposed(by: disposeBag)
@@ -396,7 +408,9 @@ final class SettingViewController: UIViewController {
                         self?.showToast(message: str.successMessageUpdated)
                     },
                     onError: { [weak self] error in
-                        self?.showAlert(title: AppStrings.Common.errorTitle, message: str.errorMessageUpdateFailed, isError: true)
+                        self?.presentError(
+                            message: str.errorMessageUpdateFailed
+                        )
                     }
                 )
                 .disposed(by: self.disposeBag)
@@ -422,7 +436,9 @@ final class SettingViewController: UIViewController {
                 .observe(on: MainScheduler.instance)
                 .subscribe(
                     onError: { [weak self] error in
-                        self?.showAlert(title: AppStrings.Common.errorTitle, message: str.errorResetFailed, isError: true)
+                        self?.presentError(
+                            message: str.errorResetFailed
+                        )
                     }
                 )
                 .disposed(by: self?.disposeBag ?? DisposeBag())
@@ -444,55 +460,6 @@ final class SettingViewController: UIViewController {
            let window = windowScene.windows.first {
             window.rootViewController = navigationController
             window.makeKeyAndVisible()
-        }
-    }
-    
-    private func showAlert(title: String, message: String, isError: Bool) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        
-        if isError && message.contains("권한") {
-            let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { _ in
-                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(settingsURL)
-                }
-            }
-            alert.addAction(settingsAction)
-        }
-        
-        let confirmAction = UIAlertAction(title: AppStrings.Common.okBtnTitle, style: .default)
-        alert.addAction(confirmAction)
-        
-        present(alert, animated: true)
-    }
-    
-    private func showToast(message: String) {
-        let toastLabel = UILabel()
-        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-        toastLabel.textColor = .white
-        toastLabel.font = Typography.body2(.medium)
-        toastLabel.textAlignment = .center
-        toastLabel.text = message
-        toastLabel.alpha = 0
-        toastLabel.layer.cornerRadius = 10
-        toastLabel.clipsToBounds = true
-        
-        view.addSubview(toastLabel)
-        
-        toastLabel.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-40)
-            $0.leading.trailing.equalToSuperview().inset(40)
-            $0.height.equalTo(44)
-        }
-        
-        UIView.animate(withDuration: 0.3, animations: {
-            toastLabel.alpha = 1
-        }) { _ in
-            UIView.animate(withDuration: 0.3, delay: 1.5, options: .curveEaseOut, animations: {
-                toastLabel.alpha = 0
-            }) { _ in
-                toastLabel.removeFromSuperview()
-            }
         }
     }
 }

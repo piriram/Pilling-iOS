@@ -118,9 +118,10 @@ struct PillingDailyWidgetProvider: TimelineProvider {
         let cycleDay = calculateCycleDay(from: cycle, for: date)
         
         // MessageResult를 WidgetDisplayData로 변환
+        // widgetText가 있으면 위젯용 텍스트 사용, 없으면 기본 텍스트 사용
         let displayData = WidgetDisplayData(
             cycleDay: cycleDay,
-            message: messageResult.text,
+            message: messageResult.widgetText ?? messageResult.text,
             iconImageName: messageResult.characterImageName,
             backgroundImageName: messageResult.backgroundImageName
         )
