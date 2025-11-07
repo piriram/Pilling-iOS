@@ -34,7 +34,7 @@ final class DashboardBottomView: UIView {
         pageControl.currentPageIndicatorTintColor = AppColor.pillGreen800
         pageControl.pageIndicatorTintColor = AppColor.notYetGray
         pageControl.isUserInteractionEnabled = false
-        pageControl.hidesForSinglePage = true
+        pageControl.hidesForSinglePage = false
         
         takePillButton.setTitle(str.takePillButton, for: .normal)
         takePillButton.setTitleColor(.label, for: .normal)
