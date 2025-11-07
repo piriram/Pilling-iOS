@@ -10,8 +10,6 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
-// MARK: - Presentation/Dashboard/Views/CalendarSheetViewController.swift
-
 final class DashboardSheetViewController: UIViewController {
     private let selectedDate: Date
     private let initialMemo: String
@@ -21,6 +19,7 @@ final class DashboardSheetViewController: UIViewController {
     private var currentStatus: PillStatus?
     var titleText: String?
     private typealias str = AppStrings.Dashboard
+    
     // MARK: - Bottom Sheet Properties
     
     private let sheetHeight: CGFloat = 350
@@ -111,6 +110,11 @@ final class DashboardSheetViewController: UIViewController {
     
     private var selectedButtonTag: Int = -1
     
+    // MARK: - ViewModel & Relays (MVVM I/O)
+    
+    private let viewModel: DefaultDashboardSheetViewModel
+    private let requestDismissRelay = PublishRelay<Void>()
+    
     // MARK: - Initialization
     
     init(
@@ -121,6 +125,11 @@ final class DashboardSheetViewController: UIViewController {
         self.selectedDate = selectedDate
         self.initialMemo = initialMemo
         self.onSelectStatus = onSelectStatus
+        self.viewModel = DefaultDashboardSheetViewModel(
+            selectedDate: selectedDate,
+            initialMemo: initialMemo,
+            initialStatus: nil // setInitialSelection을 사용할 수 있으므로 초기 선택은 명시적으로 주입하지 않음
+        )
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
@@ -129,7 +138,7 @@ final class DashboardSheetViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -137,13 +146,12 @@ final class DashboardSheetViewController: UIViewController {
         setupViews()
         setupGestures()
         setupInitialMemo()
-        bindStatusButtons()
-        bindMemoTextView()
+        bindViewModel() // MVVM 바인딩
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        showBottomSheet()
+        // 표시 애니메이션 트리거는 ViewModel output.shouldShowSheet 를 통해 수행
     }
     
     // MARK: - Setup
@@ -235,6 +243,48 @@ final class DashboardSheetViewController: UIViewController {
         memoPlaceholderLabel.isHidden = !initialMemo.isEmpty
     }
     
+    // MARK: - MVVM Binding
+    
+    private func bindViewModel() {
+        let input = DefaultDashboardSheetViewModel.Input(
+            viewDidAppear: rx.sentMessage(#selector(UIViewController.viewDidAppear(_:)))
+                .map { _ in () }
+                .take(1),
+            tapNotTaken: notTakenButton.rx.tap.asObservable(),
+            tapTaken: takenButton.rx.tap.asObservable(),
+            tapTakenDouble: takenDoubleButton.rx.tap.asObservable(),
+            memoText: memoTextView.rx.text.orEmpty.asObservable(),
+            requestDismiss: requestDismissRelay.asObservable()
+        )
+        
+        let output = viewModel.transform(input)
+        
+        output.shouldShowSheet
+            .emit(onNext: { [weak self] in
+                self?.showBottomSheet()
+            })
+            .disposed(by: disposeBag)
+        
+        output.selectedIndex
+            .drive(onNext: { [weak self] index in
+                guard let self, let tag = index else { return }
+                self.selectButton(tag: tag)
+            })
+            .disposed(by: disposeBag)
+        
+        output.isMemoPlaceholderHidden
+            .drive(memoPlaceholderLabel.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+        output.dismiss
+            .emit(onNext: { [weak self] status, memo in
+                guard let self else { return }
+                self.onSelectStatus(status, memo)
+                self.hideBottomSheet()
+            })
+            .disposed(by: disposeBag)
+    }
+    
     // MARK: - Status Button Creation
     
     private func createStatusButton(title: String, tag: Int) -> UIButton {
@@ -250,60 +300,7 @@ final class DashboardSheetViewController: UIViewController {
         return button
     }
     
-    // MARK: - Binding
-    
-    private func bindStatusButtons() {
-        let buttons = [notTakenButton, takenButton, takenDoubleButton]
-        
-        buttons.forEach { button in
-            button.rx.tap
-                .bind { [weak self] in
-                    guard let self = self else { return }
-                    self.selectButton(tag: button.tag)
-                    
-                    let status = self.determineStatus(for: button.tag)
-                    
-                    if let status = status {
-                        self.currentStatus = status
-                        self.hideBottomSheet {
-                            self.onSelectStatus(status, self.memoTextView.text ?? "")
-                        }
-                    }
-                }
-                .disposed(by: disposeBag)
-        }
-    }
-    
-    private func bindMemoTextView() {
-        memoPlaceholderLabel.isHidden = !(memoTextView.text?.isEmpty ?? true)
-        
-        memoTextView.rx.text.orEmpty
-            .map { !$0.isEmpty }
-            .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
-            .bind { [weak self] hasText in
-                self?.memoPlaceholderLabel.isHidden = hasText
-            }
-            .disposed(by: disposeBag)
-    }
-    
-    // MARK: - Status Logic
-    
-    private func determineStatus(for tag: Int) -> PillStatus? {
-        switch tag {
-        case 0:
-            let calendar = Calendar.current
-            let isToday = calendar.isDateInToday(selectedDate)
-            let isInPast = selectedDate < calendar.startOfDay(for: Date())
-            return isToday ? .scheduled : (isInPast ? .missed : .todayNotTaken)
-        case 1:
-            return .taken
-        case 2:
-            return .takenDouble
-        default:
-            return nil
-        }
-    }
+    // MARK: - Selection UI
     
     private func selectButton(tag: Int) {
         let buttons = [notTakenButton, takenButton, takenDoubleButton]
@@ -312,7 +309,12 @@ final class DashboardSheetViewController: UIViewController {
         buttons.forEach { button in
             let isSelected = button.tag == tag
             
-            UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
+            UIView.animate(
+                withDuration: 0.3,
+                delay: 0,
+                usingSpringWithDamping: 0.8,
+                initialSpringVelocity: 0.5
+            ) {
                 button.isSelected = isSelected
                 button.backgroundColor = isSelected ? AppColor.pillGreen800 : .clear
                 button.titleLabel?.font = isSelected
@@ -333,6 +335,8 @@ final class DashboardSheetViewController: UIViewController {
         }
     }
     
+    /// 외부에서 초기 상태를 세팅하고 싶을 때 호출.
+    /// 내부적으로 해당 버튼의 탭을 트리거하여 ViewModel의 선택 로직과 동기화한다.
     func setInitialSelection(for status: PillStatus) {
         let tag: Int
         switch status {
@@ -346,8 +350,15 @@ final class DashboardSheetViewController: UIViewController {
             tag = -1
         }
         
-        if tag >= 0 {
-            selectButton(tag: tag)
+        guard tag >= 0 else { return }
+        // UI 동기화
+        selectButton(tag: tag)
+        // ViewModel 로직과 상태를 일치시키기 위해 실제 탭 이벤트를 발생시킨다.
+        switch tag {
+        case 0: notTakenButton.sendActions(for: .touchUpInside)
+        case 1: takenButton.sendActions(for: .touchUpInside)
+        case 2: takenDoubleButton.sendActions(for: .touchUpInside)
+        default: break
         }
         currentStatus = status
     }
@@ -383,7 +394,8 @@ final class DashboardSheetViewController: UIViewController {
     // MARK: - Gesture Handlers
     
     @objc private func handleDimmedViewTap() {
-        handleSheetDismiss()
+        // 기존: handleSheetDismiss()
+        requestDismissRelay.accept(())
     }
     
     @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
@@ -399,11 +411,15 @@ final class DashboardSheetViewController: UIViewController {
             let shouldDismiss = translation.y > sheetHeight / 3 || velocity.y > 1000
             
             if shouldDismiss {
-                hideBottomSheet {
-                    self.handleSheetDismiss()
-                }
+                // 기존: hideBottomSheet { self.handleSheetDismiss() }
+                requestDismissRelay.accept(())
             } else {
-                UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5) {
+                UIView.animate(
+                    withDuration: 0.3,
+                    delay: 0,
+                    usingSpringWithDamping: 0.8,
+                    initialSpringVelocity: 0.5
+                ) {
                     self.containerView.transform = .identity
                 }
             }
@@ -416,16 +432,9 @@ final class DashboardSheetViewController: UIViewController {
         view.endEditing(true)
     }
     
+    // 기존 메서드를 유지하고 내부 위임 (필요시 호출 경로 호환)
     private func handleSheetDismiss() {
-        if let status = currentStatus {
-            onSelectStatus(status, memoTextView.text ?? "")
-        } else {
-            let calendar = Calendar.current
-            let isToday = calendar.isDateInToday(selectedDate)
-            let isInPast = selectedDate < calendar.startOfDay(for: Date())
-            let fallbackStatus: PillStatus = isToday ? .scheduled : (isInPast ? .missed : .scheduled)
-            onSelectStatus(fallbackStatus, memoTextView.text ?? "")
-        }
-        hideBottomSheet()
+        requestDismissRelay.accept(())
     }
 }
+
