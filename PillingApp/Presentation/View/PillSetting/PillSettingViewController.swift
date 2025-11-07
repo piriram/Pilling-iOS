@@ -10,8 +10,6 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
-// MARK: - PillSettingViewController
-
 final class PillSettingViewController: UIViewController {
     
     // MARK: - Properties
@@ -196,7 +194,7 @@ final class PillSettingViewController: UIViewController {
         
         viewModel.output.alertMessage
             .emit(onNext: { [weak self] message in
-                self?.presentAlert(message: message)
+                self?.presentNotification(message: message)
             })
             .disposed(by: disposeBag)
     }
@@ -205,7 +203,6 @@ final class PillSettingViewController: UIViewController {
     private func presentDatePickerBottomSheet() {
         let datePickerVC = DatePickerBottomSheetViewController()
         
-        // Signal은 emit(to:) 사용
         datePickerVC.selectedDate
             .emit(to: viewModel.input.dateSelected)
             .disposed(by: disposeBag)
@@ -221,13 +218,5 @@ final class PillSettingViewController: UIViewController {
             .disposed(by: disposeBag)
         
         present(pillTypeVC, animated: false)
-    }
-    
-    private func presentAlert(message: String) {
-        let alert = UIAlertController(title: AppStrings.Common.alertTitle, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: AppStrings.Common.okBtnTitle, style: .default, handler: nil))
-        present(alert, animated: true)
-        
-        
     }
 }

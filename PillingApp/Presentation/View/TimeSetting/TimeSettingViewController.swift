@@ -152,7 +152,7 @@ final class TimeSettingViewController: UIViewController {
         
         output.showError
             .drive(onNext: { [weak self] errorMessage in
-                self?.showErrorAlert(message: errorMessage)
+                self?.presentError(message: errorMessage)
             })
             .disposed(by: disposeBag)
     }
@@ -201,7 +201,7 @@ final class TimeSettingViewController: UIViewController {
         }
     }
     
-    private func showErrorAlert(message: String) {
+    func presentError(message: String) {
         let alert = UIAlertController(
             title: "알림 설정 오류",
             message: message,

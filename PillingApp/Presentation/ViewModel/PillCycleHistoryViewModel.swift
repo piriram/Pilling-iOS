@@ -13,10 +13,10 @@ import CoreData
 // MARK: - ViewModel
 final class CycleHistoryViewModel {
     let items = BehaviorRelay<[Cycle]>(value: [])
-    private let repository: PillCycleHistoryRepository
+    private let repository: CycleHistoryRepository
     
     init(context: NSManagedObjectContext?) {
-        self.repository = PillCycleHistoryRepository(context: context)
+        self.repository = CycleHistoryRepository(context: context)
     }
     
     func loadData() {

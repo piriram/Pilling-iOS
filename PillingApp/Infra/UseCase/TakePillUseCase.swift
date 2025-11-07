@@ -24,6 +24,8 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
         cycleRepository: CycleRepositoryProtocol,
         timeProvider: TimeProvider
     ) {
+        print("순서:\(#fileID)")
+        
         self.cycleRepository = cycleRepository
         self.timeProvider = timeProvider
     }

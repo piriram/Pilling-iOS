@@ -10,7 +10,7 @@ import RxSwift
 
 // MARK: - Data/Repositories/UserDefaultsUserSettingsRepository.swift
 
-final class UserDefaultsUserSettingsRepository: UserSettingsRepositoryProtocol {
+final class UserDefaultsRepository: UserDefaultsProtocol {
     private let userDefaults: UserDefaults
     
     private enum Keys {
@@ -21,6 +21,8 @@ final class UserDefaultsUserSettingsRepository: UserSettingsRepositoryProtocol {
     }
     
     init(userDefaults: UserDefaults = .standard) {
+        print("순서:\(#fileID)")
+        
         self.userDefaults = userDefaults
     }
     

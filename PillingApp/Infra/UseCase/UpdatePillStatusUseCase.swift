@@ -28,6 +28,8 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         cycleRepository: CycleRepositoryProtocol,
         timeProvider: TimeProvider
     ) {
+        print("순서:\(#fileID)")
+        
         self.cycleRepository = cycleRepository
         self.timeProvider = timeProvider
     }

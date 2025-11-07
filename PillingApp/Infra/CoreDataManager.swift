@@ -12,7 +12,10 @@ final class CoreDataManager {
     
     private let appGroupIdentifier = "group.app.Pilltastic.Pilling"
     
-    private init() {}
+    private init() {
+        print("순서:\(#fileID)")
+        
+    }
     
     // MARK: - 코어데이터 스택
     private lazy var persistentContainer: NSPersistentContainer = {

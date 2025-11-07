@@ -76,20 +76,25 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				App/Assets.xcassets,
+				Common/Constants/AppStrings.swift,
 				Common/Constants/DashboardUI.swift,
 				"Common/Extension/CycleEntity+CoreData.swift",
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillRecordEntity+.swift",
+				"Common/Extension/UIViewController+.swift",
 				Domain/Entity/CoreDataEntity.swift,
 				Domain/Entity/Cycle.swift,
 				Domain/Entity/CycleError.swift,
 				Domain/Entity/DayRecord.swift,
 				Domain/Entity/MessageResult.swift,
+				Domain/Entity/MessageType.swift,
+				Domain/Entity/NotificationError.swift,
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillStatus.swift,
 				Domain/Entity/SetupError.swift,
-				Domain/UseCase/CalculateMessageUseCase.swift,
+				Domain/Entity/UserDefaultsKey.swift,
 				Infra/SystemTimeProvider.swift,
+				Infra/UseCase/CalculateMessageUseCase.swift,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
 		};

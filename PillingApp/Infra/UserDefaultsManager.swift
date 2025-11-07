@@ -7,8 +7,6 @@
 
 import Foundation
 
-// MARK: - UserDefaultsManagerProtocol
-
 protocol UserDefaultsManagerProtocol {
     func savePillInfo(_ pillInfo: PillInfo)
     func savePillStartDate(_ date: Date)
@@ -18,18 +16,6 @@ protocol UserDefaultsManagerProtocol {
     func saveCurrentCycleID(_ id: UUID)
     func loadCurrentCycleID() -> UUID?
 }
-// MARK: - UserDefaultsKey
-
-enum UserDefaultsKey: String {
-    case pillName = "pill_name"
-    case pillTakingDays = "pill_taking_days"
-    case pillBreakDays = "pill_break_days"
-    case pillStartDate = "pill_start_date"
-    case pillInfo = "pillInfo"
-    case currentCycleID = "current_cycle_id"
-}
-
-// MARK: - UserDefaultsManager
 
 final class UserDefaultsManager: UserDefaultsManagerProtocol {
     
@@ -40,6 +26,8 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
     // MARK: - Initialization
     
     init(userDefaults: UserDefaults = .standard) {
+        print("순서:\(#fileID)")
+        
         self.userDefaults = userDefaults
         migrateIfNeeded()
     }
