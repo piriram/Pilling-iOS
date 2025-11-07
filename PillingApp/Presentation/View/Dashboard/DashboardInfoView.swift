@@ -11,10 +11,6 @@ import SnapKit
 final class DashboardInfoView: UIView {
     
     // MARK: - UI Components
-    
-    let historyButton = UIButton(type: .system)
-    let infoButton = UIButton(type: .system)
-    let gearButton = UIButton(type: .system)
     let characterImageView = UIImageView()
     
     private let progressLabel = UILabel()
@@ -47,37 +43,17 @@ final class DashboardInfoView: UIView {
     // MARK: - Setup
     
     private func setupViews() {
-        setupButtons()
+        setupCharacterImageViewIfNeeded()
         setupLabels()
         setupMessageCard()
         setupStackViews()
         
-        addSubview(historyButton)
-        addSubview(infoButton)
-        addSubview(gearButton)
         addSubview(characterImageView)
         addSubview(headerInfoStackView)
         addSubview(messageCardView)
         
         messageCardView.addSubview(messageIconImageView)
         messageCardView.addSubview(messageLabel)
-    }
-    
-    private func setupButtons() {
-        infoButton.setImage(DashboardUI.Icon.info, for: .normal)
-        infoButton.tintColor = AppColor.secondary
-        
-        if #available(iOS 13.0, *) {
-            historyButton.setImage(UIImage(systemName: "clock.arrow.circlepath"), for: .normal)
-        } else {
-            historyButton.setTitle("H", for: .normal)
-        }
-        historyButton.tintColor = AppColor.secondary
-        
-        gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
-        gearButton.tintColor = AppColor.secondary
-        
-        characterImageView.contentMode = .scaleAspectFill
     }
     
     private func setupLabels() {
@@ -92,6 +68,10 @@ final class DashboardInfoView: UIView {
         timeLabel.textColor = AppColor.secondary
         dateIconImageView.tintColor = AppColor.secondary
         timeIconImageView.tintColor = AppColor.secondary
+    }
+    
+    private func setupCharacterImageViewIfNeeded() {
+        characterImageView.contentMode = .scaleAspectFill
     }
     
     private func setupMessageCard() {
@@ -145,26 +125,9 @@ final class DashboardInfoView: UIView {
     private func setupConstraints() {
         let contentInset: CGFloat = 16
         
-        infoButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(14)
-            make.trailing.equalTo(gearButton.snp.leading).offset(-8)
-            make.width.height.lessThanOrEqualTo(30)
-        }
-        
-        historyButton.snp.makeConstraints { make in
-            make.centerY.equalTo(infoButton)
-            make.trailing.equalTo(infoButton.snp.leading).offset(-8)
-            make.width.height.lessThanOrEqualTo(30)
-        }
-        
-        gearButton.snp.makeConstraints { make in
-            make.centerY.equalTo(infoButton)
-            make.trailing.equalToSuperview().inset(contentInset)
-            make.width.height.lessThanOrEqualTo(30)
-        }
         
         characterImageView.snp.makeConstraints { make in
-            make.top.equalTo(infoButton.snp.bottom)
+            make.top.equalToSuperview().offset(14 + 30 + 8)
             make.leading.equalToSuperview().inset(contentInset)
             make.width.equalTo((UIScreen.main.bounds.width - contentInset) / 2)
             make.height.equalTo(150)
