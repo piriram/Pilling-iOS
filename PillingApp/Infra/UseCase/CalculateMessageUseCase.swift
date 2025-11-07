@@ -185,12 +185,14 @@ final class CalculateMessageUseCase {
     
     private func customMessage(
         text: String,
+        widgetText: String? = nil,
         characterImage: String,
         icon: String,
         background: String
     ) -> MessageResult {
         return MessageResult(
             text: text,
+            widgetText: widgetText,
             characterImageName: characterImage,
             iconImageName: icon,
             backgroundImageName: background

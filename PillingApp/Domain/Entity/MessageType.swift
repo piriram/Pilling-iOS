@@ -4,6 +4,12 @@
 //
 //  Created by 잠만보김쥬디 on 11/7/25.
 //
+//
+//  MessageType.swift
+//  PillingApp
+//
+//  Created by 잠만보김쥬디 on 11/7/25.
+//
 
 import Foundation
 
@@ -48,6 +54,15 @@ enum MessageType {
             return "매일 2시간 이내의 같은 시간에 복용해주세요."
         case .warning:
             return "한알을 더 먹어야 해요"
+        }
+    }
+    
+    var widgetText: String? {
+        switch self {
+        case .plantingSeed:
+            return "잔디를 심어보세요!"
+        default:
+            return nil
         }
     }
     
@@ -111,6 +126,7 @@ enum MessageType {
     func toResult() -> MessageResult {
         return MessageResult(
             text: text,
+            widgetText: widgetText,
             characterImageName: characterImageName,
             iconImageName: iconImageName,
             backgroundImageName: backgroundImageName

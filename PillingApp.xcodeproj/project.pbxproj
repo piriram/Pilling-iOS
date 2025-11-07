@@ -81,7 +81,6 @@
 				"Common/Extension/CycleEntity+CoreData.swift",
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillRecordEntity+.swift",
-				"Common/Extension/UIViewController+.swift",
 				Domain/Entity/CoreDataEntity.swift,
 				Domain/Entity/Cycle.swift,
 				Domain/Entity/CycleError.swift,

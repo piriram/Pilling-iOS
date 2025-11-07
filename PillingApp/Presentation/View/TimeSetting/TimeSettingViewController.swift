@@ -152,7 +152,17 @@ final class TimeSettingViewController: UIViewController {
         
         output.showError
             .drive(onNext: { [weak self] errorMessage in
-                self?.presentError(message: errorMessage)
+                let includeSettings = errorMessage.contains("권한")
+                self?.presentError(
+                    title: "알림 설정 오류",
+                    message: errorMessage,
+                    includeSettingsOption: includeSettings,
+                    settingsHandler: includeSettings ? {
+                        if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(settingsURL)
+                        }
+                    } : nil
+                )
             })
             .disposed(by: disposeBag)
     }
@@ -200,30 +210,4 @@ final class TimeSettingViewController: UIViewController {
             window.makeKeyAndVisible()
         }
     }
-    
-    func presentError(message: String) {
-        let alert = UIAlertController(
-            title: "알림 설정 오류",
-            message: message,
-            preferredStyle: .alert
-        )
-        
-        let confirmAction = UIAlertAction(title: "확인", style: .default)
-        
-        // 권한이 거부된 경우 설정으로 이동하는 버튼 추가
-        if message.contains("권한") {
-            let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { _ in
-                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(settingsURL)
-                }
-            }
-            alert.addAction(settingsAction)
-            alert.addAction(confirmAction)
-        } else {
-            alert.addAction(confirmAction)
-        }
-        
-        present(alert, animated: true)
-    }
 }
-
