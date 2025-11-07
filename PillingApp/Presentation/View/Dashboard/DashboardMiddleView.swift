@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class DashboardInfoView: UIView {
+final class DashboardMiddleView: UIView {
     
     // MARK: - UI Components
     let characterImageView = UIImageView()
@@ -28,7 +28,8 @@ final class DashboardInfoView: UIView {
     private let progressRowStackView = UIStackView()
     private let headerInfoStackView = UIStackView()
     
-    // MARK: - Initialization
+    // 외부에서 읽기만 가능하게 노출해서 VC가 캘린더 이벤트를 바인딩할 수 있게 함
+    private(set) lazy var calendarView = DashboardCalendarView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -54,6 +55,9 @@ final class DashboardInfoView: UIView {
         
         messageCardView.addSubview(messageIconImageView)
         messageCardView.addSubview(messageLabel)
+        
+        // 캘린더 추가
+        addSubview(calendarView)
     }
     
     private func setupLabels() {
@@ -143,7 +147,6 @@ final class DashboardInfoView: UIView {
             make.top.equalTo(characterImageView.snp.bottom).offset(28)
             make.leading.trailing.equalToSuperview().inset(contentInset)
             make.height.equalTo(52)
-            make.bottom.equalToSuperview()
         }
         
         messageIconImageView.snp.makeConstraints { make in
@@ -156,6 +159,12 @@ final class DashboardInfoView: UIView {
             make.leading.equalTo(messageIconImageView.snp.trailing).offset(16)
             make.trailing.equalToSuperview().inset(16)
             make.centerY.equalToSuperview()
+        }
+        
+        calendarView.snp.makeConstraints { make in
+            make.top.equalTo(messageCardView.snp.bottom).offset(30)
+            make.leading.trailing.equalToSuperview().inset(contentInset)
+            make.bottom.equalToSuperview()
         }
     }
     
@@ -191,5 +200,22 @@ final class DashboardInfoView: UIView {
         if let iconImage = UIImage(named: message.icon.rawValue) {
             messageIconImageView.image = iconImage
         }
+    }
+    
+    // MARK: - Calendar Forwarding API (VC 편의용)
+    func applyCalendarSnapshot(with items: [DayItem]) {
+        calendarView.applySnapshot(with: items)
+    }
+    
+    func updateCalendarWeekdayStart(from startDate: Date) {
+        calendarView.updateWeekdayStart(from: startDate)
+    }
+    
+    func updateCalendarLayout() {
+        calendarView.updateLayout()
+    }
+    
+    var onCalendarCellSelected: ((Int, DayItem) -> Void)? {
+        didSet { calendarView.onCellSelected = onCalendarCellSelected }
     }
 }

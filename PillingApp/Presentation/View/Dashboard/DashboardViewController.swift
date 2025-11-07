@@ -10,8 +10,6 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
-// MARK: - Presentation/Dashboard/Views/DashboardViewController.swift
-
 final class DashboardViewController: UIViewController {
     
     private let viewModel: DashboardViewModel
@@ -20,8 +18,7 @@ final class DashboardViewController: UIViewController {
     // MARK: - SubViews
     
     private let backgroundImageView = UIImageView(image: UIImage(named: "background_taken"))
-    private let infoView = DashboardInfoView()
-    private let calendarView = DashboardCalendarView()
+    private let infoView = DashboardMiddleView()
     private let bottomView = DashboardBottomView()
     
     
@@ -65,7 +62,7 @@ final class DashboardViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        calendarView.updateLayout()
+        infoView.updateCalendarLayout()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -92,7 +89,6 @@ final class DashboardViewController: UIViewController {
         view.sendSubviewToBack(backgroundImageView)
         
         view.addSubview(infoView)
-        view.addSubview(calendarView)
         view.addSubview(bottomView)
         
         setupTopButtons()
@@ -132,15 +128,9 @@ final class DashboardViewController: UIViewController {
             make.leading.trailing.equalToSuperview()
         }
         
-        
-        calendarView.snp.makeConstraints { make in
-            make.top.equalTo(infoView.snp.bottom).offset(30)
-            make.leading.trailing.equalToSuperview().inset(contentInset)
-        }
-        
         bottomView.snp.makeConstraints { make in
-            make.top.equalTo(calendarView.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(contentInset)
+            make.top.equalTo(infoView.snp.bottom).offset(16)
+            make.horizontalEdges.equalToSuperview().inset(contentInset)
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
     }
@@ -151,7 +141,7 @@ final class DashboardViewController: UIViewController {
         viewModel.items
             .asDriver()
             .drive(onNext: { [weak self] items in
-                self?.calendarView.applySnapshot(with: items)
+                self?.infoView.applyCalendarSnapshot(with: items)
                 self?.bottomView.updatePageControl(for: items.count)
             })
             .disposed(by: disposeBag)
@@ -180,7 +170,7 @@ final class DashboardViewController: UIViewController {
             ))
             .drive(onNext: { [weak self] cycle in
                 self?.infoView.configure(with: cycle)
-                self?.calendarView.updateWeekdayStart(from: cycle.startDate)
+                self?.infoView.updateCalendarWeekdayStart(from: cycle.startDate)
                 self?.updateBackgroundForToday()
             })
             .disposed(by: disposeBag)
@@ -208,16 +198,13 @@ final class DashboardViewController: UIViewController {
     }
     
     // MARK: - Actions
-    
     private func setupActions() {
-        // Info button
         infoButton.rx.tap
             .bind { [weak self] in
                 self?.presentInfoFloatingView()
             }
             .disposed(by: disposeBag)
         
-        // Gear button
         gearButton.rx.tap
             .bind { [weak self] in
                 let vm = DIContainer.shared.makeSettingViewModel()
@@ -226,7 +213,6 @@ final class DashboardViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        // History button
         historyButton.rx.tap
             .bind { [weak self] in
                 guard let self = self else { return }
@@ -236,15 +222,13 @@ final class DashboardViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        // Take pill button
         bottomView.takePillButton.rx.tap
             .bind { [weak self] in
                 self?.viewModel.takePill()
             }
             .disposed(by: disposeBag)
         
-        // Calendar cell selection
-        calendarView.onCellSelected = { [weak self] index, item in
+        infoView.onCalendarCellSelected = { [weak self] index, item in
             self?.presentCalendarSheet(for: index, item: item)
         }
     }
