@@ -3,13 +3,7 @@
 //  PillingApp
 //
 //  Created by 잠만보김쥬디 on 11/7/25.
-//
-//
-//  MessageType.swift
-//  PillingApp
-//
-//  Created by 잠만보김쥬디 on 11/7/25.
-//
+
 
 import Foundation
 
@@ -27,6 +21,10 @@ enum MessageType {
     case takingBeforeTwo
     case takingBefore
     case warning
+    case takenDelayedOk
+    case takenTooEarly
+    case takenDoubleComplete
+    case beforeStart(daysUntilStart: Int)
     
     var text: String {
         switch self {
@@ -54,6 +52,20 @@ enum MessageType {
             return "매일 2시간 이내의 같은 시간에 복용해주세요."
         case .warning:
             return "한알을 더 먹어야 해요"
+        case .takenDelayedOk:
+            return "2시간 지났지만 괜찮아요!"
+        case .takenTooEarly:
+            return "예정보다 2시간 이상 일찍 복용했어요"
+        case .takenDoubleComplete:
+            return "내일의 잔디도 부탁해요."
+        case .beforeStart(let daysUntilStart):
+            if daysUntilStart == 0 {
+                return "오늘부터 복용을 시작해요"
+            } else if daysUntilStart == 1 {
+                return "내일부터 복용을 시작해요"
+            } else {
+                return "복용 시작까지 \(daysUntilStart)일 남았어요"
+            }
         }
     }
     
@@ -102,6 +114,14 @@ enum MessageType {
             return "icon_takingBefore"
         case .warning:
             return "icon_takingBeforeTwo"
+        case .takenDelayedOk:
+            return "icon_takingAfter"
+        case .takenTooEarly:
+            return "icon_takingAfter"
+        case .takenDoubleComplete:
+            return "icon_takingAfter"
+        case .beforeStart:
+            return "icon_plant"
         }
     }
     
@@ -113,10 +133,12 @@ enum MessageType {
             return "missed"
         case .plantingSeed, .pilledTwo, .fire, .takingBeforeTwo, .warning:
             return "notTaken"
-        case .success, .todayAfter, .takingBefore:
+        case .success, .todayAfter, .takingBefore, .takenDelayedOk, .takenTooEarly, .takenDoubleComplete:
             return "taken"
         case .groomy:
             return "missed"
+        case .beforeStart:
+            return "rest"
         }
     }
     

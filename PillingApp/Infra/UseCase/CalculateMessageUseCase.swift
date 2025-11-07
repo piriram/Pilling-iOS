@@ -111,20 +111,10 @@ final class CalculateMessageUseCase {
             return MessageType.todayAfter.toResult()
             
         case .todayTakenDelayed:
-            return customMessage(
-                text: "2시간 지났지만 괜찮아요!",
-                characterImage: "icon_takingAfter",
-                icon: "taken",
-                background: "widget_background_normal"
-            )
+            return MessageType.takenDelayedOk.toResult()
             
         case .todayTakenTooEarly:
-            return customMessage(
-                text: "예정보다 2시간 이상 일찍 복용했어요",
-                characterImage: "icon_takingAfter",
-                icon: "taken",
-                background: "widget_background_normal"
-            )
+            return MessageType.takenTooEarly.toResult()
             
         case .todayDelayed:
             return MessageType.groomy.toResult()
@@ -133,12 +123,7 @@ final class CalculateMessageUseCase {
             return MessageType.fire.toResult()
             
         case .takenDouble:
-            return customMessage(
-                text: "내일의 잔디도 부탁해요.",
-                characterImage: "icon_takingAfter",
-                icon: "taken",
-                background: "widget_background_normal"
-            )
+            return MessageType.takenDoubleComplete.toResult()
             
         case .todayNotTaken:
             return MessageType.plantingSeed.toResult()
@@ -158,45 +143,10 @@ final class CalculateMessageUseCase {
         let components = calendar.dateComponents([.day], from: currentDate, to: startDate)
         
         guard let daysUntilStart = components.day else {
-            return customMessage(
-                text: "복용 시작일이 다가오고 있어요",
-                characterImage: "icon_plant",
-                icon: "rest",
-                background: "widget_background_normal"
-            )
+            return MessageType.beforeStart(daysUntilStart: 0).toResult()
         }
         
-        let messageText: String
-        if daysUntilStart == 0 {
-            messageText = "오늘부터 복용을 시작해요"
-        } else if daysUntilStart == 1 {
-            messageText = "내일부터 복용을 시작해요"
-        } else {
-            messageText = "복용 시작까지 \(daysUntilStart)일 남았어요"
-        }
-        
-        return customMessage(
-            text: messageText,
-            characterImage: "icon_plant",
-            icon: "rest",
-            background: "widget_background_normal"
-        )
-    }
-    
-    private func customMessage(
-        text: String,
-        widgetText: String? = nil,
-        characterImage: String,
-        icon: String,
-        background: String
-    ) -> MessageResult {
-        return MessageResult(
-            text: text,
-            widgetText: widgetText,
-            characterImageName: characterImage,
-            iconImageName: icon,
-            backgroundImageName: background
-        )
+        return MessageType.beforeStart(daysUntilStart: daysUntilStart).toResult()
     }
     
     private func findRelevantRecord(in cycle: Cycle, for date: Date) -> DayRecord? {
