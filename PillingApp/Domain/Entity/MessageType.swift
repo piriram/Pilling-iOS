@@ -61,6 +61,16 @@ enum MessageType {
         switch self {
         case .plantingSeed:
             return "잔디를 심어보세요!"
+        case .todayAfter:
+            return "잔디 심기 완료!"
+        case .waiting:
+            return "잔디가 기다려요"
+        case .groomy:
+            return "2시간 지났어요!"
+        case .fire:
+            return "4시간 지났어요!"
+        case .resting:
+            return "지금은 쉬는 시간"
         default:
             return nil
         }
