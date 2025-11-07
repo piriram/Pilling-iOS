@@ -281,38 +281,13 @@ final class DashboardViewController: UIViewController {
         viewModel.showRetryAlert
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] in
-                self?.showRetryAlert()
+                self?.presentRetryAlert(){[weak self] in
+                    self?.viewModel.reloadData()
+                    
+                }
             })
             .disposed(by: disposeBag)
     }
-    
-    /// 데이터 로드 실패 시 재시도 Alert 표시
-    private func showRetryAlert() {
-        let alert = UIAlertController(
-            title: "데이터를 불러올 수 없습니다",
-            message: "잠시 후 다시 시도해주세요.",
-            preferredStyle: .alert
-        )
-        
-        // 재시도 액션
-        let retryAction = UIAlertAction(
-            title: "재시도",
-            style: .default
-        ) { [weak self] _ in
-            self?.viewModel.reloadData()
-        }
-        alert.addAction(retryAction)
-        
-        // 취소 액션
-        let cancelAction = UIAlertAction(
-            title: "취소",
-            style: .cancel
-        )
-        alert.addAction(cancelAction)
-        
-        present(alert, animated: true)
-    }
-    
     
     private func setupTopButtons() {
         // info
