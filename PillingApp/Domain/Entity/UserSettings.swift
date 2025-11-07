@@ -9,7 +9,7 @@ import UIKit
 import RxSwift
 // MARK: - Domain/RepositoryProtocols/UserSettingsRepositoryProtocol.swift
 
-protocol UserSettingsRepositoryProtocol {
+protocol UserDefaultsProtocol {
     func fetchSettings() -> Observable<UserSettings>
     func saveSettings(_ settings: UserSettings) -> Observable<Void>
 }

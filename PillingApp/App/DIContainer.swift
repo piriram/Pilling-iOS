@@ -24,7 +24,7 @@ final class DIContainer {
         SystemTimeProvider()
     }()
     
-    // MARK: - Managers (⭐️ Singleton으로 변경)
+    // MARK: - Managers(싱글톤)
     
     private lazy var userDefaultsManager: UserDefaultsManagerProtocol = {
         return UserDefaultsManager()
@@ -34,14 +34,14 @@ final class DIContainer {
         return LocalNotificationManager()
     }()
     
-    // MARK: - Repositories (⭐️ Singleton으로 변경)
+    // MARK: - Repositories (싱글톤)
     
     private lazy var cycleRepository: CycleRepositoryProtocol = {
         return CycleRepository(coreDataManager: coreDataManager)
     }()
     
-    private lazy var settingsRepository: UserSettingsRepositoryProtocol = {
-        return UserDefaultsUserSettingsRepository()
+    private lazy var settingsRepository: UserDefaultsProtocol = {
+        return UserDefaultsRepository()
     }()
     
     // MARK: - UseCases

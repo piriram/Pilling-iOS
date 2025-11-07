@@ -31,6 +31,8 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
         timeProvider: TimeProvider,
         userDefaultsManager: UserDefaultsManagerProtocol
     ) {
+        print("순서:\(#fileID)")
+        
         self.cycleRepository = cycleRepository
         self.timeProvider = timeProvider
         self.userDefaultsManager = userDefaultsManager

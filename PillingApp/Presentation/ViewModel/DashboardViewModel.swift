@@ -18,7 +18,7 @@ final class DashboardViewModel {
     private let updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol
     private let calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
-    private let settingsRepository: UserSettingsRepositoryProtocol
+    private let settingsRepository: UserDefaultsProtocol
     
     private let disposeBag = DisposeBag()
     private let calendar = Calendar.current
@@ -40,7 +40,7 @@ final class DashboardViewModel {
         updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol,
         calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
-        settingsRepository: UserSettingsRepositoryProtocol
+        settingsRepository: UserDefaultsProtocol
     ) {
         self.fetchDashboardDataUseCase = fetchDashboardDataUseCase
         self.takePillUseCase = takePillUseCase
@@ -291,7 +291,7 @@ final class DashboardViewModel {
     /// 설정 변경 후 화면 복귀 시 최신 설정 및 사이클 데이터 다시 로드
     func reloadData() {
         loadDashboardData()
-//        loadPillInfo()
+        //        loadPillInfo()
     }
     
     /// 설정 변경 후 UI 업데이트 (설정값만 다시 로드)

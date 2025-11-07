@@ -15,6 +15,8 @@ final class CycleRepository: CycleRepositoryProtocol {
     private let coreDataManager: CoreDataManager
     
     init(coreDataManager: CoreDataManager) {
+        print("순서:\(#fileID)")
+        
         self.coreDataManager = coreDataManager
     }
     

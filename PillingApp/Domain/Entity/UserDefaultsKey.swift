@@ -1,0 +1,17 @@
+//
+//  UserDefaultsKey.swift
+//  PillingApp
+//
+//  Created by 잠만보김쥬디 on 11/6/25.
+//
+
+import Foundation
+
+enum UserDefaultsKey: String {
+    case pillName = "pill_name"
+    case pillTakingDays = "pill_taking_days"
+    case pillBreakDays = "pill_break_days"
+    case pillStartDate = "pill_start_date"
+    case pillInfo = "pillInfo"
+    case currentCycleID = "current_cycle_id"
+}

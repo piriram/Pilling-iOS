@@ -28,7 +28,7 @@ final class TimeSettingViewModel {
     
     // MARK: - Properties
     
-    private let settingsRepository: UserSettingsRepositoryProtocol
+    private let settingsRepository: UserDefaultsProtocol
     private let notificationManager: NotificationManagerProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let createPillCycleUseCase: CreateCycleUseCaseProtocol
@@ -40,7 +40,7 @@ final class TimeSettingViewModel {
     // MARK: - Initialization
     
     init(
-        settingsRepository: UserSettingsRepositoryProtocol,
+        settingsRepository: UserDefaultsProtocol,
         notificationManager: NotificationManagerProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
         createPillCycleUseCase: CreateCycleUseCaseProtocol

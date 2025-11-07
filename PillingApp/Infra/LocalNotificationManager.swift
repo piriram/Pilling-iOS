@@ -19,6 +19,8 @@ final class LocalNotificationManager: NotificationManagerProtocol {
     // MARK: - Initialization
     
     init(notificationCenter: UNUserNotificationCenter = .current()) {
+        print("순서:\(#fileID)")
+        
         self.notificationCenter = notificationCenter
     }
     
@@ -118,12 +120,6 @@ final class LocalNotificationManager: NotificationManagerProtocol {
             return Disposables.create()
         }
     }
-}
-
-enum NotificationError: Error {
-    case permissionDenied
-    case schedulingFailed
-    case invalidTime
 }
 
 protocol NotificationManagerProtocol {

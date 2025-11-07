@@ -8,9 +8,13 @@ protocol CycleHistoryProtocol {
     func fetchAllCycles() throws -> [Cycle]
 }
 
-final class PillCycleHistoryRepository: CycleHistoryProtocol {
+final class CycleHistoryRepository: CycleHistoryProtocol {
     private let context: NSManagedObjectContext?
-    init(context: NSManagedObjectContext?) { self.context = context }
+    init(context: NSManagedObjectContext?) {
+        print("순서:\(#fileID)")
+        
+        self.context = context
+    }
     
     func fetchAllCycles() throws -> [Cycle] {
         guard let ctx = context else { return [] }
