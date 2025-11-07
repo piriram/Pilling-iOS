@@ -24,12 +24,19 @@ final class DashboardViewController: UIViewController {
     private let calendarView = DashboardCalendarView()
     private let bottomView = DashboardBottomView()
     
+    
+    // MARK: - 상단 버튼들
+    private let historyButton = UIButton(type: .system)
+    private let infoButton = UIButton(type: .system)
+    private let gearButton = UIButton(type: .system)
+    
+    
     // MARK: - Properties
     
     var shouldHideHistoryButton: Bool = false {
         didSet {
-            infoView.historyButton.isHidden = shouldHideHistoryButton
-            infoView.historyButton.isEnabled = !shouldHideHistoryButton
+            historyButton.isHidden = shouldHideHistoryButton
+            historyButton.isEnabled = !shouldHideHistoryButton
         }
     }
     
@@ -88,8 +95,12 @@ final class DashboardViewController: UIViewController {
         view.addSubview(calendarView)
         view.addSubview(bottomView)
         
-        infoView.historyButton.isHidden = shouldHideHistoryButton
-        infoView.historyButton.isEnabled = !shouldHideHistoryButton
+        setupTopButtons()
+        view.addSubview(historyButton)
+        view.addSubview(infoButton)
+        view.addSubview(gearButton)
+        historyButton.isHidden = shouldHideHistoryButton
+        historyButton.isEnabled = !shouldHideHistoryButton
     }
     
     private func setupConstraints() {
@@ -101,10 +112,26 @@ final class DashboardViewController: UIViewController {
             make.bottom.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.top).offset(220)
         }
         
+        gearButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(14)
+            make.trailing.equalToSuperview().inset(contentInset)
+            make.size.lessThanOrEqualTo(30)
+        }
+        infoButton.snp.makeConstraints { make in
+            make.centerY.equalTo(gearButton)
+            make.trailing.equalTo(gearButton.snp.leading).offset(-8)
+            make.size.lessThanOrEqualTo(30)
+        }
+        historyButton.snp.makeConstraints { make in
+            make.centerY.equalTo(gearButton)
+            make.trailing.equalTo(infoButton.snp.leading).offset(-8)
+            make.size.lessThanOrEqualTo(30)
+        }
         infoView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalToSuperview()
         }
+        
         
         calendarView.snp.makeConstraints { make in
             make.top.equalTo(infoView.snp.bottom).offset(30)
@@ -117,7 +144,6 @@ final class DashboardViewController: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
     }
-    
     // MARK: - Binding
     
     private func bindViewModel() {
@@ -185,14 +211,14 @@ final class DashboardViewController: UIViewController {
     
     private func setupActions() {
         // Info button
-        infoView.infoButton.rx.tap
+        infoButton.rx.tap
             .bind { [weak self] in
                 self?.presentInfoFloatingView()
             }
             .disposed(by: disposeBag)
         
         // Gear button
-        infoView.gearButton.rx.tap
+        gearButton.rx.tap
             .bind { [weak self] in
                 let vm = DIContainer.shared.makeSettingViewModel()
                 let vc = SettingViewController(viewModel: vm)
@@ -201,7 +227,7 @@ final class DashboardViewController: UIViewController {
             .disposed(by: disposeBag)
         
         // History button
-        infoView.historyButton.rx.tap
+        historyButton.rx.tap
             .bind { [weak self] in
                 guard let self = self else { return }
                 let vm = DIContainer.shared.makePillCycleHistoryViewModel()
@@ -246,16 +272,16 @@ final class DashboardViewController: UIViewController {
     
     private func presentCalendarSheet(for index: Int, item: DayItem) {
         guard let cycle = viewModel.currentCycle.value else { return }
-        if #available(iOS 16.0, *) {
-            CalendarSheetPresenter.present(
-                from: self,
-                selectedIndex: index,
-                item: item,
-                cycle: cycle
-            ) { [weak self] idx, status, memo in
-                self?.viewModel.updateState(at: idx, to: status, memo: memo)
-            }
+        
+        CalendarSheetPresenter.present(
+            from: self,
+            selectedIndex: index,
+            item: item,
+            cycle: cycle
+        ) { [weak self] idx, status, memo in
+            self?.viewModel.updateState(at: idx, to: status, memo: memo)
         }
+        
     }
     
     private func presentInfoFloatingView() {
@@ -267,39 +293,54 @@ final class DashboardViewController: UIViewController {
     }
     
     /// ViewModel의 alert 이벤트를 바인딩
-      func bindAlert() {
-          viewModel.showRetryAlert
-              .observe(on: MainScheduler.instance)
-              .subscribe(onNext: { [weak self] in
-                  self?.showRetryAlert()
-              })
-              .disposed(by: disposeBag)
-      }
-      
-      /// 데이터 로드 실패 시 재시도 Alert 표시
-      private func showRetryAlert() {
-          let alert = UIAlertController(
-              title: "데이터를 불러올 수 없습니다",
-              message: "잠시 후 다시 시도해주세요.",
-              preferredStyle: .alert
-          )
-          
-          // 재시도 액션
-          let retryAction = UIAlertAction(
-              title: "재시도",
-              style: .default
-          ) { [weak self] _ in
-              self?.viewModel.reloadData()
-          }
-          alert.addAction(retryAction)
-          
-          // 취소 액션
-          let cancelAction = UIAlertAction(
-              title: "취소",
-              style: .cancel
-          )
-          alert.addAction(cancelAction)
-          
-          present(alert, animated: true)
-      }
+    func bindAlert() {
+        viewModel.showRetryAlert
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in
+                self?.showRetryAlert()
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    /// 데이터 로드 실패 시 재시도 Alert 표시
+    private func showRetryAlert() {
+        let alert = UIAlertController(
+            title: "데이터를 불러올 수 없습니다",
+            message: "잠시 후 다시 시도해주세요.",
+            preferredStyle: .alert
+        )
+        
+        // 재시도 액션
+        let retryAction = UIAlertAction(
+            title: "재시도",
+            style: .default
+        ) { [weak self] _ in
+            self?.viewModel.reloadData()
+        }
+        alert.addAction(retryAction)
+        
+        // 취소 액션
+        let cancelAction = UIAlertAction(
+            title: "취소",
+            style: .cancel
+        )
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true)
+    }
+    
+    
+    private func setupTopButtons() {
+        // info
+        infoButton.setImage(DashboardUI.Icon.info, for: .normal)
+        infoButton.tintColor = AppColor.secondary
+        
+        // history
+        historyButton.setImage(UIImage(systemName: "clock.arrow.circlepath"), for: .normal)
+        historyButton.tintColor = AppColor.secondary
+        
+        // gear
+        gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
+        gearButton.tintColor = AppColor.secondary
+    }
 }
