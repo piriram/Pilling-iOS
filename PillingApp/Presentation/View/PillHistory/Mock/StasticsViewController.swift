@@ -79,7 +79,7 @@ final class StasticsViewController: UIViewController {
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .clear
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
