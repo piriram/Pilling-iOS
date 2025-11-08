@@ -58,9 +58,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func showDashboard() {
-        let viewModel = DIContainer.shared.makeDashboardViewModel()
-        let dashboardVC = DashboardViewController(viewModel: viewModel)
-        let navigationController = UINavigationController(rootViewController: dashboardVC)
+        let mainPageVC = MainPageViewController()
+        let navigationController = UINavigationController(rootViewController: mainPageVC)
         window?.rootViewController = navigationController
     }
     

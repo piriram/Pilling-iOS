@@ -37,6 +37,20 @@ final class DashboardViewController: UIViewController {
         }
     }
     
+    var shouldHideCommonViews: Bool = false {
+        didSet {
+            if shouldHideCommonViews {
+                backgroundImageView.isHidden = true
+                historyButton.isHidden = true
+                infoButton.isHidden = true
+                gearButton.isHidden = true
+                bottomView.isHidden = true
+            }
+        }
+    }
+    
+    weak var parentPageController: MainPageViewController?
+    
     // MARK: - Initialization
     
     init(viewModel: DashboardViewModel) {
@@ -67,15 +81,7 @@ final class DashboardViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false)
-        extendedLayoutIncludesOpaqueBars = true
-        edgesForExtendedLayout = [.top, .left, .right, .bottom]
-        
-        viewModel.reloadData()    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false)
+        viewModel.reloadData()
     }
     
     // MARK: - Setup
@@ -193,6 +199,7 @@ final class DashboardViewController: UIViewController {
         .asDriver(onErrorJustReturn: (false, nil))
         .drive(onNext: { [weak self] canTake, cycle in
             self?.bottomView.updateButton(canTake: canTake, cycle: cycle)
+            self?.updateParentBottomButton(canTake: canTake, cycle: cycle)
         })
         .disposed(by: disposeBag)
     }
@@ -245,11 +252,13 @@ final class DashboardViewController: UIViewController {
             calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
         }) else {
             backgroundImageView.image = UIImage(named: "background")
+            parentPageController?.updateBackgroundImage("background")
             return
         }
         
         let adjustedStatus = todayRecord.status.adjustedForDate(todayRecord.scheduledDateTime, calendar: calendar)
         backgroundImageView.image = UIImage(named: adjustedStatus.backgroundImageName)
+        parentPageController?.updateBackgroundImage(adjustedStatus.backgroundImageName)
     }
     
     // MARK: - Presentation
@@ -301,5 +310,54 @@ final class DashboardViewController: UIViewController {
         // gear
         gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
         gearButton.tintColor = AppColor.secondary
+    }
+    
+    // MARK: - Helper Methods for Parent Controller
+    
+    private func updateParentBottomButton(canTake: Bool, cycle: Cycle?) {
+        guard let cycle = cycle else { return }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        
+        guard let todayRecord = cycle.records.first(where: {
+            calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
+        }) else {
+            return
+        }
+        
+        if case .rest = todayRecord.status {
+            parentPageController?.updateBottomButton(
+                title: AppStrings.Dashboard.restPeriod,
+                backgroundColor: AppColor.pillWhite,
+                isEnabled: false
+            )
+        } else if todayRecord.status.isTaken {
+            parentPageController?.updateBottomButton(
+                title: AppStrings.Dashboard.takePillCompleted,
+                backgroundColor: AppColor.notYetGray,
+                isEnabled: false
+            )
+        } else if canTake {
+            parentPageController?.updateBottomButton(
+                title: AppStrings.Dashboard.takePillButton,
+                backgroundColor: AppColor.pillGreen200,
+                isEnabled: true
+            )
+        } else {
+            parentPageController?.updateBottomButton(
+                title: AppStrings.Dashboard.takePillButton,
+                backgroundColor: AppColor.pillGreen200,
+                isEnabled: true
+            )
+        }
+    }
+    
+    func presentInfoFloatingViewFromParent() {
+        presentInfoFloatingView()
+    }
+    
+    func takePillFromParent() {
+        viewModel.takePill()
     }
 }
