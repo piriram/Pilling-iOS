@@ -10,10 +10,13 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
+// MARK: - DashboardSheetViewController
 final class DashboardSheetViewController: UIViewController {
     private let selectedDate: Date
     private let initialMemo: String
-    private let onSelectStatus: (PillStatus, String) -> Void
+    private let takenAt: Date?
+    private let onDataChanged: (PillStatus?, String) -> Void
+    private let onTimeChanged: ((Date) -> Void)?
     private let disposeBag = DisposeBag()
     
     private var currentStatus: PillStatus?
@@ -22,7 +25,7 @@ final class DashboardSheetViewController: UIViewController {
     
     // MARK: - Bottom Sheet Properties
     
-    private let sheetHeight: CGFloat = 350
+    private let sheetHeight: CGFloat = 430
     private var currentSheetY: CGFloat = 0
     
     // MARK: - UI Components
@@ -110,6 +113,14 @@ final class DashboardSheetViewController: UIViewController {
     
     private var selectedButtonTag: Int = -1
     
+    // MARK: - Time Setting Button
+    
+    private let timeSettingButton: SettingItemButton = {
+        let button = SettingItemButton()
+        button.configure(title: AppStrings.Setting.timeSettingTitle, iconSystemName: "clock")
+        return button
+    }()
+    
     // MARK: - ViewModel & Relays (MVVM I/O)
     
     private let viewModel: DefaultDashboardSheetViewModel
@@ -120,15 +131,21 @@ final class DashboardSheetViewController: UIViewController {
     init(
         selectedDate: Date,
         initialMemo: String = "",
-        onSelectStatus: @escaping (PillStatus, String) -> Void
+        takenAt: Date? = nil,
+        initialStatus: PillStatus? = nil,
+        onDataChanged: @escaping (PillStatus?, String) -> Void,
+        onTimeChanged: ((Date) -> Void)? = nil
     ) {
         self.selectedDate = selectedDate
         self.initialMemo = initialMemo
-        self.onSelectStatus = onSelectStatus
+        self.takenAt = takenAt
+        self.onDataChanged = onDataChanged
+        self.onTimeChanged = onTimeChanged
+        self.currentStatus = initialStatus
         self.viewModel = DefaultDashboardSheetViewModel(
             selectedDate: selectedDate,
             initialMemo: initialMemo,
-            initialStatus: nil // setInitialSelection을 사용할 수 있으므로 초기 선택은 명시적으로 주입하지 않음
+            initialStatus: initialStatus
         )
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
@@ -146,6 +163,7 @@ final class DashboardSheetViewController: UIViewController {
         setupViews()
         setupGestures()
         setupInitialMemo()
+        setupTimeSettingButton()
         bindViewModel() // MVVM 바인딩
     }
     
@@ -183,6 +201,8 @@ final class DashboardSheetViewController: UIViewController {
         statusButtonsStack.addArrangedSubview(notTakenButton)
         statusButtonsStack.addArrangedSubview(takenButton)
         statusButtonsStack.addArrangedSubview(takenDoubleButton)
+        
+        contentStackView.addArrangedSubview(timeSettingButton)
     }
     
     private func setupConstraints() {
@@ -216,6 +236,10 @@ final class DashboardSheetViewController: UIViewController {
             make.edges.equalToSuperview().inset(4)
         }
         
+        timeSettingButton.snp.makeConstraints { make in
+            make.height.equalTo(56)
+        }
+        
         memoTextView.snp.makeConstraints { make in
             make.height.equalTo(120)
         }
@@ -241,6 +265,21 @@ final class DashboardSheetViewController: UIViewController {
     private func setupInitialMemo() {
         memoTextView.text = initialMemo
         memoPlaceholderLabel.isHidden = !initialMemo.isEmpty
+    }
+    
+    private func setupTimeSettingButton() {
+        if let takenAt = takenAt {
+            let timeString = takenAt.formatted(style: .time24Hour)
+            timeSettingButton.setValue(timeString)
+        } else {
+            timeSettingButton.setValue("-")
+        }
+        
+        timeSettingButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.presentTimePickerBottomSheet()
+            })
+            .disposed(by: disposeBag)
     }
     
     // MARK: - MVVM Binding
@@ -279,7 +318,7 @@ final class DashboardSheetViewController: UIViewController {
         output.dismiss
             .emit(onNext: { [weak self] status, memo in
                 guard let self else { return }
-                self.onSelectStatus(status, memo)
+                self.onDataChanged(status, memo)
                 self.hideBottomSheet()
             })
             .disposed(by: disposeBag)
@@ -436,5 +475,25 @@ final class DashboardSheetViewController: UIViewController {
     private func handleSheetDismiss() {
         requestDismissRelay.accept(())
     }
+    
+    // MARK: - Time Picker
+    
+    private func presentTimePickerBottomSheet() {
+        let initialTime = takenAt ?? Date()
+        let timePickerSheet = TimePickerBottomSheet(initialTime: initialTime)
+        
+        timePickerSheet.selectedTime
+            .take(1)
+            .subscribe(onNext: { [weak self] selectedTime in
+                guard let self = self else { return }
+                
+                let timeString = selectedTime.formatted(style: .time24Hour)
+                self.timeSettingButton.setValue(timeString)
+                
+                self.onTimeChanged?(selectedTime)
+            })
+            .disposed(by: disposeBag)
+        
+        present(timePickerSheet, animated: false)
+    }
 }
-

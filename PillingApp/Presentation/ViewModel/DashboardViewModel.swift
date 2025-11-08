@@ -70,7 +70,8 @@ final class DashboardViewModel {
                             cycle: cycle,
                             recordIndex: index,
                             newStatus: .missed,
-                            memo: nil
+                            memo: nil,
+                            takenAt: nil
                         )
                         .subscribe(onNext: { [weak self] updatedCycle in
                             self?.currentCycle.accept(updatedCycle)
@@ -313,7 +314,8 @@ final class DashboardViewModel {
             cycle: cycle,
             recordIndex: index,
             newStatus: newStatus,
-            memo: nil
+            memo: nil,
+            takenAt: nil
         )
         .subscribe(onNext: { [weak self] updatedCycle in
             self?.currentCycle.accept(updatedCycle)
@@ -324,7 +326,7 @@ final class DashboardViewModel {
         .disposed(by: disposeBag)
     }
     
-    func updateState(at index: Int, to newStatus: PillStatus, memo: String?) {
+    func updateState(at index: Int, to newStatus: PillStatus, memo: String?, takenAt: Date? = nil) {
         guard let cycle = currentCycle.value else {
             print("❌ updateState: cycle이 nil입니다")
             return
@@ -334,7 +336,8 @@ final class DashboardViewModel {
             cycle: cycle,
             recordIndex: index,
             newStatus: newStatus,
-            memo: memo
+            memo: memo,
+            takenAt: takenAt
         )
         .subscribe(
             onNext: { [weak self] updatedCycle in

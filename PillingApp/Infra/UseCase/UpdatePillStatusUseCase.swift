@@ -14,7 +14,8 @@ protocol UpdatePillStatusUseCaseProtocol {
         cycle: Cycle,
         recordIndex: Int,
         newStatus: PillStatus,
-        memo: String?
+        memo: String?,
+        takenAt: Date?
     ) -> Observable<Cycle>
 }
 
@@ -38,7 +39,8 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         cycle: Cycle,
         recordIndex: Int,
         newStatus: PillStatus,
-        memo: String?
+        memo: String?,
+        takenAt: Date? = nil
     ) -> Observable<Cycle> {
         guard cycle.records.indices.contains(recordIndex) else {
             return .just(cycle)
@@ -48,14 +50,22 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         let record = updatedCycle.records[recordIndex]
         let now = timeProvider.now
         
-        let takenAt: Date? = newStatus.isTaken ? (record.takenAt ?? now) : nil
+        // takenAt 결정 로직:
+        // 1. 명시적으로 전달된 takenAt이 있으면 사용
+        // 2. 없으면 기존 로직 적용 (상태가 taken이면 record.takenAt ?? now)
+        let finalTakenAt: Date?
+        if let providedTakenAt = takenAt {
+            finalTakenAt = providedTakenAt
+        } else {
+            finalTakenAt = newStatus.isTaken ? (record.takenAt ?? now) : nil
+        }
         
         let updatedRecord = DayRecord(
             id: record.id,
             cycleDay: record.cycleDay,
             status: newStatus,
             scheduledDateTime: record.scheduledDateTime,
-            takenAt: takenAt,
+            takenAt: finalTakenAt,
             memo: memo ?? record.memo,
             createdAt: record.createdAt,
             updatedAt: now

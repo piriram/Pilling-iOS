@@ -8,8 +8,6 @@
 import Foundation
 import RxSwift
 
-// MARK: - CreateCycleUseCaseProtocol
-
 protocol CreateCycleUseCaseProtocol {
     func execute(
         pillInfo: PillInfo,
@@ -18,7 +16,7 @@ protocol CreateCycleUseCaseProtocol {
     ) -> Observable<Cycle>
 }
 
-// MARK: - CreateCycleUseCase
+// MARK: - pillInfo,startDate,복용 시각 문자열로 새 Cycle과 DayRecord들을 생성하고 + 유저디폴트에 사이클 ID 저장
 
 final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
     

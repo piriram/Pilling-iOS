@@ -14,7 +14,7 @@ protocol TakePillUseCaseProtocol {
     func execute(cycle: Cycle, settings: UserSettings) -> Observable<Cycle>
 }
 
-// MARK: - TakePillUseCase
+// MARK: - 약을 복용했을 때, 복용 시간과 설정값(UserSettings)을 기준으로 복용 상태(PillStatus)를 계산하고 cycle 업데이트
 
 final class TakePillUseCase: TakePillUseCaseProtocol {
     private let cycleRepository: CycleRepositoryProtocol
