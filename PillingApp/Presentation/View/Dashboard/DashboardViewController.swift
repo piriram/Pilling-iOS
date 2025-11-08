@@ -262,8 +262,8 @@ final class DashboardViewController: UIViewController {
             selectedIndex: index,
             item: item,
             cycle: cycle
-        ) { [weak self] idx, status, memo in
-            self?.viewModel.updateState(at: idx, to: status, memo: memo)
+        ) { [weak self] idx, status, memo, takenAt in
+            self?.viewModel.updateState(at: idx, to: status, memo: memo, takenAt: takenAt)
         }
         
     }

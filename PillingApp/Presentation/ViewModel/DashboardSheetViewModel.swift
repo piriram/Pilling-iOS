@@ -27,7 +27,7 @@ final class DefaultDashboardSheetViewModel {
         let selectedIndex: Driver<Int?>            // -1 or 0/1/2
         let isMemoPlaceholderHidden: Driver<Bool>  // true면 placeholder 숨김
         let shouldShowSheet: Signal<Void>
-        let dismiss: Signal<(PillStatus, String)>  // VC가 onSelectStatus 호출
+        let dismiss: Signal<(PillStatus?, String)>  // status가 nil이면 메모만 저장
     }
 
     // MARK: State
@@ -87,18 +87,21 @@ final class DefaultDashboardSheetViewModel {
 
         // 버튼 탭 시 즉시 dismiss 이벤트 발생
         let dismissOnTap = statusFromTag
-            .withLatestFrom(currentMemo.asObservable()) { ($0, $1) }
+            .withLatestFrom(currentMemo.asObservable()) { ($0 as PillStatus?, $1) }
             .asSignal(onErrorSignalWith: .empty())
 
-        // requestDismiss 시 선택값이 있으면 그걸로, 없으면 폴백 규칙
+        // requestDismiss 시 선택값이 있으면 그걸로, 없으면 메모만 저장
         let dismissOnRequest = input.requestDismiss
             .withLatestFrom(Observable.combineLatest(lastResolvedStatus.asObservable(),
                                                      currentMemo.asObservable()))
-            .map { [weak self] (statusOpt, memo) -> (PillStatus, String) in
-                if let s = statusOpt { return (s, memo) }
-                // 선택이 없을 때 폴백
-                guard let self else { return (.scheduled, memo) }
-                return (self.fallbackStatus(), memo)
+            .map { [weak self] (statusOpt, memo) -> (PillStatus?, String) in
+                guard let self = self else { return (nil, memo) }
+                // 상태 버튼을 눌렀으면 선택된 상태 사용
+                if let status = statusOpt {
+                    return (status, memo)
+                }
+                // 버튼을 누르지 않았으면 상태는 nil, 메모만 저장
+                return (nil, memo)
             }
             .asSignal(onErrorSignalWith: .empty())
 

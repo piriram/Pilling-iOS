@@ -7,9 +7,7 @@
 
 import Foundation
 
-// MARK: - CalculateMessageUseCase
-
-/// 본앱과 위젯에서 공통으로 사용하는 메시지 계산 UseCase
+/// 본앱과 위젯에서 공통으로 사용하는 메시지 계산 
 final class CalculateMessageUseCase {
     
     private let timeProvider: TimeProvider
