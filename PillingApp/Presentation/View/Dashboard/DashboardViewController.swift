@@ -13,20 +13,23 @@ import SnapKit
 final class DashboardViewController: UIViewController {
     
     private let viewModel: DashboardViewModel
+    private let stasticsViewModel: StasticsViewModel
     private let disposeBag = DisposeBag()
     
     // MARK: - SubViews
     
     private let backgroundImageView = UIImageView(image: UIImage(named: "background_taken"))
     private let infoView = DashboardMiddleView()
+    private let stasticsView = StasticsContentView()
     private let bottomView = DashboardBottomView()
     
+    private let containerView = UIView()
+    private var currentViewIndex = 0 // 0: Dashboard, 1: Stastics
     
     // MARK: - 상단 버튼들
     private let historyButton = UIButton(type: .system)
     private let infoButton = UIButton(type: .system)
     private let gearButton = UIButton(type: .system)
-    
     
     // MARK: - Properties
     
@@ -37,24 +40,11 @@ final class DashboardViewController: UIViewController {
         }
     }
     
-    var shouldHideCommonViews: Bool = false {
-        didSet {
-            if shouldHideCommonViews {
-                backgroundImageView.isHidden = true
-                historyButton.isHidden = true
-                infoButton.isHidden = true
-                gearButton.isHidden = true
-                bottomView.isHidden = true
-            }
-        }
-    }
-    
-    weak var parentPageController: MainPageViewController?
-    
     // MARK: - Initialization
     
-    init(viewModel: DashboardViewModel) {
+    init(viewModel: DashboardViewModel, stasticsViewModel: StasticsViewModel) {
         self.viewModel = viewModel
+        self.stasticsViewModel = stasticsViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -81,7 +71,15 @@ final class DashboardViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        viewModel.reloadData()
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        extendedLayoutIncludesOpaqueBars = true
+        edgesForExtendedLayout = [.top, .left, .right, .bottom]
+        
+        viewModel.reloadData()    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
     }
     
     // MARK: - Setup
@@ -94,7 +92,11 @@ final class DashboardViewController: UIViewController {
         view.addSubview(backgroundImageView)
         view.sendSubviewToBack(backgroundImageView)
         
-        view.addSubview(infoView)
+        view.addSubview(containerView)
+        containerView.addSubview(infoView)
+        containerView.addSubview(stasticsView)
+        stasticsView.isHidden = true
+        
         view.addSubview(bottomView)
         
         setupTopButtons()
@@ -103,6 +105,8 @@ final class DashboardViewController: UIViewController {
         view.addSubview(gearButton)
         historyButton.isHidden = shouldHideHistoryButton
         historyButton.isEnabled = !shouldHideHistoryButton
+        
+        setupSwipeGestures()
     }
     
     private func setupConstraints() {
@@ -129,13 +133,22 @@ final class DashboardViewController: UIViewController {
             make.trailing.equalTo(infoButton.snp.leading).offset(-8)
             make.size.lessThanOrEqualTo(30)
         }
-        infoView.snp.makeConstraints { make in
+        
+        containerView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.equalToSuperview()
         }
         
+        infoView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        stasticsView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
         bottomView.snp.makeConstraints { make in
-            make.top.equalTo(infoView.snp.bottom).offset(16)
+            make.top.equalTo(containerView.snp.bottom).offset(16)
             make.horizontalEdges.equalToSuperview().inset(contentInset)
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
@@ -199,9 +212,64 @@ final class DashboardViewController: UIViewController {
         .asDriver(onErrorJustReturn: (false, nil))
         .drive(onNext: { [weak self] canTake, cycle in
             self?.bottomView.updateButton(canTake: canTake, cycle: cycle)
-            self?.updateParentBottomButton(canTake: canTake, cycle: cycle)
         })
         .disposed(by: disposeBag)
+        
+        bindStasticsViewModel()
+    }
+    
+    private func bindStasticsViewModel() {
+        let viewDidLoadSubject = PublishSubject<Void>()
+        let leftArrowTappedSubject = PublishSubject<Void>()
+        let rightArrowTappedSubject = PublishSubject<Void>()
+        let periodButtonTappedSubject = PublishSubject<Void>()
+        
+        let input = StasticsViewModel.Input(
+            viewDidLoad: viewDidLoadSubject.asObservable(),
+            leftArrowTapped: leftArrowTappedSubject.asObservable(),
+            rightArrowTapped: rightArrowTappedSubject.asObservable(),
+            periodButtonTapped: periodButtonTappedSubject.asObservable()
+        )
+        
+        let output = stasticsViewModel.transform(input: input)
+        
+        output.currentPeriodData
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] data in
+                self?.stasticsView.configure(with: data)
+            })
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(output.isLeftArrowEnabled, output.isRightArrowEnabled)
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] isLeftEnabled, isRightEnabled in
+                self?.stasticsView.updateArrowButtons(
+                    isLeftEnabled: isLeftEnabled,
+                    isRightEnabled: isRightEnabled
+                )
+            })
+            .disposed(by: disposeBag)
+        
+        output.periodList
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] periodList in
+                self?.showPeriodSelectionAlert(periodList: periodList)
+            })
+            .disposed(by: disposeBag)
+        
+        stasticsView.leftArrowTapped = {
+            leftArrowTappedSubject.onNext(())
+        }
+        
+        stasticsView.rightArrowTapped = {
+            rightArrowTappedSubject.onNext(())
+        }
+        
+        stasticsView.periodButtonTapped = {
+            periodButtonTappedSubject.onNext(())
+        }
+        
+        viewDidLoadSubject.onNext(())
     }
     
     // MARK: - Actions
@@ -252,13 +320,11 @@ final class DashboardViewController: UIViewController {
             calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
         }) else {
             backgroundImageView.image = UIImage(named: "background")
-            parentPageController?.updateBackgroundImage("background")
             return
         }
         
         let adjustedStatus = todayRecord.status.adjustedForDate(todayRecord.scheduledDateTime, calendar: calendar)
         backgroundImageView.image = UIImage(named: adjustedStatus.backgroundImageName)
-        parentPageController?.updateBackgroundImage(adjustedStatus.backgroundImageName)
     }
     
     // MARK: - Presentation
@@ -312,52 +378,82 @@ final class DashboardViewController: UIViewController {
         gearButton.tintColor = AppColor.secondary
     }
     
-    // MARK: - Helper Methods for Parent Controller
+    // MARK: - Swipe Gestures
     
-    private func updateParentBottomButton(canTake: Bool, cycle: Cycle?) {
-        guard let cycle = cycle else { return }
+    private func setupSwipeGestures() {
+        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeLeft))
+        swipeLeft.direction = .left
+        containerView.addGestureRecognizer(swipeLeft)
         
-        let calendar = Calendar.current
-        let now = Date()
-        
-        guard let todayRecord = cycle.records.first(where: {
-            calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
-        }) else {
-            return
-        }
-        
-        if case .rest = todayRecord.status {
-            parentPageController?.updateBottomButton(
-                title: AppStrings.Dashboard.restPeriod,
-                backgroundColor: AppColor.pillWhite,
-                isEnabled: false
-            )
-        } else if todayRecord.status.isTaken {
-            parentPageController?.updateBottomButton(
-                title: AppStrings.Dashboard.takePillCompleted,
-                backgroundColor: AppColor.notYetGray,
-                isEnabled: false
-            )
-        } else if canTake {
-            parentPageController?.updateBottomButton(
-                title: AppStrings.Dashboard.takePillButton,
-                backgroundColor: AppColor.pillGreen200,
-                isEnabled: true
-            )
-        } else {
-            parentPageController?.updateBottomButton(
-                title: AppStrings.Dashboard.takePillButton,
-                backgroundColor: AppColor.pillGreen200,
-                isEnabled: true
-            )
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeRight))
+        swipeRight.direction = .right
+        containerView.addGestureRecognizer(swipeRight)
+    }
+    
+    @objc private func handleSwipeLeft() {
+        if currentViewIndex == 0 {
+            switchToView(index: 1, direction: .left)
         }
     }
     
-    func presentInfoFloatingViewFromParent() {
-        presentInfoFloatingView()
+    @objc private func handleSwipeRight() {
+        if currentViewIndex == 1 {
+            switchToView(index: 0, direction: .right)
+        }
     }
     
-    func takePillFromParent() {
-        viewModel.takePill()
+    private func switchToView(index: Int, direction: UISwipeGestureRecognizer.Direction) {
+        guard index != currentViewIndex else { return }
+        
+        let fromView = currentViewIndex == 0 ? infoView : stasticsView
+        let toView = index == 0 ? infoView : stasticsView
+        
+        currentViewIndex = index
+        
+        // 페이지 컨트롤 업데이트
+        bottomView.pageControl.numberOfPages = 2
+        bottomView.pageControl.currentPage = index
+        
+        // 히스토리 버튼 표시/숨김
+        historyButton.isHidden = (index == 1)
+        historyButton.isEnabled = (index == 0)
+        
+        // 애니메이션 준비
+        toView.isHidden = false
+        toView.alpha = 0
+        
+        let screenWidth = view.bounds.width
+        let translateX: CGFloat = direction == .left ? screenWidth : -screenWidth
+        
+        toView.transform = CGAffineTransform(translationX: translateX, y: 0)
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            fromView.alpha = 0
+            fromView.transform = CGAffineTransform(translationX: -translateX, y: 0)
+            
+            toView.alpha = 1
+            toView.transform = .identity
+        }) { _ in
+            fromView.isHidden = true
+            fromView.transform = .identity
+        }
+    }
+    
+    private func showPeriodSelectionAlert(periodList: [PeriodRecordDTO]) {
+        let alert = UIAlertController(title: "기간 선택", message: nil, preferredStyle: .actionSheet)
+        
+        for (index, data) in periodList.enumerated() {
+            let action = UIAlertAction(title: "\(data.startDate) - \(data.endDate)", style: .default) { [weak self] _ in
+                self?.stasticsViewModel.selectPeriod(at: index)
+            }
+            if index == stasticsViewModel.getCurrentIndex() {
+                action.setValue(true, forKey: "checked")
+            }
+            alert.addAction(action)
+        }
+        
+        alert.addAction(UIAlertAction(title: AppStrings.Common.cancelTitle, style: .cancel))
+        
+        present(alert, animated: true)
     }
 }
