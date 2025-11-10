@@ -524,6 +524,7 @@ final class DashboardSheetViewController: UIViewController {
     
     private func presentSideEffectManagement() {
         let managementVC = SideEffectManagementViewController(userDefaultsManager: userDefaultsManager)
+        navigationController?.setNavigationBarHidden(false, animated: false)
         navigationController?.pushViewController(managementVC, animated: true)
     }
 }
