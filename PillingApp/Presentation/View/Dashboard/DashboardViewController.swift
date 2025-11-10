@@ -14,6 +14,7 @@ final class DashboardViewController: UIViewController {
     
     private let viewModel: DashboardViewModel
     private let stasticsViewModel: StasticsViewModel
+    private let userDefaultsManager: UserDefaultsManagerProtocol
     private let disposeBag = DisposeBag()
     
     // MARK: - SubViews
@@ -42,9 +43,14 @@ final class DashboardViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(viewModel: DashboardViewModel, stasticsViewModel: StasticsViewModel) {
+    init(
+        viewModel: DashboardViewModel,
+        stasticsViewModel: StasticsViewModel,
+        userDefaultsManager: UserDefaultsManagerProtocol
+    ) {
         self.viewModel = viewModel
         self.stasticsViewModel = stasticsViewModel
+        self.userDefaultsManager = userDefaultsManager
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -336,7 +342,8 @@ final class DashboardViewController: UIViewController {
             from: self,
             selectedIndex: index,
             item: item,
-            cycle: cycle
+            cycle: cycle,
+            userDefaultsManager: userDefaultsManager
         ) { [weak self] idx, status, memo, takenAt in
             self?.viewModel.updateState(at: idx, to: status, memo: memo, takenAt: takenAt)
         }

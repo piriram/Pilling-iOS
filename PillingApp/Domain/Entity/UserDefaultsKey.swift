@@ -14,4 +14,5 @@ enum UserDefaultsKey: String {
     case pillStartDate = "pill_start_date"
     case pillInfo = "pillInfo"
     case currentCycleID = "current_cycle_id"
+    case sideEffectTags = "side_effect_tags"
 }

@@ -13,6 +13,7 @@ final class CalendarSheetPresenter {
         selectedIndex: Int,
         item: DayItem,
         cycle: Cycle,
+        userDefaultsManager: UserDefaultsManagerProtocol,
         update: @escaping (Int, PillStatus, String, Date?) -> Void
     ) {
         let calendar = Calendar.current
@@ -29,6 +30,7 @@ final class CalendarSheetPresenter {
             initialMemo: existingMemo,
             takenAt: currentTakenAt,
             initialStatus: item.status,
+            userDefaultsManager: userDefaultsManager,
             onDataChanged: { chosenStatus, memo in
                 if let status = chosenStatus {
                     update(selectedIndex, status, memo, currentTakenAt)
@@ -48,7 +50,13 @@ final class CalendarSheetPresenter {
         viewController.title = dayText
         viewController.setInitialSelection(for: item.status)
         
-        presenter.present(viewController, animated: false)
+        // NavigationController로 감싸기
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.modalPresentationStyle = .overFullScreen
+        navigationController.modalTransitionStyle = .crossDissolve
+        navigationController.navigationBar.isHidden = true // 기본 네비게이션 바 숨김 (커스텀 UI 사용)
+        
+        presenter.present(navigationController, animated: false)
     }
 }
 
