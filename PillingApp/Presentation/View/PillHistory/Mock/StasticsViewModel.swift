@@ -72,7 +72,7 @@ final class StasticsViewModel {
             startDate: "11월 1일",
             endDate: "12월 1일",
             completionRate: 95,
-            medicineName: "아조",
+            medicineName: "야즈",
             records: [
                 RecordItemDTO(category: "정시에 복용했어요", percentage: 60, days: 15, colorHex: "#99D94C"),
                 RecordItemDTO(category: "조금 늦었어요", percentage: 35, days: 8, colorHex: "#4C8033"),

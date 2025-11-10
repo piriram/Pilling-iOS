@@ -50,7 +50,7 @@ final class StasticsContentView: UIView {
     private let recordListStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 0
+        stackView.spacing = 8
         return stackView
     }()
     
@@ -74,7 +74,7 @@ final class StasticsContentView: UIView {
         
         addSubview(scrollView)
         scrollView.addSubview(contentView)
-        
+        scrollView.alwaysBounceVertical = false
         contentView.addSubview(headerLabel)
         contentView.addSubview(periodButton)
         contentView.addSubview(chartContainerView)
@@ -93,7 +93,7 @@ final class StasticsContentView: UIView {
         }
         
         headerLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(20)
+            make.top.equalToSuperview().offset(60)
             make.leading.equalToSuperview().offset(20)
         }
         
@@ -103,19 +103,19 @@ final class StasticsContentView: UIView {
         }
         
         chartContainerView.snp.makeConstraints { make in
-            make.top.equalTo(headerLabel.snp.bottom).offset(30)
+            make.top.equalTo(headerLabel.snp.bottom).offset(16)
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
-            make.height.equalTo(250)
+            make.height.equalTo(220)
         }
         
         medicineLabel.snp.makeConstraints { make in
-            make.top.equalTo(chartContainerView.snp.bottom).offset(60)
+            make.top.equalTo(chartContainerView.snp.bottom).offset(16)
             make.leading.equalToSuperview().offset(20)
         }
         
         recordListStackView.snp.makeConstraints { make in
-            make.top.equalTo(medicineLabel.snp.bottom).offset(16)
+            make.top.equalTo(medicineLabel.snp.bottom).offset(8)
             make.leading.trailing.equalToSuperview()
             make.bottom.equalToSuperview().offset(-20)
         }
@@ -232,7 +232,7 @@ final class StasticsContentView: UIView {
         }
         
         containerView.snp.makeConstraints { make in
-            make.height.equalTo(56)
+            make.height.equalTo(48)
         }
         
         return containerView
@@ -278,7 +278,7 @@ final class StasticsContentView: UIView {
         }
         
         containerView.snp.makeConstraints { make in
-            make.height.equalTo(56)
+            make.height.equalTo(48)
         }
         
         return containerView
