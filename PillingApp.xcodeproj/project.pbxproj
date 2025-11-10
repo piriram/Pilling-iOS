@@ -91,6 +91,7 @@
 				Domain/Entity/PillingApp.xcdatamodeld,
 				Domain/Entity/PillStatus.swift,
 				Domain/Entity/SetupError.swift,
+				Domain/Entity/SideEffectTag.swift,
 				Domain/Entity/UserDefaultsKey.swift,
 				Infra/SystemTimeProvider.swift,
 				Infra/UseCase/CalculateMessageUseCase.swift,
