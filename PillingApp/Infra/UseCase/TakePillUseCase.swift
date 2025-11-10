@@ -11,7 +11,7 @@ import RxSwift
 // MARK: - TakePillUseCaseProtocol
 
 protocol TakePillUseCaseProtocol {
-    func execute(cycle: Cycle, settings: UserSettings) -> Observable<Cycle>
+    func execute(cycle: Cycle, settings: UserSettings, takenAt: Date) -> Observable<Cycle>
 }
 
 // MARK: - 약을 복용했을 때, 복용 시간과 설정값(UserSettings)을 기준으로 복용 상태(PillStatus)를 계산하고 cycle 업데이트
@@ -30,8 +30,8 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
         self.timeProvider = timeProvider
     }
     
-    func execute(cycle: Cycle, settings: UserSettings) -> Observable<Cycle> {
-        let now = timeProvider.now
+    func execute(cycle: Cycle, settings: UserSettings, takenAt: Date) -> Observable<Cycle> {
+        let now = takenAt
         
         guard let todayIndex = cycle.records.firstIndex(where: {
             timeProvider.isDate($0.scheduledDateTime, inSameDayAs: now)
@@ -79,4 +79,3 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
             .map { updatedCycle }
     }
 }
-

@@ -296,8 +296,9 @@ final class DashboardViewModel {
     
     func takePill() {
         guard let cycle = currentCycle.value else { return }
+        let takenAt = Date()
         
-        takePillUseCase.execute(cycle: cycle, settings: settings.value)
+        takePillUseCase.execute(cycle: cycle, settings: settings.value, takenAt: takenAt)
             .subscribe(onNext: { [weak self] updatedCycle in
                 self?.currentCycle.accept(updatedCycle)
                 self?.updateItems()
