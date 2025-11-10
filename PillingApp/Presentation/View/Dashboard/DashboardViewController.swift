@@ -338,17 +338,67 @@ final class DashboardViewController: UIViewController {
     private func presentCalendarSheet(for index: Int, item: DayItem) {
         guard let cycle = viewModel.currentCycle.value else { return }
         
-        CalendarSheetPresenter.present(
-            from: self,
-            selectedIndex: index,
-            item: item,
-            cycle: cycle,
-            userDefaultsManager: userDefaultsManager
-        ) { [weak self] idx, status, memo, takenAt in
-            self?.viewModel.updateState(at: idx, to: status, memo: memo, takenAt: takenAt)
-        }
+        // Day 텍스트 계산 (ex: "3일차/28")
+        let calendar = Calendar.current
+        let daysSinceStart = max(0, calendar.dateComponents([.day], from: cycle.startDate, to: item.date).day ?? 0)
+        let currentDay = min(daysSinceStart + 1, cycle.totalDays)
+        let dayText = "\(currentDay)일차/\(cycle.totalDays)"
         
+        // 기존 메모/복용시간 안전 접근
+        let existingMemo: String = {
+            guard cycle.records.indices.contains(index) else { return "" }
+            return cycle.records[index].memo ?? ""
+        }()
+        
+        var currentTakenAt: Date? = {
+            guard cycle.records.indices.contains(index) else { return nil }
+            return cycle.records[index].takenAt
+        }()
+        
+        // 시트 VC 생성
+        let sheetVC = DashboardSheetViewController(
+            selectedDate: item.date,
+            initialMemo: existingMemo,
+            takenAt: currentTakenAt,
+            initialStatus: item.status,
+            userDefaultsManager: userDefaultsManager,
+            onDataChanged: { [weak self] chosenStatus, memo in
+                guard let self = self else { return }
+                // 상태가 선택되지 않았다면 기존 상태 유지
+                let finalStatus = chosenStatus ?? item.status
+                self.viewModel.updateState(
+                    at: index,
+                    to: finalStatus,
+                    memo: memo,
+                    takenAt: currentTakenAt
+                )
+            },
+            onTimeChanged: { [weak self] newTime in
+                guard let self = self else { return }
+                // 시간 변경은 즉시 반영
+                currentTakenAt = newTime
+                self.viewModel.updateState(
+                    at: index,
+                    to: item.status,
+                    memo: existingMemo,
+                    takenAt: newTime
+                )
+            }
+        )
+        
+        sheetVC.titleText = dayText
+        sheetVC.title = dayText
+        sheetVC.setInitialSelection(for: item.status)
+        
+        // 네비게이션으로 감싸 동일한 표시 방식 유지
+        let nav = UINavigationController(rootViewController: sheetVC)
+        nav.modalPresentationStyle = .overFullScreen
+        nav.modalTransitionStyle = .crossDissolve
+        nav.navigationBar.isHidden = true
+        
+        present(nav, animated: false)
     }
+    
     
     private func presentInfoFloatingView() {
         let infoView = DashboardGuideView()
