@@ -202,7 +202,12 @@ final class TimeSettingViewController: UIViewController {
     private func navigateToDashboard() {
         let dashboardViewModel = DIContainer.shared.makeDashboardViewModel()
         let stasticsViewModel = DIContainer.shared.makeStasticsViewModel()
-        let dashboardVC = DashboardViewController(viewModel: dashboardViewModel, stasticsViewModel: stasticsViewModel)
+        let userDefaultsManager = DIContainer.shared.getUserDefaultsManager()
+        let dashboardVC = DashboardViewController(
+            viewModel: dashboardViewModel,
+            stasticsViewModel: stasticsViewModel,
+            userDefaultsManager: userDefaultsManager
+        )
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {

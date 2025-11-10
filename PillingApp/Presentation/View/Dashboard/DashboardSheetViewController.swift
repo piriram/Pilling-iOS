@@ -17,15 +17,19 @@ final class DashboardSheetViewController: UIViewController {
     private let takenAt: Date?
     private let onDataChanged: (PillStatus?, String) -> Void
     private let onTimeChanged: ((Date) -> Void)?
+    private let userDefaultsManager: UserDefaultsManagerProtocol
     private let disposeBag = DisposeBag()
     
     private var currentStatus: PillStatus?
     var titleText: String?
     private typealias str = AppStrings.Dashboard
     
+    private var sideEffectTags: [SideEffectTag] = []
+    private var selectedTagIndices: Set<Int> = []
+    
     // MARK: - Bottom Sheet Properties
     
-    private let sheetHeight: CGFloat = 430
+    private let sheetHeight: CGFloat = 480
     private var currentSheetY: CGFloat = 0
     
     // MARK: - UI Components
@@ -57,29 +61,6 @@ final class DashboardSheetViewController: UIViewController {
         let label = UILabel()
         label.font = Typography.headline5(.semibold)
         label.textColor = AppColor.textBlack
-        return label
-    }()
-    
-    private let memoTextView: UITextView = {
-        let textView = UITextView()
-        textView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        textView.font = .systemFont(ofSize: 15, weight: .regular)
-        textView.textColor = AppColor.textBlack
-        textView.backgroundColor = AppColor.grayBackground
-        textView.layer.cornerRadius = 12
-        textView.layer.borderWidth = 1
-        textView.layer.borderColor = AppColor.borderGray.cgColor
-        textView.isScrollEnabled = true
-        textView.textContainer.lineFragmentPadding = 0
-        textView.keyboardDismissMode = .interactive
-        return textView
-    }()
-    
-    private let memoPlaceholderLabel: UILabel = {
-        let label = UILabel()
-        label.text = "메모를 입력하세요"
-        label.textColor = AppColor.textGray
-        label.font = .systemFont(ofSize: 15, weight: .regular)
         return label
     }()
     
@@ -121,6 +102,30 @@ final class DashboardSheetViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Side Effect Tags CollectionView
+    
+    private let sideEffectSectionLabel: UILabel = {
+        let label = UILabel()
+        label.text = "오늘의 컨디션"
+        label.font = Typography.body1(.semibold)
+        label.textColor = AppColor.textBlack
+        return label
+    }()
+    
+    private lazy var sideEffectCollectionView: UICollectionView = {
+        let layout = createCollectionViewLayout()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.showsVerticalScrollIndicator = true
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.isScrollEnabled = true
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(SideEffectTagCell.self, forCellWithReuseIdentifier: SideEffectTagCell.identifier)
+        collectionView.register(SideEffectAddButtonCell.self, forCellWithReuseIdentifier: SideEffectAddButtonCell.identifier)
+        return collectionView
+    }()
+    
     // MARK: - ViewModel & Relays (MVVM I/O)
     
     private let viewModel: DefaultDashboardSheetViewModel
@@ -133,6 +138,7 @@ final class DashboardSheetViewController: UIViewController {
         initialMemo: String = "",
         takenAt: Date? = nil,
         initialStatus: PillStatus? = nil,
+        userDefaultsManager: UserDefaultsManagerProtocol,
         onDataChanged: @escaping (PillStatus?, String) -> Void,
         onTimeChanged: ((Date) -> Void)? = nil
     ) {
@@ -142,6 +148,7 @@ final class DashboardSheetViewController: UIViewController {
         self.onDataChanged = onDataChanged
         self.onTimeChanged = onTimeChanged
         self.currentStatus = initialStatus
+        self.userDefaultsManager = userDefaultsManager
         self.viewModel = DefaultDashboardSheetViewModel(
             selectedDate: selectedDate,
             initialMemo: initialMemo,
@@ -162,14 +169,13 @@ final class DashboardSheetViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         setupGestures()
-        setupInitialMemo()
+        loadSideEffectTags()
         setupTimeSettingButton()
-        bindViewModel() // MVVM 바인딩
+        bindViewModel()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // 표시 애니메이션 트리거는 ViewModel output.shouldShowSheet 를 통해 수행
     }
     
     // MARK: - Setup
@@ -188,8 +194,9 @@ final class DashboardSheetViewController: UIViewController {
         
         setupStatusButtons()
         
-        contentStackView.addArrangedSubview(memoTextView)
-        memoTextView.addSubview(memoPlaceholderLabel)
+        // 부작용 태그 섹션 추가
+        contentStackView.addArrangedSubview(sideEffectSectionLabel)
+        contentStackView.addArrangedSubview(sideEffectCollectionView)
         
         setupConstraints()
     }
@@ -240,13 +247,8 @@ final class DashboardSheetViewController: UIViewController {
             make.height.equalTo(56)
         }
         
-        memoTextView.snp.makeConstraints { make in
-            make.height.equalTo(120)
-        }
-        
-        memoPlaceholderLabel.snp.makeConstraints { make in
-            make.top.equalTo(memoTextView).inset(12)
-            make.leading.equalTo(memoTextView).inset(12)
+        sideEffectCollectionView.snp.makeConstraints { make in
+            make.height.equalTo(120) // 3줄 정도 높이
         }
     }
     
@@ -260,11 +262,6 @@ final class DashboardSheetViewController: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
-    }
-    
-    private func setupInitialMemo() {
-        memoTextView.text = initialMemo
-        memoPlaceholderLabel.isHidden = !initialMemo.isEmpty
     }
     
     private func setupTimeSettingButton() {
@@ -282,6 +279,39 @@ final class DashboardSheetViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
+    // MARK: - Side Effect Tags
+    
+    private func loadSideEffectTags() {
+        let allTags = userDefaultsManager.loadSideEffectTags()
+        sideEffectTags = allTags.filter { $0.isVisible }.sorted { $0.order < $1.order }
+        sideEffectCollectionView.reloadData()
+    }
+    
+    private func createCollectionViewLayout() -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .estimated(80),
+            heightDimension: .absolute(36)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(36)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+        group.interItemSpacing = .fixed(8)
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 8
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+        
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        return layout
+    }
+    
     // MARK: - MVVM Binding
     
     private func bindViewModel() {
@@ -292,7 +322,7 @@ final class DashboardSheetViewController: UIViewController {
             tapNotTaken: notTakenButton.rx.tap.asObservable(),
             tapTaken: takenButton.rx.tap.asObservable(),
             tapTakenDouble: takenDoubleButton.rx.tap.asObservable(),
-            memoText: memoTextView.rx.text.orEmpty.asObservable(),
+            memoText: Observable.just(""), // 메모 기능 제거됨
             requestDismiss: requestDismissRelay.asObservable()
         )
         
@@ -312,7 +342,7 @@ final class DashboardSheetViewController: UIViewController {
             .disposed(by: disposeBag)
         
         output.isMemoPlaceholderHidden
-            .drive(memoPlaceholderLabel.rx.isHidden)
+            .drive()
             .disposed(by: disposeBag)
         
         output.dismiss
@@ -374,8 +404,6 @@ final class DashboardSheetViewController: UIViewController {
         }
     }
     
-    /// 외부에서 초기 상태를 세팅하고 싶을 때 호출.
-    /// 내부적으로 해당 버튼의 탭을 트리거하여 ViewModel의 선택 로직과 동기화한다.
     func setInitialSelection(for status: PillStatus) {
         let tag: Int
         switch status {
@@ -390,9 +418,7 @@ final class DashboardSheetViewController: UIViewController {
         }
         
         guard tag >= 0 else { return }
-        // UI 동기화
         selectButton(tag: tag)
-        // ViewModel 로직과 상태를 일치시키기 위해 실제 탭 이벤트를 발생시킨다.
         switch tag {
         case 0: notTakenButton.sendActions(for: .touchUpInside)
         case 1: takenButton.sendActions(for: .touchUpInside)
@@ -433,7 +459,6 @@ final class DashboardSheetViewController: UIViewController {
     // MARK: - Gesture Handlers
     
     @objc private func handleDimmedViewTap() {
-        // 기존: handleSheetDismiss()
         requestDismissRelay.accept(())
     }
     
@@ -450,7 +475,6 @@ final class DashboardSheetViewController: UIViewController {
             let shouldDismiss = translation.y > sheetHeight / 3 || velocity.y > 1000
             
             if shouldDismiss {
-                // 기존: hideBottomSheet { self.handleSheetDismiss() }
                 requestDismissRelay.accept(())
             } else {
                 UIView.animate(
@@ -471,7 +495,6 @@ final class DashboardSheetViewController: UIViewController {
         view.endEditing(true)
     }
     
-    // 기존 메서드를 유지하고 내부 위임 (필요시 호출 경로 호환)
     private func handleSheetDismiss() {
         requestDismissRelay.accept(())
     }
@@ -495,5 +518,58 @@ final class DashboardSheetViewController: UIViewController {
             .disposed(by: disposeBag)
         
         present(timePickerSheet, animated: false)
+    }
+    
+    // MARK: - Navigation
+    
+    private func presentSideEffectManagement() {
+        let managementVC = SideEffectManagementViewController(userDefaultsManager: userDefaultsManager)
+        navigationController?.pushViewController(managementVC, animated: true)
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+
+extension DashboardSheetViewController: UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return sideEffectTags.count + 1 // +1 for add button
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        // 마지막 셀은 + 버튼
+        if indexPath.item == sideEffectTags.count {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectAddButtonCell.identifier, for: indexPath) as! SideEffectAddButtonCell
+            return cell
+        }
+        
+        // 일반 태그 셀
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectTagCell.identifier, for: indexPath) as! SideEffectTagCell
+        let tag = sideEffectTags[indexPath.item]
+        let isSelected = selectedTagIndices.contains(indexPath.item)
+        cell.configure(with: tag.name, isSelected: isSelected)
+        return cell
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension DashboardSheetViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        // + 버튼 클릭
+        if indexPath.item == sideEffectTags.count {
+            presentSideEffectManagement()
+            return
+        }
+        
+        // 태그 선택/해제
+        if selectedTagIndices.contains(indexPath.item) {
+            selectedTagIndices.remove(indexPath.item)
+        } else {
+            selectedTagIndices.insert(indexPath.item)
+        }
+        
+        collectionView.reloadItems(at: [indexPath])
     }
 }
