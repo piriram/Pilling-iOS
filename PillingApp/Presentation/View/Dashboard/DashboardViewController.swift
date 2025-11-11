@@ -12,32 +12,36 @@ import SnapKit
 
 final class DashboardViewController: UIViewController {
     
+    // MARK: - ViewModels
+    
     private let viewModel: DashboardViewModel
     private let stasticsViewModel: StasticsViewModel
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let disposeBag = DisposeBag()
     
+    // MARK: - Managers & Coordinators
+    
+    private lazy var coordinator = DashboardCoordinator(navigationController: navigationController)
+    private lazy var sheetPresenter = DashboardSheetPresenter(
+        viewController: self,
+        userDefaultsManager: userDefaultsManager
+    )
+    private var transitionManager: DashboardViewTransitionManager?
+    
     // MARK: - SubViews
     
     private let backgroundImageView = UIImageView(image: UIImage(named: "background_taken"))
+    private let topButtonsView = DashboardTopButtonsView()
     private let infoView = DashboardMiddleView()
     private let stasticsView = StasticsContentView()
     private let bottomView = DashboardBottomView()
-    
     private let containerView = UIView()
-    private var currentViewIndex = 0 // 0: Dashboard, 1: Stastics
-    
-    // MARK: - 상단 버튼들
-    private let historyButton = UIButton(type: .system)
-    private let infoButton = UIButton(type: .system)
-    private let gearButton = UIButton(type: .system)
     
     // MARK: - Properties
     
     var shouldHideHistoryButton: Bool = false {
         didSet {
-            historyButton.isHidden = shouldHideHistoryButton
-            historyButton.isEnabled = !shouldHideHistoryButton
+            topButtonsView.isHistoryButtonHidden = shouldHideHistoryButton
         }
     }
     
@@ -62,12 +66,23 @@ final class DashboardViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setupViews()
+        
         setupConstraints()
+        
+        setupTransitionManager()
+        
         bindViewModel()
-        setupActions()
-        updateBackgroundForToday()
+        
+        bindTopButtons()
+        
+        bindBottomView()
+        
         bindAlert()
+        
+        updateBackgroundForToday()
+        
     }
     
     override func viewDidLayoutSubviews() {
@@ -81,11 +96,32 @@ final class DashboardViewController: UIViewController {
         extendedLayoutIncludesOpaqueBars = true
         edgesForExtendedLayout = [.top, .left, .right, .bottom]
         
-        viewModel.reloadData()    }
+        viewModel.reloadData()
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+    
+    // MARK: - Touch Debugging
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        if let touch = touches.first {
+            let location = touch.location(in: view)
+            
+            // Check which view would receive this touch
+            if let hitView = view.hitTest(location, with: event) {
+                
+                // Check if touch is in button areas
+                let topButtonsLocation = touch.location(in: topButtonsView)
+                let bottomViewLocation = touch.location(in: bottomView)
+                
+            } else {
+                
+            }
+        }
     }
     
     // MARK: - Setup
@@ -99,20 +135,17 @@ final class DashboardViewController: UIViewController {
         view.sendSubviewToBack(backgroundImageView)
         
         view.addSubview(containerView)
+        
         containerView.addSubview(infoView)
         containerView.addSubview(stasticsView)
         stasticsView.isHidden = true
         
         view.addSubview(bottomView)
         
-        setupTopButtons()
-        view.addSubview(historyButton)
-        view.addSubview(infoButton)
-        view.addSubview(gearButton)
-        historyButton.isHidden = shouldHideHistoryButton
-        historyButton.isEnabled = !shouldHideHistoryButton
+        view.addSubview(topButtonsView)
         
-        setupSwipeGestures()
+        topButtonsView.isHistoryButtonHidden = shouldHideHistoryButton
+        
     }
     
     private func setupConstraints() {
@@ -124,20 +157,10 @@ final class DashboardViewController: UIViewController {
             make.bottom.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.top).offset(220)
         }
         
-        gearButton.snp.makeConstraints { make in
+        topButtonsView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(14)
             make.trailing.equalToSuperview().inset(contentInset)
-            make.size.lessThanOrEqualTo(30)
-        }
-        infoButton.snp.makeConstraints { make in
-            make.centerY.equalTo(gearButton)
-            make.trailing.equalTo(gearButton.snp.leading).offset(-8)
-            make.size.lessThanOrEqualTo(30)
-        }
-        historyButton.snp.makeConstraints { make in
-            make.centerY.equalTo(gearButton)
-            make.trailing.equalTo(infoButton.snp.leading).offset(-8)
-            make.size.lessThanOrEqualTo(30)
+            make.height.equalTo(30)
         }
         
         containerView.snp.makeConstraints { make in
@@ -159,6 +182,19 @@ final class DashboardViewController: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
     }
+    
+    private func setupTransitionManager() {
+        transitionManager = DashboardViewTransitionManager(
+            containerView: containerView,
+            infoView: infoView,
+            statisticsView: stasticsView
+        )
+        
+        transitionManager?.onViewIndexChanged = { [weak self] index in
+            self?.handleViewIndexChanged(index)
+        }
+    }
+    
     // MARK: - Binding
     
     private func bindViewModel() {
@@ -221,6 +257,26 @@ final class DashboardViewController: UIViewController {
         })
         .disposed(by: disposeBag)
         
+        // Calendar cell selection
+        infoView.onCalendarCellSelected = { [weak self] index, item in
+            guard let self = self,
+                  let cycle = self.viewModel.currentCycle.value else { return }
+            
+            self.sheetPresenter.presentCalendarSheet(
+                for: index,
+                item: item,
+                cycle: cycle,
+                onStatusUpdate: { [weak self] index, status, memo, takenAt in
+                    self?.viewModel.updateState(
+                        at: index,
+                        to: status,
+                        memo: memo,
+                        takenAt: takenAt
+                    )
+                }
+            )
+        }
+        
         bindStasticsViewModel()
     }
     
@@ -259,7 +315,14 @@ final class DashboardViewController: UIViewController {
         output.periodList
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] periodList in
-                self?.showPeriodSelectionAlert(periodList: periodList)
+                guard let self = self else { return }
+                self.sheetPresenter.showPeriodSelectionAlert(
+                    periodList: periodList,
+                    currentIndex: self.stasticsViewModel.getCurrentIndex(),
+                    onPeriodSelected: { [weak self] index in
+                        self?.stasticsViewModel.selectPeriod(at: index)
+                    }
+                )
             })
             .disposed(by: disposeBag)
         
@@ -278,40 +341,47 @@ final class DashboardViewController: UIViewController {
         viewDidLoadSubject.onNext(())
     }
     
-    // MARK: - Actions
-    private func setupActions() {
-        infoButton.rx.tap
-            .bind { [weak self] in
-                self?.presentInfoFloatingView()
-            }
+    private func bindTopButtons() {
+        
+        topButtonsView.historyButtonTapped
+            .subscribe(onNext: { [weak self] in
+                self?.coordinator.navigateToCycleHistory()
+            })
             .disposed(by: disposeBag)
         
-        gearButton.rx.tap
-            .bind { [weak self] in
-                let vm = DIContainer.shared.makeSettingViewModel()
-                let vc = SettingViewController(viewModel: vm)
-                self?.navigationController?.pushViewController(vc, animated: true)
-            }
+        topButtonsView.infoButtonTapped
+            .subscribe(onNext: { [weak self] in
+                self?.sheetPresenter.presentInfoFloatingView()
+            })
             .disposed(by: disposeBag)
         
-        historyButton.rx.tap
-            .bind { [weak self] in
-                guard let self = self else { return }
-                let vm = DIContainer.shared.makePillCycleHistoryViewModel()
-                let vc = CycleHistoryViewController(viewModel: vm)
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
+        topButtonsView.gearButtonTapped
+            .subscribe(onNext: { [weak self] in
+                self?.coordinator.navigateToSettings()
+            })
             .disposed(by: disposeBag)
+        
+    }
+    
+    private func bindBottomView() {
         
         bottomView.takePillButton.rx.tap
-            .bind { [weak self] in
+            .subscribe(onNext: { [weak self] in
                 self?.viewModel.takePill()
-            }
+            })
             .disposed(by: disposeBag)
         
-        infoView.onCalendarCellSelected = { [weak self] index, item in
-            self?.presentCalendarSheet(for: index, item: item)
-        }
+    }
+    
+    private func bindAlert() {
+        viewModel.showRetryAlert
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in
+                self?.presentRetryAlert { [weak self] in
+                    self?.viewModel.reloadData()
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
     // MARK: - UI Updates
@@ -333,184 +403,11 @@ final class DashboardViewController: UIViewController {
         backgroundImageView.image = UIImage(named: adjustedStatus.backgroundImageName)
     }
     
-    // MARK: - Presentation
-    
-    private func presentCalendarSheet(for index: Int, item: DayItem) {
-        guard let cycle = viewModel.currentCycle.value else { return }
-        
-        // Day 텍스트 계산 (ex: "3일차/28")
-        let calendar = Calendar.current
-        let daysSinceStart = max(0, calendar.dateComponents([.day], from: cycle.startDate, to: item.date).day ?? 0)
-        let currentDay = min(daysSinceStart + 1, cycle.totalDays)
-        let dayText = "\(currentDay)일차/\(cycle.totalDays)"
-        
-        // 기존 메모/복용시간 안전 접근
-        let existingMemo: String = {
-            guard cycle.records.indices.contains(index) else { return "" }
-            return cycle.records[index].memo ?? ""
-        }()
-        
-        var currentTakenAt: Date? = {
-            guard cycle.records.indices.contains(index) else { return nil }
-            return cycle.records[index].takenAt
-        }()
-        
-        // 시트 VC 생성
-        let sheetVC = DashboardSheetViewController(
-            selectedDate: item.date,
-            initialMemo: existingMemo,
-            takenAt: currentTakenAt,
-            initialStatus: item.status,
-            userDefaultsManager: userDefaultsManager,
-            onDataChanged: { [weak self] chosenStatus, memo in
-                guard let self = self else { return }
-                // 상태가 선택되지 않았다면 기존 상태 유지
-                let finalStatus = chosenStatus ?? item.status
-                self.viewModel.updateState(
-                    at: index,
-                    to: finalStatus,
-                    memo: memo,
-                    takenAt: currentTakenAt
-                )
-            },
-            onTimeChanged: { [weak self] newTime in
-                guard let self = self else { return }
-                // 시간 변경은 즉시 반영
-                currentTakenAt = newTime
-                self.viewModel.updateState(
-                    at: index,
-                    to: item.status,
-                    memo: existingMemo,
-                    takenAt: newTime
-                )
-            }
-        )
-        
-        sheetVC.titleText = dayText
-        sheetVC.title = dayText
-        sheetVC.setInitialSelection(for: item.status)
-        
-        // 네비게이션으로 감싸 동일한 표시 방식 유지
-        let nav = UINavigationController(rootViewController: sheetVC)
-        nav.modalPresentationStyle = .overFullScreen
-        nav.modalTransitionStyle = .crossDissolve
-        nav.navigationBar.isHidden = true
-        
-        present(nav, animated: false)
-    }
-    
-    
-    private func presentInfoFloatingView() {
-        let infoView = DashboardGuideView()
-        infoView.onConfirm = { [weak infoView] in
-            infoView?.dismiss()
-        }
-        infoView.show(in: self.view)
-    }
-    
-    /// ViewModel의 alert 이벤트를 바인딩
-    func bindAlert() {
-        viewModel.showRetryAlert
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] in
-                self?.presentRetryAlert(){[weak self] in
-                    self?.viewModel.reloadData()
-                    
-                }
-            })
-            .disposed(by: disposeBag)
-    }
-    
-    private func setupTopButtons() {
-        // info
-        infoButton.setImage(DashboardUI.Icon.info, for: .normal)
-        infoButton.tintColor = AppColor.secondary
-        
-        // history
-        historyButton.setImage(UIImage(systemName: "clock.arrow.circlepath"), for: .normal)
-        historyButton.tintColor = AppColor.secondary
-        
-        // gear
-        gearButton.setImage(DashboardUI.Icon.gear, for: .normal)
-        gearButton.tintColor = AppColor.secondary
-    }
-    
-    // MARK: - Swipe Gestures
-    
-    private func setupSwipeGestures() {
-        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeLeft))
-        swipeLeft.direction = .left
-        containerView.addGestureRecognizer(swipeLeft)
-        
-        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeRight))
-        swipeRight.direction = .right
-        containerView.addGestureRecognizer(swipeRight)
-    }
-    
-    @objc private func handleSwipeLeft() {
-        if currentViewIndex == 0 {
-            switchToView(index: 1, direction: .left)
-        }
-    }
-    
-    @objc private func handleSwipeRight() {
-        if currentViewIndex == 1 {
-            switchToView(index: 0, direction: .right)
-        }
-    }
-    
-    private func switchToView(index: Int, direction: UISwipeGestureRecognizer.Direction) {
-        guard index != currentViewIndex else { return }
-        
-        let fromView = currentViewIndex == 0 ? infoView : stasticsView
-        let toView = index == 0 ? infoView : stasticsView
-        
-        currentViewIndex = index
-        
-        // 페이지 컨트롤 업데이트
+    private func handleViewIndexChanged(_ index: DashboardViewTransitionManager.ViewIndex) {
         bottomView.pageControl.numberOfPages = 2
-        bottomView.pageControl.currentPage = index
+        bottomView.pageControl.currentPage = index.rawValue
         
-        // 히스토리 버튼 표시/숨김
-        historyButton.isHidden = (index == 1)
-        historyButton.isEnabled = (index == 0)
-        
-        // 애니메이션 준비
-        toView.isHidden = false
-        toView.alpha = 0
-        
-        let screenWidth = view.bounds.width
-        let translateX: CGFloat = direction == .left ? screenWidth : -screenWidth
-        
-        toView.transform = CGAffineTransform(translationX: translateX, y: 0)
-        
-        UIView.animate(withDuration: 0.3, animations: {
-            fromView.alpha = 0
-            fromView.transform = CGAffineTransform(translationX: -translateX, y: 0)
-            
-            toView.alpha = 1
-            toView.transform = .identity
-        }) { _ in
-            fromView.isHidden = true
-            fromView.transform = .identity
-        }
-    }
-    
-    private func showPeriodSelectionAlert(periodList: [PeriodRecordDTO]) {
-        let alert = UIAlertController(title: "기간 선택", message: nil, preferredStyle: .actionSheet)
-        
-        for (index, data) in periodList.enumerated() {
-            let action = UIAlertAction(title: "\(data.startDate) - \(data.endDate)", style: .default) { [weak self] _ in
-                self?.stasticsViewModel.selectPeriod(at: index)
-            }
-            if index == stasticsViewModel.getCurrentIndex() {
-                action.setValue(true, forKey: "checked")
-            }
-            alert.addAction(action)
-        }
-        
-        alert.addAction(UIAlertAction(title: AppStrings.Common.cancelTitle, style: .cancel))
-        
-        present(alert, animated: true)
+        topButtonsView.isHistoryButtonHidden = (index == .statistics)
     }
 }
+
