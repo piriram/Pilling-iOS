@@ -2,159 +2,120 @@
 //  DashboardSheetViewModel.swift
 //  PillingApp
 //
-//  Created by 잠만보김쥬디 on 11/7/25.
+//  Created by 잠만보김쥬디 on 11/12/25.
 //
+
 import Foundation
 import RxSwift
 import RxCocoa
 
-// MARK: - ViewModel (no protocol, MVVM I/O)
+protocol DashboardSheetViewModel {
+    func transform(_ input: DashboardSheetViewModelInput) -> DashboardSheetViewModelOutput
+}
 
-final class DefaultDashboardSheetViewModel {
+struct DashboardSheetViewModelInput {
+    let viewDidAppear: Observable<Void>
+    let tapNotTaken: Observable<Void>
+    let tapTaken: Observable<Void>
+    let tapTakenDouble: Observable<Void>
+    let memoText: Observable<String>
+    let requestDismiss: Observable<Void>
+    let timeChanged: Observable<Date>
+}
 
-    // MARK: Input/Output
+struct DashboardSheetViewModelOutput {
+    let shouldShowSheet: Signal<Void>
+    let initialButtonTag: Driver<StatusButtonTag>
+    let formattedTime: Driver<String>
+    let isMemoPlaceholderHidden: Driver<Bool>
+    let dismiss: Signal<(PillStatus?, String)>
+}
 
-    struct Input {
-        let viewDidAppear: Observable<Void>
-        let tapNotTaken: Observable<Void>
-        let tapTaken: Observable<Void>
-        let tapTakenDouble: Observable<Void>
-        let memoText: Observable<String>
-        let requestDismiss: Observable<Void> // 딤드 탭/스와이프 등
-    }
-
-    struct Output {
-        let selectedIndex: Driver<Int?>            // -1 or 0/1/2
-        let isMemoPlaceholderHidden: Driver<Bool>  // true면 placeholder 숨김
-        let shouldShowSheet: Signal<Void>
-        let dismiss: Signal<(PillStatus?, String)>  // status가 nil이면 메모만 저장
-    }
-
-    // MARK: State
-
+final class DefaultDashboardSheetViewModel: DashboardSheetViewModel {
+    
     private let selectedDate: Date
-    private let disposeBag = DisposeBag()
-
-    private let currentMemo = BehaviorRelay<String>(value: "")
-    private let currentSelectedIndex = BehaviorRelay<Int?>(value: nil)
-    private let lastResolvedStatus = BehaviorRelay<PillStatus?>(value: nil)
-
-    // MARK: Init
-
-    init(selectedDate: Date, initialMemo: String = "", initialStatus: PillStatus? = nil) {
+    private let initialMemo: String
+    private let initialStatus: PillStatus?
+    private let takenAt: Date?
+    
+    private var selectedStatus: PillStatus?
+    
+    init(
+        selectedDate: Date,
+        initialMemo: String,
+        initialStatus: PillStatus?,
+        takenAt: Date? = nil
+    ) {
         self.selectedDate = selectedDate
-        currentMemo.accept(initialMemo)
-
-        if let status = initialStatus {
-            let tag = Self.tag(for: status)
-            currentSelectedIndex.accept(tag >= 0 ? tag : nil)
-            lastResolvedStatus.accept(status)
-        }
+        self.initialMemo = initialMemo
+        self.initialStatus = initialStatus
+        self.takenAt = takenAt
+        self.selectedStatus = initialStatus
     }
-
-    // MARK: Transform
-
-    func transform(_ input: Input) -> Output {
-        // 메모
-        input.memoText
-            .bind(to: currentMemo)
-            .disposed(by: disposeBag)
-
-        // 버튼 탭 → tag + PillStatus 계산
-        let notTakenSelected = input.tapNotTaken
-            .map { 0 }
-            .share()
-
-        let takenSelected = input.tapTaken
-            .map { 1 }
-            .share()
-
-        let takenDoubleSelected = input.tapTakenDouble
-            .map { 2 }
-            .share()
-
-        let selectedTag = Observable.merge(notTakenSelected, takenSelected, takenDoubleSelected)
-            .do(onNext: { [weak self] tag in self?.currentSelectedIndex.accept(tag) })
-            .share()
-
-        let statusFromTag = selectedTag
-            .map { [weak self] tag -> PillStatus in
-                guard let self else { return .scheduled }
-                return self.resolveStatus(forTag: tag)
-            }
-            .do(onNext: { [weak self] status in self?.lastResolvedStatus.accept(status) })
-            .share()
-
-        // 버튼 탭 시 즉시 dismiss 이벤트 발생
-        let dismissOnTap = statusFromTag
-            .withLatestFrom(currentMemo.asObservable()) { ($0 as PillStatus?, $1) }
+    
+    func transform(_ input: DashboardSheetViewModelInput) -> DashboardSheetViewModelOutput {
+        
+        let shouldShowSheet = input.viewDidAppear
             .asSignal(onErrorSignalWith: .empty())
-
-        // requestDismiss 시 선택값이 있으면 그걸로, 없으면 메모만 저장
-        let dismissOnRequest = input.requestDismiss
-            .withLatestFrom(Observable.combineLatest(lastResolvedStatus.asObservable(),
-                                                     currentMemo.asObservable()))
-            .map { [weak self] (statusOpt, memo) -> (PillStatus?, String) in
-                guard let self = self else { return (nil, memo) }
-                // 상태 버튼을 눌렀으면 선택된 상태 사용
-                if let status = statusOpt {
-                    return (status, memo)
-                }
-                // 버튼을 누르지 않았으면 상태는 nil, 메모만 저장
-                return (nil, memo)
+        
+        let initialButtonTag = Driver.just(initialStatus)
+            .map { status -> StatusButtonTag in
+                guard let status = status else { return .none }
+                return PillStatusMapper.mapStatusToButtonTag(status)
+            }
+        
+        let formattedTime = Driver.just(takenAt)
+            .map { [weak self] date -> String in
+                self?.formatTime(date) ?? "-"
+            }
+        
+        let updatedTime = input.timeChanged
+            .map { [weak self] date -> String in
+                self?.formatTime(date) ?? "-"
+            }
+            .asDriver(onErrorJustReturn: "-")
+        
+        let finalFormattedTime = Driver.merge(formattedTime, updatedTime)
+        
+        let statusFromNotTaken = input.tapNotTaken
+            .map { [weak self] _ -> PillStatus? in
+                self?.selectedStatus = .todayNotTaken
+                return .todayNotTaken
+            }
+        
+        let statusFromTaken = input.tapTaken
+            .map { [weak self] _ -> PillStatus? in
+                self?.selectedStatus = .todayTaken
+                return .todayTaken
+            }
+        
+        let statusFromTakenDouble = input.tapTakenDouble
+            .map { [weak self] _ -> PillStatus? in
+                self?.selectedStatus = .takenDouble
+                return .takenDouble
+            }
+        
+        let isMemoPlaceholderHidden = input.memoText
+            .map { !$0.isEmpty }
+            .asDriver(onErrorJustReturn: false)
+        
+        let dismiss = input.requestDismiss
+            .withLatestFrom(input.memoText) { [weak self] _, memo in
+                (self?.selectedStatus, memo)
             }
             .asSignal(onErrorSignalWith: .empty())
-
-        // 출력 구성
-        let output = Output(
-            selectedIndex: currentSelectedIndex
-                .asDriver(onErrorJustReturn: nil),
-            isMemoPlaceholderHidden: currentMemo
-                .map { !$0.isEmpty }
-                .asDriver(onErrorJustReturn: true),
-            shouldShowSheet: input.viewDidAppear
-                .asSignal(onErrorSignalWith: .empty()),
-            dismiss: Signal.merge(dismissOnTap, dismissOnRequest)
+        
+        return DashboardSheetViewModelOutput(
+            shouldShowSheet: shouldShowSheet,
+            initialButtonTag: initialButtonTag,
+            formattedTime: finalFormattedTime,
+            isMemoPlaceholderHidden: isMemoPlaceholderHidden,
+            dismiss: dismiss
         )
-
-        return output
     }
-
-    // MARK: Helpers
-
-    private func resolveStatus(forTag tag: Int) -> PillStatus {
-        switch tag {
-        case 0:
-            let cal = Calendar.current
-            let isToday = cal.isDateInToday(selectedDate)
-            let isInPast = selectedDate < cal.startOfDay(for: Date())
-            return isToday ? .scheduled : (isInPast ? .missed : .todayNotTaken)
-        case 1:
-            return .taken
-        case 2:
-            return .takenDouble
-        default:
-            return .scheduled
-        }
-    }
-
-    private func fallbackStatus() -> PillStatus {
-        let cal = Calendar.current
-        let isToday = cal.isDateInToday(selectedDate)
-        let isInPast = selectedDate < cal.startOfDay(for: Date())
-        return isToday ? .scheduled : (isInPast ? .missed : .scheduled)
-    }
-
-    private static func tag(for status: PillStatus) -> Int {
-        switch status {
-        case .missed, .scheduled, .todayNotTaken, .todayDelayed, .todayDelayedCritical:
-            return 0
-        case .taken, .takenDelayed, .todayTaken, .todayTakenDelayed, .todayTakenTooEarly, .takenTooEarly:
-            return 1
-        case .takenDouble:
-            return 2
-        case .rest:
-            return -1
-        }
+    
+    private func formatTime(_ date: Date?) -> String {
+        guard let date = date else { return "-" }
+        return date.formatted(style: .time24Hour)
     }
 }

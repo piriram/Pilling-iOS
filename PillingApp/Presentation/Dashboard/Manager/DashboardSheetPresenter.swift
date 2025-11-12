@@ -74,7 +74,8 @@ final class DashboardSheetPresenter {
         
         sheetVC.titleText = dayText
         sheetVC.title = dayText
-        sheetVC.setInitialSelection(for: item.status)
+        
+        // Initial selection is now handled automatically by ViewModel
         
         // Wrap in navigation controller
         let nav = UINavigationController(rootViewController: sheetVC)

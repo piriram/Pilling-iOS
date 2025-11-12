@@ -1,7 +1,6 @@
 import UIKit
 import SnapKit
 
-// MARK: - Presentation/Dashboard/Views/CalendarCell.swift
 
 final class DashboardCalendarCell: UICollectionViewCell {
     static let identifier = "CalendarCell"

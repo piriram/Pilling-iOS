@@ -8,26 +8,8 @@
 import RxSwift
 import RxCocoa
 
-// MARK: - DTO
-struct RecordItemDTO {
-    let category: String
-    let percentage: Int
-    let days: Int
-    let colorHex: String
-}
-
-struct PeriodRecordDTO {
-    let startDate: String
-    let endDate: String
-    let completionRate: Int
-    let medicineName: String
-    let records: [RecordItemDTO]
-    let skippedCount: Int
-    let isEmpty: Bool
-}
-
 // MARK: - ViewModel
-final class StasticsViewModel {
+final class StatisticsViewModel {
     
     struct Input {
         let viewDidLoad: Observable<Void>
