@@ -1,27 +1,23 @@
 //
-//  StasticsViewController.swift
+//  StasticsContentView.swift
 //  PillingApp
 //
-//  Created by 잠만보김쥬디 on 11/6/25.
+//  Created by 잠만보김쥬디 on 11/8/25.
 //
 
 import UIKit
 import SnapKit
-import RxSwift
-import RxCocoa
 
-// MARK: - ViewController
-final class StasticsViewController: UIViewController {
+final class StatisticsContentView: UIView {
     
-    private let viewModel: StasticsViewModel
-    private let disposeBag = DisposeBag()
+    // MARK: - Callbacks
     
-    private let viewDidLoadSubject = PublishSubject<Void>()
-    private let leftArrowTappedSubject = PublishSubject<Void>()
-    private let rightArrowTappedSubject = PublishSubject<Void>()
-    private let periodButtonTappedSubject = PublishSubject<Void>()
+    var leftArrowTapped: (() -> Void)?
+    var rightArrowTapped: (() -> Void)?
+    var periodButtonTapped: (() -> Void)?
     
     // MARK: - UI Components
+    
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
@@ -54,36 +50,31 @@ final class StasticsViewController: UIViewController {
     private let recordListStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 0
+        stackView.spacing = 8
         return stackView
     }()
     
     // MARK: - Initialization
-    init(viewModel: StasticsViewModel) {
-        self.viewModel = viewModel
-        super.init(nibName: nil, bundle: nil)
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+        setupLayout()
+        setupActions()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Lifecycle
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupUI()
-        setupLayout()
-        bindViewModel()
-        viewDidLoadSubject.onNext(())
-    }
-    
     // MARK: - Setup
+    
     private func setupUI() {
-        view.backgroundColor = .clear
+        backgroundColor = .clear
         
-        view.addSubview(scrollView)
+        addSubview(scrollView)
         scrollView.addSubview(contentView)
-        
+        scrollView.alwaysBounceVertical = false
         contentView.addSubview(headerLabel)
         contentView.addSubview(periodButton)
         contentView.addSubview(chartContainerView)
@@ -93,7 +84,7 @@ final class StasticsViewController: UIViewController {
     
     private func setupLayout() {
         scrollView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+            make.edges.equalToSuperview()
         }
         
         contentView.snp.makeConstraints { make in
@@ -102,7 +93,7 @@ final class StasticsViewController: UIViewController {
         }
         
         headerLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(20)
+            make.top.equalToSuperview().offset(60)
             make.leading.equalToSuperview().offset(20)
         }
         
@@ -112,72 +103,46 @@ final class StasticsViewController: UIViewController {
         }
         
         chartContainerView.snp.makeConstraints { make in
-            make.top.equalTo(headerLabel.snp.bottom).offset(30)
+            make.top.equalTo(headerLabel.snp.bottom).offset(16)
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
-            make.height.equalTo(250)
+            make.height.equalTo(220)
         }
         
         medicineLabel.snp.makeConstraints { make in
-            make.top.equalTo(chartContainerView.snp.bottom).offset(60)
+            make.top.equalTo(chartContainerView.snp.bottom).offset(16)
             make.leading.equalToSuperview().offset(20)
         }
         
         recordListStackView.snp.makeConstraints { make in
-            make.top.equalTo(medicineLabel.snp.bottom).offset(16)
+            make.top.equalTo(medicineLabel.snp.bottom).offset(8)
             make.leading.trailing.equalToSuperview()
             make.bottom.equalToSuperview().offset(-20)
         }
     }
     
-    private func bindViewModel() {
-        let input = StasticsViewModel.Input(
-            viewDidLoad: viewDidLoadSubject.asObservable(),
-            leftArrowTapped: leftArrowTappedSubject.asObservable(),
-            rightArrowTapped: rightArrowTappedSubject.asObservable(),
-            periodButtonTapped: periodButtonTappedSubject.asObservable()
-        )
+    private func setupActions() {
+        periodButton.addTarget(self, action: #selector(handlePeriodButtonTap), for: .touchUpInside)
         
-        let output = viewModel.transform(input: input)
-        
-        output.currentPeriodData
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] data in
-                self?.updateUI(with: data)
-            })
-            .disposed(by: disposeBag)
-        
-        Observable.combineLatest(output.isLeftArrowEnabled, output.isRightArrowEnabled)
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] isLeftEnabled, isRightEnabled in
-                self?.chartContainerView.updateArrowButtons(
-                    isLeftEnabled: isLeftEnabled,
-                    isRightEnabled: isRightEnabled
-                )
-            })
-            .disposed(by: disposeBag)
-        
-        output.periodList
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] periodList in
-                self?.showPeriodSelectionAlert(periodList: periodList)
-            })
-            .disposed(by: disposeBag)
-        
-        chartContainerView.leftArrowButton.rx.tap
-            .bind(to: leftArrowTappedSubject)
-            .disposed(by: disposeBag)
-        
-        chartContainerView.rightArrowButton.rx.tap
-            .bind(to: rightArrowTappedSubject)
-            .disposed(by: disposeBag)
-        
-        periodButton.rx.tap
-            .bind(to: periodButtonTappedSubject)
-            .disposed(by: disposeBag)
+        chartContainerView.leftArrowButton.addTarget(self, action: #selector(handleLeftArrowTap), for: .touchUpInside)
+        chartContainerView.rightArrowButton.addTarget(self, action: #selector(handleRightArrowTap), for: .touchUpInside)
     }
     
-    private func updateUI(with data: PeriodRecordDTO) {
+    @objc private func handleLeftArrowTap() {
+        leftArrowTapped?()
+    }
+    
+    @objc private func handleRightArrowTap() {
+        rightArrowTapped?()
+    }
+    
+    @objc private func handlePeriodButtonTap() {
+        periodButtonTapped?()
+    }
+    
+    // MARK: - Public Methods
+    
+    func configure(with data: PeriodRecordDTO) {
         periodButton.setTitle("\(data.startDate) - \(data.endDate)", for: .normal)
         
         chartContainerView.configure(with: data)
@@ -202,6 +167,13 @@ final class StasticsViewController: UIViewController {
             
             updateRecordList(records: data.records, skippedCount: data.skippedCount)
         }
+    }
+    
+    func updateArrowButtons(isLeftEnabled: Bool, isRightEnabled: Bool) {
+        chartContainerView.updateArrowButtons(
+            isLeftEnabled: isLeftEnabled,
+            isRightEnabled: isRightEnabled
+        )
     }
     
     private func updateRecordList(records: [RecordItemDTO], skippedCount: Int) {
@@ -260,7 +232,7 @@ final class StasticsViewController: UIViewController {
         }
         
         containerView.snp.makeConstraints { make in
-            make.height.equalTo(56)
+            make.height.equalTo(48)
         }
         
         return containerView
@@ -306,27 +278,9 @@ final class StasticsViewController: UIViewController {
         }
         
         containerView.snp.makeConstraints { make in
-            make.height.equalTo(56)
+            make.height.equalTo(48)
         }
         
         return containerView
-    }
-    
-    private func showPeriodSelectionAlert(periodList: [PeriodRecordDTO]) {
-        let alert = UIAlertController(title: "기간 선택", message: nil, preferredStyle: .actionSheet)
-        
-        for (index, data) in periodList.enumerated() {
-            let action = UIAlertAction(title: "\(data.startDate) - \(data.endDate)", style: .default) { [weak self] _ in
-                self?.viewModel.selectPeriod(at: index)
-            }
-            if index == viewModel.getCurrentIndex() {
-                action.setValue(true, forKey: "checked")
-            }
-            alert.addAction(action)
-        }
-        
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-        
-        present(alert, animated: true)
     }
 }

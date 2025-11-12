@@ -77,7 +77,7 @@
 			membershipExceptions = (
 				App/Assets.xcassets,
 				Common/Constants/AppStrings.swift,
-				Common/Constants/DashboardUI.swift,
+				Common/Constants/Layout/DashboardUI.swift,
 				"Common/Extension/CycleEntity+CoreData.swift",
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillRecordEntity+.swift",

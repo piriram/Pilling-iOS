@@ -133,15 +133,15 @@ final class DIContainer {
         return CycleHistoryViewModel(context: coreDataManager.viewContext)
     }
     
-    func makeStasticsViewModel() -> StasticsViewModel {
-        return StasticsViewModel()
+    func makeStasticsViewModel() -> StatisticsViewModel {
+        return StatisticsViewModel()
     }
     
     func getPillCycleRepository() -> CycleRepositoryProtocol {
-           return cycleRepository
-       }
-       
-       func getUserDefaultsManager() -> UserDefaultsManagerProtocol {
-           return userDefaultsManager
-       }
+        return cycleRepository
+    }
+    
+    func getUserDefaultsManager() -> UserDefaultsManagerProtocol {
+        return userDefaultsManager
+    }
 }
