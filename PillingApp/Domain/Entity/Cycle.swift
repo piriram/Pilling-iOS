@@ -28,4 +28,13 @@ struct Cycle {
     func isBreakDay(forDay day: Int) -> Bool {
         return day > activeDays && day <= totalDays
     }
+    
+    var recordsByDate: [Date: DayRecord] {
+           let calendar = Calendar.current
+           return Dictionary(
+               uniqueKeysWithValues: records.map {
+                   (calendar.startOfDay(for: $0.scheduledDateTime), $0)
+               }
+           )
+       }
 }

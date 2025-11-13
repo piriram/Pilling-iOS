@@ -73,12 +73,13 @@ final class DashboardBottomView: UIView {
         pageControl.currentPage = 0
     }
     
-    func updateButton(canTake: Bool, cycle: Cycle?) {
+    func updateButton(canTake: Bool, cycle: Cycle?, environment: DateEnvironment = .default) {
         guard let cycle = cycle else { return }
         
-        let calendar = Calendar.current
-        let now = Date()
+        let calendar = environment.calendar
+        let now = environment.now
         
+        //TODO: 에러처리
         guard let todayRecord = cycle.records.first(where: {
             calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
         }) else {
@@ -98,9 +99,10 @@ final class DashboardBottomView: UIView {
             takePillButton.backgroundColor = AppColor.pillGreen200
             takePillButton.isEnabled = true
         } else {
-            takePillButton.setTitle(str.takePillButton, for: .normal)
+            takePillButton.setTitle("???", for: .normal)
             takePillButton.backgroundColor = AppColor.pillGreen200
             takePillButton.isEnabled = true
         }
     }
 }
+

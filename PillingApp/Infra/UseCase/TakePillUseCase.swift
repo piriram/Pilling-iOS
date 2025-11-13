@@ -67,7 +67,7 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
             cycleDay: record.cycleDay,
             status: newStatus,
             scheduledDateTime: record.scheduledDateTime,
-            takenAt: now,
+            takenAt: takenAt,
             memo: record.memo,
             createdAt: record.createdAt,
             updatedAt: now

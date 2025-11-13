@@ -27,7 +27,6 @@ struct DashboardSheetViewModelOutput {
     let shouldShowSheet: Signal<Void>
     let initialButtonTag: Driver<StatusButtonTag>
     let formattedTime: Driver<String>
-    let isMemoPlaceholderHidden: Driver<Bool>
     let dismiss: Signal<(PillStatus?, String)>
 }
 
@@ -36,9 +35,11 @@ final class DefaultDashboardSheetViewModel: DashboardSheetViewModel {
     private let selectedDate: Date
     private let initialMemo: String
     private let initialStatus: PillStatus?
-    private let takenAt: Date?
+    private let disposeBag = DisposeBag()
     
     private var selectedStatus: PillStatus?
+    private var currentTakenAt: Date?
+    private var currentMemo: String
     
     init(
         selectedDate: Date,
@@ -49,11 +50,45 @@ final class DefaultDashboardSheetViewModel: DashboardSheetViewModel {
         self.selectedDate = selectedDate
         self.initialMemo = initialMemo
         self.initialStatus = initialStatus
-        self.takenAt = takenAt
         self.selectedStatus = initialStatus
+        self.currentTakenAt = takenAt
+        self.currentMemo = initialMemo
     }
     
     func transform(_ input: DashboardSheetViewModelInput) -> DashboardSheetViewModelOutput {
+        
+        // Update takenAt when timeChanged emits
+        input.timeChanged
+            .subscribe(onNext: { [weak self] date in
+                self?.currentTakenAt = date
+            })
+            .disposed(by: disposeBag)
+        
+        // Update memo when it changes
+        input.memoText
+            .subscribe(onNext: { [weak self] text in
+                self?.currentMemo = text
+            })
+            .disposed(by: disposeBag)
+        
+        // 상태 업데이트
+        input.tapNotTaken
+            .subscribe(onNext: { [weak self] in
+                self?.selectedStatus = .todayNotTaken
+            })
+            .disposed(by: disposeBag)
+        
+        input.tapTaken
+            .subscribe(onNext: { [weak self] in
+                self?.selectedStatus = .todayTaken
+            })
+            .disposed(by: disposeBag)
+        
+        input.tapTakenDouble
+            .subscribe(onNext: { [weak self] in
+                self?.selectedStatus = .takenDouble
+            })
+            .disposed(by: disposeBag)
         
         let shouldShowSheet = input.viewDidAppear
             .asSignal(onErrorSignalWith: .empty())
@@ -64,7 +99,7 @@ final class DefaultDashboardSheetViewModel: DashboardSheetViewModel {
                 return PillStatusMapper.mapStatusToButtonTag(status)
             }
         
-        let formattedTime = Driver.just(takenAt)
+        let formattedTime = Driver.just(currentTakenAt)
             .map { [weak self] date -> String in
                 self?.formatTime(date) ?? "-"
             }
@@ -77,31 +112,21 @@ final class DefaultDashboardSheetViewModel: DashboardSheetViewModel {
         
         let finalFormattedTime = Driver.merge(formattedTime, updatedTime)
         
-        let statusFromNotTaken = input.tapNotTaken
-            .map { [weak self] _ -> PillStatus? in
-                self?.selectedStatus = .todayNotTaken
-                return .todayNotTaken
-            }
+        let statusTapped = Observable.merge(
+            input.tapNotTaken,
+            input.tapTaken,
+            input.tapTakenDouble
+        )
         
-        let statusFromTaken = input.tapTaken
-            .map { [weak self] _ -> PillStatus? in
-                self?.selectedStatus = .todayTaken
-                return .todayTaken
-            }
+        let dismissTrigger = Observable.merge(
+            input.requestDismiss,
+            statusTapped
+        )
         
-        let statusFromTakenDouble = input.tapTakenDouble
-            .map { [weak self] _ -> PillStatus? in
-                self?.selectedStatus = .takenDouble
-                return .takenDouble
-            }
-        
-        let isMemoPlaceholderHidden = input.memoText
-            .map { !$0.isEmpty }
-            .asDriver(onErrorJustReturn: false)
-        
-        let dismiss = input.requestDismiss
-            .withLatestFrom(input.memoText) { [weak self] _, memo in
-                (self?.selectedStatus, memo)
+        let dismiss = dismissTrigger
+            .map { [weak self] _ -> (PillStatus?, String) in
+                guard let self = self else { return (nil, "") }
+                return (self.selectedStatus, self.currentMemo)
             }
             .asSignal(onErrorSignalWith: .empty())
         
@@ -109,7 +134,6 @@ final class DefaultDashboardSheetViewModel: DashboardSheetViewModel {
             shouldShowSheet: shouldShowSheet,
             initialButtonTag: initialButtonTag,
             formattedTime: finalFormattedTime,
-            isMemoPlaceholderHidden: isMemoPlaceholderHidden,
             dismiss: dismiss
         )
     }

@@ -196,10 +196,10 @@ final class DashboardSheetViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        output.isMemoPlaceholderHidden
-            .drive()
-            .disposed(by: disposeBag)
-        
+//        output.isMemoPlaceholderHidden
+//            .drive()
+//            .disposed(by: disposeBag)
+//        
         output.dismiss
             .emit(onNext: { [weak self] status, memo in
                 guard let self else { return }
