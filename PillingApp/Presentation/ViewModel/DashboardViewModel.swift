@@ -19,9 +19,10 @@ final class DashboardViewModel {
     private let calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let settingsRepository: UserDefaultsProtocol
-    
+    private let timeProvider: TimeProvider
+
     private let disposeBag = DisposeBag()
-    private let calendar = Calendar.current
+    private var calendar: Calendar { timeProvider.calendar }
     
     // MARK: - Outputs
     
@@ -41,7 +42,8 @@ final class DashboardViewModel {
         updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol,
         calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
-        settingsRepository: UserDefaultsProtocol
+        settingsRepository: UserDefaultsProtocol,
+        timeProvider: TimeProvider
     ) {
         self.fetchDashboardDataUseCase = fetchDashboardDataUseCase
         self.takePillUseCase = takePillUseCase
@@ -49,6 +51,7 @@ final class DashboardViewModel {
         self.calculateDashboardMessageUseCase = calculateDashboardMessageUseCase
         self.userDefaultsManager = userDefaultsManager
         self.settingsRepository = settingsRepository
+        self.timeProvider = timeProvider
         
         
         loadDashboardData()
@@ -59,9 +62,8 @@ final class DashboardViewModel {
     
     private func autoMarkPastScheduledAsMissed() {
         guard let cycle = currentCycle.value else { return }
-        let calendar = Calendar.current
-        let now = Date()
-        let startOfToday = calendar.startOfDay(for: now)
+        let now = timeProvider.now
+        let startOfToday = timeProvider.startOfDay(for: now)
         
         for (index, record) in cycle.records.enumerated() {
             if record.scheduledDateTime < startOfToday {
@@ -138,10 +140,10 @@ final class DashboardViewModel {
     
     private func updateItems() {
         guard let cycle = currentCycle.value else { return }
-        
+
         let maxItems = 28
         let visibleRecords = Array(cycle.records.prefix(maxItems))
-        let now = Date()
+        let now = timeProvider.now
         
         let currentScheduledTime = settings.value.scheduledTime
         
@@ -195,7 +197,7 @@ final class DashboardViewModel {
         from scheduledTime: Date,
         calendar: Calendar
     ) -> Date {
-        let now = Date()
+        let now = timeProvider.now
         let todayComponents = calendar.dateComponents([.year, .month, .day], from: now)
         let timeComponents = calendar.dateComponents([.hour, .minute], from: scheduledTime)
         
@@ -237,8 +239,8 @@ final class DashboardViewModel {
             canTakePill.accept(false)
             return
         }
-        
-        let now = Date()
+
+        let now = timeProvider.now
         
         guard let todayRecord = cycle.records.first(where: {
             calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
@@ -270,9 +272,9 @@ final class DashboardViewModel {
             updateCanTakePill()
             return
         }
-        
-        let now = Date()
-        let startOfToday = calendar.startOfDay(for: now)
+
+        let now = timeProvider.now
+        let startOfToday = timeProvider.startOfDay(for: now)
         
         let hasPastScheduled = cycle.records.contains { record in
             record.scheduledDateTime < startOfToday && record.status == .scheduled
@@ -297,7 +299,7 @@ final class DashboardViewModel {
     
     func takePill() {
         guard let cycle = currentCycle.value else { return }
-        let takenAt = Date()
+        let takenAt = timeProvider.now
         
         takePillUseCase.execute(cycle: cycle, settings: settings.value, takenAt: takenAt)
             .subscribe(onNext: { [weak self] updatedCycle in

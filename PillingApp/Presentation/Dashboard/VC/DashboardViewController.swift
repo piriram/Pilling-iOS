@@ -13,18 +13,20 @@ import SnapKit
 final class DashboardViewController: UIViewController {
     
     // MARK: - ViewModels
-    
+
     private let viewModel: DashboardViewModel
     private let stasticsViewModel: StatisticsViewModel
     private let userDefaultsManager: UserDefaultsManagerProtocol
+    private let timeProvider: TimeProvider
     private let disposeBag = DisposeBag()
-    
+
     // MARK: - Managers & Coordinators
-    
+
     private lazy var coordinator = DashboardCoordinator(navigationController: navigationController)
     private lazy var sheetPresenter = DashboardSheetPresenter(
         viewController: self,
-        userDefaultsManager: userDefaultsManager
+        userDefaultsManager: userDefaultsManager,
+        timeProvider: timeProvider
     )
     private var transitionManager: DashboardViewTransitionManager?
     private var bindingManager: DashboardViewBindingManager?
@@ -47,15 +49,17 @@ final class DashboardViewController: UIViewController {
     }
     
     // MARK: - Initialization
-    
+
     init(
         viewModel: DashboardViewModel,
         stasticsViewModel: StatisticsViewModel,
-        userDefaultsManager: UserDefaultsManagerProtocol
+        userDefaultsManager: UserDefaultsManagerProtocol,
+        timeProvider: TimeProvider
     ) {
         self.viewModel = viewModel
         self.stasticsViewModel = stasticsViewModel
         self.userDefaultsManager = userDefaultsManager
+        self.timeProvider = timeProvider
         super.init(nibName: nil, bundle: nil)
     }
     

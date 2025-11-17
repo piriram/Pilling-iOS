@@ -14,10 +14,11 @@ import SnapKit
 final class DashboardSheetViewController: UIViewController {
     
     // MARK: - Properties
-    
+
     private let onDataChanged: (PillStatus?, String) -> Void
     private let onTimeChanged: ((Date) -> Void)?
     private let userDefaultsManager: UserDefaultsManagerProtocol
+    private let timeProvider: TimeProvider
     private let disposeBag = DisposeBag()
     
     var titleText: String?
@@ -73,12 +74,14 @@ final class DashboardSheetViewController: UIViewController {
         takenAt: Date? = nil,
         initialStatus: PillStatus? = nil,
         userDefaultsManager: UserDefaultsManagerProtocol,
+        timeProvider: TimeProvider,
         onDataChanged: @escaping (PillStatus?, String) -> Void,
         onTimeChanged: ((Date) -> Void)? = nil
     ) {
         self.onDataChanged = onDataChanged
         self.onTimeChanged = onTimeChanged
         self.userDefaultsManager = userDefaultsManager
+        self.timeProvider = timeProvider
 
         // 초기 메모에서 부작용 태그 파싱
         let parsedMemo = PillRecordMemo.fromJSONString(initialMemo)
@@ -245,7 +248,7 @@ final class DashboardSheetViewController: UIViewController {
     // MARK: - Time Picker
     
     private func presentTimePickerBottomSheet() {
-        let timePickerSheet = TimePickerBottomSheet(initialTime: Date())
+        let timePickerSheet = TimePickerBottomSheet(initialTime: timeProvider.now)
         
         timePickerSheet.selectedTime
             .take(1)
