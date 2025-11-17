@@ -20,9 +20,10 @@ final class DashboardSheetViewController: UIViewController {
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let timeProvider: TimeProvider
     private let disposeBag = DisposeBag()
-    
+    private var initialSideEffectIds: [String] = []
+
     var titleText: String?
-    
+
     private typealias str = AppStrings.Dashboard
     
     // MARK: - Components
@@ -92,6 +93,7 @@ final class DashboardSheetViewController: UIViewController {
 
         // 초기 메모에서 부작용 태그 파싱
         let parsedMemo = PillRecordMemo.fromJSONString(initialMemo)
+        self.initialSideEffectIds = parsedMemo.sideEffectIds
 
         self.viewModel = DefaultDashboardSheetViewModel(
             selectedDate: selectedDate,
@@ -102,11 +104,6 @@ final class DashboardSheetViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
-
-        // 부작용 태그 선택 복원 (뷰가 생성된 후에 설정해야 함)
-        DispatchQueue.main.async { [weak self] in
-            self?.sideEffectTagsView.setSelectedTagIds(parsedMemo.sideEffectIds)
-        }
     }
     
     required init?(coder: NSCoder) {
@@ -114,7 +111,7 @@ final class DashboardSheetViewController: UIViewController {
     }
     
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
@@ -122,7 +119,16 @@ final class DashboardSheetViewController: UIViewController {
         bindComponents()
         bindViewModel()
     }
-    
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        // 부작용 태그 선택 복원 (뷰가 완전히 로드된 후에 설정)
+        if !initialSideEffectIds.isEmpty {
+            sideEffectTagsView.setSelectedTagIds(initialSideEffectIds)
+        }
+    }
+
     // MARK: - Setup
     
     private func setupViews() {
