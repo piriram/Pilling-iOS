@@ -199,21 +199,24 @@ final class StasticsViewController: UIViewController {
                 attributes: [.font: UIFont.systemFont(ofSize: 18, weight: .bold)]
             ))
             medicineLabel.attributedText = attributedString
-            
-            updateRecordList(records: data.records, skippedCount: data.skippedCount)
+
+            updateRecordList(records: data.records, skippedCount: data.skippedCount, sideEffectStats: data.sideEffectStats)
         }
     }
     
-    private func updateRecordList(records: [RecordItemDTO], skippedCount: Int) {
+    private func updateRecordList(records: [RecordItemDTO], skippedCount: Int, sideEffectStats: [SideEffectStatDTO]) {
         recordListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
+
         for item in records {
             let itemView = createRecordItemView(item: item)
             recordListStackView.addArrangedSubview(itemView)
         }
-        
-        let skippedView = createSkippedItemView(count: skippedCount)
-        recordListStackView.addArrangedSubview(skippedView)
+
+        // Add side effect statistics
+        for stat in sideEffectStats {
+            let sideEffectView = createSideEffectItemView(stat: stat)
+            recordListStackView.addArrangedSubview(sideEffectView)
+        }
     }
     
     private func createRecordItemView(item: RecordItemDTO) -> UIView {
@@ -266,49 +269,49 @@ final class StasticsViewController: UIViewController {
         return containerView
     }
     
-    private func createSkippedItemView(count: Int) -> UIView {
+    private func createSideEffectItemView(stat: SideEffectStatDTO) -> UIView {
         let containerView = UIView()
-        
+
         let iconImageView = UIImageView()
-        iconImageView.image = UIImage(systemName: "drop.fill")
-        iconImageView.tintColor = .gray
+        iconImageView.image = UIImage(systemName: "exclamationmark.circle.fill")
+        iconImageView.tintColor = AppColor.pillGreen600
         iconImageView.contentMode = .center
-        
+
         let categoryLabel = UILabel()
-        categoryLabel.text = "부정출혈"
+        categoryLabel.text = stat.tagName
         categoryLabel.font = .systemFont(ofSize: 16)
         categoryLabel.textColor = .black
-        
+
         let countLabel = UILabel()
-        countLabel.text = "\(count)회"
+        countLabel.text = "\(stat.count)회"
         countLabel.font = .systemFont(ofSize: 16)
         countLabel.textColor = .gray
-        
+
         containerView.addSubview(iconImageView)
         containerView.addSubview(categoryLabel)
         containerView.addSubview(countLabel)
-        
+
         iconImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(20)
             make.centerY.equalToSuperview()
             make.width.equalTo(60)
             make.height.equalTo(32)
         }
-        
+
         categoryLabel.snp.makeConstraints { make in
             make.leading.equalTo(iconImageView.snp.trailing).offset(12)
             make.centerY.equalToSuperview()
         }
-        
+
         countLabel.snp.makeConstraints { make in
             make.trailing.equalToSuperview().offset(-20)
             make.centerY.equalToSuperview()
         }
-        
+
         containerView.snp.makeConstraints { make in
             make.height.equalTo(56)
         }
-        
+
         return containerView
     }
     
