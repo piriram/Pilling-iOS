@@ -32,11 +32,12 @@ final class PillSettingViewModel {
     }
     
     // MARK: - Properties
-    
+
     let input: Input
     let output: Output
-    
+
     private let userDefaultsManager: UserDefaultsManagerProtocol
+    private let timeProvider: TimeProvider
     
     private let pillTypeButtonTappedSubject = PublishSubject<Void>()
     private let startDateButtonTappedSubject = PublishSubject<Void>()
@@ -51,9 +52,10 @@ final class PillSettingViewModel {
     private let disposeBag = DisposeBag()
     
     // MARK: - Initialization
-    
-    init(userDefaultsManager: UserDefaultsManagerProtocol) {
+
+    init(userDefaultsManager: UserDefaultsManagerProtocol, timeProvider: TimeProvider) {
         self.userDefaultsManager = userDefaultsManager
+        self.timeProvider = timeProvider
         
         // Input 초기화
         self.input = Input(
@@ -80,11 +82,11 @@ final class PillSettingViewModel {
                 guard let info = pillInfo else { return nil }
                 return "\(info.name) (복용 \(info.takingDays)일 / 휴약 \(info.breakDays)일)"
             }
-        
+
         let selectedStartDateText = selectedStartDateRelay
-            .map { date -> String? in
+            .map { [timeProvider] date -> String? in
                 guard let date = date else { return nil }
-                return PillSettingViewModel.formatDateWithDayInfo(date: date)
+                return PillSettingViewModel.formatDateWithDayInfo(date: date, timeProvider: timeProvider)
             }
         
         // userDefaultsManager를 캡처하여 사용
@@ -146,25 +148,19 @@ final class PillSettingViewModel {
     }
     
     // MARK: - Private Methods
-    
-    private static func calculateDaysSinceStart(from startDate: Date) -> Int {
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.day], from: startDate, to: Date())
-        return (components.day ?? 0) + 1 // 1일차부터 시작
-    }
-    
-    private static func formatDateWithDayInfo(date: Date) -> String {
+
+    private static func formatDateWithDayInfo(date: Date, timeProvider: TimeProvider) -> String {
         let dateText = date.formatted(style: .monthDay)
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let selectedDay = calendar.startOfDay(for: date)
+        let today = timeProvider.startOfDay(for: timeProvider.now)
+        let selectedDay = timeProvider.startOfDay(for: date)
         if selectedDay < today {
-            let days = calculateDaysSinceStart(from: date)
+            let components = timeProvider.calendar.dateComponents([.day], from: date, to: timeProvider.now)
+            let days = (components.day ?? 0) + 1 // 1일차부터 시작
             return "\(dateText) (\(days)일째)"
         } else if selectedDay == today {
             return "\(dateText) (오늘)"
         } else {
-            let components = calendar.dateComponents([.day], from: today, to: selectedDay)
+            let components = timeProvider.calendar.dateComponents([.day], from: today, to: selectedDay)
             let daysRemaining = components.day ?? 0
             return "\(dateText) (\(daysRemaining)일 남음)"
         }

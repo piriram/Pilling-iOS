@@ -27,28 +27,32 @@ final class TimeSettingViewModel {
     }
     
     // MARK: - Properties
-    
+
     private let settingsRepository: UserDefaultsProtocol
     private let notificationManager: NotificationManagerProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let createPillCycleUseCase: CreateCycleUseCaseProtocol
+    private let timeProvider: TimeProvider
     private let disposeBag = DisposeBag()
-    
-    private let selectedTime = BehaviorRelay<Date>(value: Date())
+
+    private let selectedTime: BehaviorRelay<Date>
     private let isAlarmEnabled = BehaviorRelay<Bool>(value: true)
-    
+
     // MARK: - Initialization
-    
+
     init(
         settingsRepository: UserDefaultsProtocol,
         notificationManager: NotificationManagerProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
-        createPillCycleUseCase: CreateCycleUseCaseProtocol
+        createPillCycleUseCase: CreateCycleUseCaseProtocol,
+        timeProvider: TimeProvider
     ) {
         self.settingsRepository = settingsRepository
         self.notificationManager = notificationManager
         self.userDefaultsManager = userDefaultsManager
         self.createPillCycleUseCase = createPillCycleUseCase
+        self.timeProvider = timeProvider
+        self.selectedTime = BehaviorRelay<Date>(value: timeProvider.now)
     }
     
     // MARK: - Transform

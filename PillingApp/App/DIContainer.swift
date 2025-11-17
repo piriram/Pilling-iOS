@@ -102,20 +102,25 @@ final class DIContainer {
             updatePillStatusUseCase: makeUpdatePillStatusUseCase(),
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase(),
             userDefaultsManager: userDefaultsManager,
-            settingsRepository: settingsRepository
+            settingsRepository: settingsRepository,
+            timeProvider: timeProvider
         )
     }
-    
+
     func makePillSettingViewModel() -> PillSettingViewModel {
-        return PillSettingViewModel(userDefaultsManager: userDefaultsManager)
+        return PillSettingViewModel(
+            userDefaultsManager: userDefaultsManager,
+            timeProvider: timeProvider
+        )
     }
-    
+
     func makeTimeSettingViewModel() -> TimeSettingViewModel {
         return TimeSettingViewModel(
             settingsRepository: settingsRepository,
             notificationManager: notificationManager,
             userDefaultsManager: userDefaultsManager,
-            createPillCycleUseCase: makeCreatePillCycleUseCase()
+            createPillCycleUseCase: makeCreatePillCycleUseCase(),
+            timeProvider: timeProvider
         )
     }
     
