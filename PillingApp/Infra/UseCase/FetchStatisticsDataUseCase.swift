@@ -207,12 +207,15 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
 
         // Convert to SideEffectStatDTO and sort by count (descending)
         let result = sideEffectCounts
-            .compactMap { (tagId, count) -> SideEffectStatDTO? in
-                guard let tagName = tagMap[tagId] else {
-                    print("   ⚠️ tagId '\(tagId)'에 해당하는 태그 이름을 찾을 수 없음")
-                    return nil
+            .map { (tagId, count) -> SideEffectStatDTO in
+                let tagName: String
+                if let name = tagMap[tagId] {
+                    tagName = name
+                    print("   ✅ 통계 생성: \(tagName) - \(count)회")
+                } else {
+                    tagName = "삭제된 부작용"
+                    print("   ⚠️ tagId '\(tagId)'에 해당하는 태그 이름을 찾을 수 없음 -> '삭제된 부작용'으로 표시")
                 }
-                print("   ✅ 통계 생성: \(tagName) - \(count)회")
                 return SideEffectStatDTO(tagId: tagId, tagName: tagName, count: count)
             }
             .sorted { $0.count > $1.count }
