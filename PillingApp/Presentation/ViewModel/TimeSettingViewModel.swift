@@ -28,10 +28,10 @@ final class TimeSettingViewModel {
     
     // MARK: - Properties
     
-    private let settingsRepository: UserSettingsRepositoryProtocol
+    private let settingsRepository: UserDefaultsProtocol
     private let notificationManager: NotificationManagerProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
-    private let createPillCycleUseCase: CreatePillCycleUseCaseProtocol
+    private let createPillCycleUseCase: CreateCycleUseCaseProtocol
     private let disposeBag = DisposeBag()
     
     private let selectedTime = BehaviorRelay<Date>(value: Date())
@@ -40,10 +40,10 @@ final class TimeSettingViewModel {
     // MARK: - Initialization
     
     init(
-        settingsRepository: UserSettingsRepositoryProtocol,
+        settingsRepository: UserDefaultsProtocol,
         notificationManager: NotificationManagerProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
-        createPillCycleUseCase: CreatePillCycleUseCaseProtocol
+        createPillCycleUseCase: CreateCycleUseCaseProtocol
     ) {
         self.settingsRepository = settingsRepository
         self.notificationManager = notificationManager

@@ -7,8 +7,6 @@
 
 import Foundation
 
-// MARK: - UserDefaultsManagerProtocol
-
 protocol UserDefaultsManagerProtocol {
     func savePillInfo(_ pillInfo: PillInfo)
     func savePillStartDate(_ date: Date)
@@ -17,19 +15,11 @@ protocol UserDefaultsManagerProtocol {
     func clearPillSettings()
     func saveCurrentCycleID(_ id: UUID)
     func loadCurrentCycleID() -> UUID?
-}
-// MARK: - UserDefaultsKey
-
-enum UserDefaultsKey: String {
-    case pillName = "pill_name"
-    case pillTakingDays = "pill_taking_days"
-    case pillBreakDays = "pill_break_days"
-    case pillStartDate = "pill_start_date"
-    case pillInfo = "pillInfo"
-    case currentCycleID = "current_cycle_id"
+    
+    func saveSideEffectTags(_ tags: [SideEffectTag])
+    func loadSideEffectTags() -> [SideEffectTag]
 }
 
-// MARK: - UserDefaultsManager
 
 final class UserDefaultsManager: UserDefaultsManagerProtocol {
     
@@ -40,6 +30,8 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
     // MARK: - Initialization
     
     init(userDefaults: UserDefaults = .standard) {
+        print("순서:\(#fileID)")
+        
         self.userDefaults = userDefaults
         migrateIfNeeded()
     }
@@ -142,5 +134,42 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
         userDefaults.removeObject(forKey: UserDefaultsKey.pillBreakDays.rawValue)
         userDefaults.removeObject(forKey: UserDefaultsKey.pillStartDate.rawValue)
         userDefaults.removeObject(forKey: UserDefaultsKey.currentCycleID.rawValue) // ⭐️ 추가
+    }
+    
+    /// 부작용 태그 저장
+    func saveSideEffectTags(_ tags: [SideEffectTag]) {
+        if let encoded = try? JSONEncoder().encode(tags) {
+            userDefaults.set(encoded, forKey: UserDefaultsKey.sideEffectTags.rawValue)
+        }
+    }
+    
+    /// 부작용 태그 로드 (기본값 포함)
+    func loadSideEffectTags() -> [SideEffectTag] {
+        // 저장된 데이터 확인
+        if let data = userDefaults.data(forKey: UserDefaultsKey.sideEffectTags.rawValue),
+           let tags = try? JSONDecoder().decode([SideEffectTag].self, from: data) {
+            return tags
+        }
+        
+        // 저장된 데이터가 없으면 기본 태그 반환
+        return createDefaultSideEffectTags()
+    }
+    
+    /// 기본 부작용 태그 생성
+    private func createDefaultSideEffectTags() -> [SideEffectTag] {
+        let defaultNames = [
+            "두통", "메스꺼움", "유방통", "기분변화",
+            "체중증가", "불규칙출혈", "피로", "불면증",
+            "여드름", "성욕감소", "복통", "어지러움"
+        ]
+        
+        return defaultNames.enumerated().map { index, name in
+            SideEffectTag(
+                name: name,
+                isVisible: true,
+                order: index,
+                isDefault: true
+            )
+        }
     }
 }

@@ -24,7 +24,7 @@ final class DIContainer {
         SystemTimeProvider()
     }()
     
-    // MARK: - Managers (⭐️ Singleton으로 변경)
+    // MARK: - Managers(싱글톤)
     
     private lazy var userDefaultsManager: UserDefaultsManagerProtocol = {
         return UserDefaultsManager()
@@ -34,14 +34,14 @@ final class DIContainer {
         return LocalNotificationManager()
     }()
     
-    // MARK: - Repositories (⭐️ Singleton으로 변경)
+    // MARK: - Repositories (싱글톤)
     
-    private lazy var cycleRepository: PillCycleRepositoryProtocol = {
-        return CoreDataPillCycleRepository(coreDataManager: coreDataManager)
+    private lazy var cycleRepository: CycleRepositoryProtocol = {
+        return CycleRepository(coreDataManager: coreDataManager)
     }()
     
-    private lazy var settingsRepository: UserSettingsRepositoryProtocol = {
-        return UserDefaultsUserSettingsRepository()
+    private lazy var settingsRepository: UserDefaultsProtocol = {
+        return UserDefaultsRepository()
     }()
     
     // MARK: - UseCases
@@ -74,8 +74,8 @@ final class DIContainer {
         )
     }
     
-    func makeCreatePillCycleUseCase() -> CreatePillCycleUseCaseProtocol {
-        return CreatePillCycleUseCase(
+    func makeCreatePillCycleUseCase() -> CreateCycleUseCaseProtocol {
+        return CreateCycleUseCase(
             cycleRepository: cycleRepository,
             timeProvider: timeProvider,
             userDefaultsManager: userDefaultsManager
@@ -129,15 +129,19 @@ final class DIContainer {
     
     // MARK: - History
     
-    func makePillCycleHistoryViewModel() -> PillCycleHistoryViewModel {
-        return PillCycleHistoryViewModel(context: coreDataManager.viewContext)
+    func makePillCycleHistoryViewModel() -> CycleHistoryViewModel {
+        return CycleHistoryViewModel(context: coreDataManager.viewContext)
     }
     
-    func getPillCycleRepository() -> PillCycleRepositoryProtocol {
-           return cycleRepository
-       }
-       
-       func getUserDefaultsManager() -> UserDefaultsManagerProtocol {
-           return userDefaultsManager
-       }
+    func makeStasticsViewModel() -> StatisticsViewModel {
+        return StatisticsViewModel()
+    }
+    
+    func getPillCycleRepository() -> CycleRepositoryProtocol {
+        return cycleRepository
+    }
+    
+    func getUserDefaultsManager() -> UserDefaultsManagerProtocol {
+        return userDefaultsManager
+    }
 }
