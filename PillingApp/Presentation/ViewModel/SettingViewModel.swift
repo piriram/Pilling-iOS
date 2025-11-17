@@ -22,12 +22,12 @@ final class SettingViewModel {
         let newPillCycleTapped: Observable<Void>
         
         init(
-        viewWillAppear: Observable<Void>,
-        timeSettingTapped: Observable<Void>,
-        messageSettingTapped: Observable<Void>,
-        alarmToggleChanged: Observable<Bool>? = nil,
-        healthToggleChanged: Observable<Bool>? = nil,
-        newPillCycleTapped: Observable<Void>
+            viewWillAppear: Observable<Void>,
+            timeSettingTapped: Observable<Void>,
+            messageSettingTapped: Observable<Void>,
+            alarmToggleChanged: Observable<Bool>? = nil,
+            healthToggleChanged: Observable<Bool>? = nil,
+            newPillCycleTapped: Observable<Void>
         ) {
             self.viewWillAppear = viewWillAppear
             self.timeSettingTapped = timeSettingTapped
@@ -50,9 +50,9 @@ final class SettingViewModel {
     
     // MARK: - Properties
     
-    private let settingsRepository: UserSettingsRepositoryProtocol
+    private let settingsRepository: UserDefaultsProtocol
     private let notificationManager: NotificationManagerProtocol
-    private let pillCycleRepository: PillCycleRepositoryProtocol
+    private let pillCycleRepository: CycleRepositoryProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let disposeBag = DisposeBag()
     
@@ -62,9 +62,9 @@ final class SettingViewModel {
     // MARK: - Initialization
     
     init(
-        settingsRepository: UserSettingsRepositoryProtocol,
+        settingsRepository: UserDefaultsProtocol,
         notificationManager: NotificationManagerProtocol,
-        pillCycleRepository: PillCycleRepositoryProtocol,
+        pillCycleRepository: CycleRepositoryProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol
     ) {
         self.settingsRepository = settingsRepository

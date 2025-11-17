@@ -49,7 +49,7 @@ final class SharedCoreDataManager {
     
     // MARK: - Fetch Methods
     
-    func fetchCurrentCycle() -> PillCycle? {
+    func fetchCurrentCycle() -> Cycle? {
         let fetchRequest: NSFetchRequest<PillCycleEntity> = PillCycleEntity.fetchRequest()
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "createdAt", ascending: false),

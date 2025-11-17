@@ -22,7 +22,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Window 생성
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        
+        //        self.showTest()
+        //        window.makeKeyAndVisible()
         // 기록 중인 사이클이 있는지 확인
         checkExistingCycle { hasExistingCycle in
             DispatchQueue.main.async {
@@ -58,7 +59,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func showDashboard() {
         let viewModel = DIContainer.shared.makeDashboardViewModel()
-        let dashboardVC = DashboardViewController(viewModel: viewModel)
+        let stasticsViewModel = DIContainer.shared.makeStasticsViewModel()
+        let userDefaultsManager = DIContainer.shared.getUserDefaultsManager()
+        let dashboardVC = DashboardViewController(
+            viewModel: viewModel,
+            stasticsViewModel: stasticsViewModel,
+            userDefaultsManager: userDefaultsManager
+        )
         let navigationController = UINavigationController(rootViewController: dashboardVC)
         window?.rootViewController = navigationController
     }
@@ -66,6 +73,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func showPillSetting() {
         let viewModel = DIContainer.shared.makePillSettingViewModel()
         let pillSettingVC = PillSettingViewController(viewModel: viewModel)
+        let navigationController = UINavigationController(rootViewController: pillSettingVC)
+        navigationController.navigationBar.isHidden = false
+        window?.rootViewController = navigationController
+    }
+    private func showTest() {
+        
+        let pillSettingVC = StasticsViewController(viewModel: StatisticsViewModel())
         let navigationController = UINavigationController(rootViewController: pillSettingVC)
         navigationController.navigationBar.isHidden = false
         window?.rootViewController = navigationController

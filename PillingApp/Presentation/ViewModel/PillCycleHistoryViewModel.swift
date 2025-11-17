@@ -1,5 +1,5 @@
 //
-//  PillCycleHistoryViewModel.swift
+//  CycleHistoryViewModel.swift
 //  PillingApp
 //
 //  Created by 잠만보김쥬디 on 10/16/25.
@@ -11,12 +11,12 @@ import RxCocoa
 import CoreData
 
 // MARK: - ViewModel
-final class PillCycleHistoryViewModel {
-    let items = BehaviorRelay<[PillCycle]>(value: [])
-    private let repository: PillCycleHistoryRepository
+final class CycleHistoryViewModel {
+    let items = BehaviorRelay<[Cycle]>(value: [])
+    private let repository: CycleHistoryRepository
     
     init(context: NSManagedObjectContext?) {
-        self.repository = CoreDataPillCycleHistoryRepository(context: context)
+        self.repository = CycleHistoryRepository(context: context)
     }
     
     func loadData() {

@@ -1,0 +1,170 @@
+//
+//  SideEffectTagsView.swift
+//  PillingApp
+//
+//  Created by 잠만보김쥬디 on 11/12/25.
+//
+
+import UIKit
+import RxSwift
+import RxCocoa
+import SnapKit
+
+final class SideEffectTagsView: UIView {
+    
+    // MARK: - Properties
+    
+    private let userDefaultsManager: UserDefaultsManagerProtocol
+    private var sideEffectTags: [SideEffectTag] = []
+    private var selectedTagIndices: Set<Int> = []
+    
+    // MARK: - Observables
+    
+    let addButtonTapped = PublishRelay<Void>()
+    
+    // MARK: - UI Components
+    
+    private let sectionLabel: UILabel = {
+        let label = UILabel()
+        label.text = "오늘의 컨디션"
+        label.font = Typography.body1(.semibold)
+        label.textColor = AppColor.textBlack
+        return label
+    }()
+    
+    private lazy var collectionView: UICollectionView = {
+        let layout = createCollectionViewLayout()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.showsVerticalScrollIndicator = true
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.isScrollEnabled = true
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(SideEffectTagCell.self, forCellWithReuseIdentifier: SideEffectTagCell.identifier)
+        collectionView.register(SideEffectAddButtonCell.self, forCellWithReuseIdentifier: SideEffectAddButtonCell.identifier)
+        return collectionView
+    }()
+    
+    private let containerStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 12
+        return stack
+    }()
+    
+    // MARK: - Initialization
+    
+    init(userDefaultsManager: UserDefaultsManagerProtocol) {
+        self.userDefaultsManager = userDefaultsManager
+        super.init(frame: .zero)
+        setupViews()
+        loadSideEffectTags()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Setup
+    
+    private func setupViews() {
+        addSubview(containerStack)
+        
+        containerStack.addArrangedSubview(sectionLabel)
+        containerStack.addArrangedSubview(collectionView)
+        
+        containerStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        collectionView.snp.makeConstraints { make in
+            make.height.equalTo(120)
+        }
+    }
+    
+    private func createCollectionViewLayout() -> UICollectionViewLayout {
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .estimated(80),
+            heightDimension: .absolute(36)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(36)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+        group.interItemSpacing = .fixed(8)
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 8
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+        
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        return layout
+    }
+    
+    // MARK: - Public Methods
+    
+    func reloadTags() {
+        loadSideEffectTags()
+        collectionView.reloadData()
+    }
+    
+    func getSelectedTags() -> [String] {
+        return selectedTagIndices.map { sideEffectTags[$0].name }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func loadSideEffectTags() {
+        let allTags = userDefaultsManager.loadSideEffectTags()
+        sideEffectTags = allTags.filter { $0.isVisible }.sorted { $0.order < $1.order }
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+
+extension SideEffectTagsView: UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return sideEffectTags.count + 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.item == sideEffectTags.count {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectAddButtonCell.identifier, for: indexPath) as! SideEffectAddButtonCell
+            return cell
+        }
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectTagCell.identifier, for: indexPath) as! SideEffectTagCell
+        let tag = sideEffectTags[indexPath.item]
+        let isSelected = selectedTagIndices.contains(indexPath.item)
+        cell.configure(with: tag.name, isSelected: isSelected)
+        return cell
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension SideEffectTagsView: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.item == sideEffectTags.count {
+            addButtonTapped.accept(())
+            return
+        }
+        
+        if selectedTagIndices.contains(indexPath.item) {
+            selectedTagIndices.remove(indexPath.item)
+        } else {
+            selectedTagIndices.insert(indexPath.item)
+        }
+        
+        collectionView.reloadItems(at: [indexPath])
+    }
+}

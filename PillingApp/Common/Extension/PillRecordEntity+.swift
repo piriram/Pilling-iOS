@@ -11,10 +11,10 @@ import CoreData
 
 extension PillRecordEntity {
     
-    func toDomain() -> PillRecord {
+    func toDomain() -> DayRecord {
         let pillStatus = PillStatus(rawValue: Int(status)) ?? .scheduled
         
-        return PillRecord(
+        return DayRecord(
             id: id ?? UUID(),
             cycleDay: Int(cycleDay),
             status: pillStatus,
@@ -27,7 +27,7 @@ extension PillRecordEntity {
     }
     
     static func from(
-        domain: PillRecord,
+        domain: DayRecord,
         context: NSManagedObjectContext
     ) -> PillRecordEntity {
         let entity = PillRecordEntity(context: context)
@@ -42,7 +42,7 @@ extension PillRecordEntity {
         return entity
     }
     
-    func update(from domain: PillRecord) {
+    func update(from domain: DayRecord) {
         cycleDay = Int16(domain.cycleDay)
         status = Int16(domain.status.rawValue)
         scheduledDateTime = domain.scheduledDateTime

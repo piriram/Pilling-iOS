@@ -20,7 +20,11 @@ protocol TimeProvider {
 }
 
 final class SystemTimeProvider: TimeProvider {
-    var now: Date { Date() }
+    var now: Date {
+        print("순서:\(#fileID)")
+        
+        return Date()
+    }
     
     var calendar: Calendar {
         var cal = Calendar.current
