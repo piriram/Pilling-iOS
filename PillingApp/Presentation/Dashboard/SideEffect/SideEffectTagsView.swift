@@ -77,12 +77,18 @@ final class SideEffectTagsView: UIView {
         containerStack.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+
+        // 초기 최소 높이 설정 (1~2줄 정도)
+        collectionView.snp.makeConstraints { make in
+            make.height.greaterThanOrEqualTo(44)
+        }
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
 
         // CollectionView의 컨텐츠 크기에 맞게 높이 조정
+        collectionView.layoutIfNeeded()
         let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
         if contentHeight > 0 {
             collectionView.snp.remakeConstraints { make in
