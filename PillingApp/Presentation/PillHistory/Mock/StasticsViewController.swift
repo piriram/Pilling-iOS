@@ -71,10 +71,15 @@ final class StasticsViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("🔍 [StasticsViewController] viewDidLoad 시작")
         setupUI()
+        print("🔍 [StasticsViewController] setupUI 완료")
         setupLayout()
+        print("🔍 [StasticsViewController] setupLayout 완료")
         bindViewModel()
+        print("🔍 [StasticsViewController] bindViewModel 완료")
         viewDidLoadSubject.onNext(())
+        print("🔍 [StasticsViewController] viewDidLoadSubject.onNext() 완료")
     }
     
     // MARK: - Setup
@@ -131,21 +136,35 @@ final class StasticsViewController: UIViewController {
     }
     
     private func bindViewModel() {
+        print("🔍 [StasticsViewController] bindViewModel 시작")
+
         let input = StatisticsViewModel.Input(
             viewDidLoad: viewDidLoadSubject.asObservable(),
             leftArrowTapped: leftArrowTappedSubject.asObservable(),
             rightArrowTapped: rightArrowTappedSubject.asObservable(),
             periodButtonTapped: periodButtonTappedSubject.asObservable()
         )
-        
+
+        print("🔍 [StasticsViewController] Input 생성 완료")
+
         let output = viewModel.transform(input: input)
-        
+
+        print("🔍 [StasticsViewController] Output 생성 완료, 구독 시작")
+
         output.currentPeriodData
             .observe(on: MainScheduler.instance)
+            .do(onNext: { data in
+                print("🔍 [StasticsViewController] currentPeriodData onNext 호출됨")
+                print("   📅 data: \(data.startDate) - \(data.endDate)")
+                print("   🏷️ sideEffectStats.count: \(data.sideEffectStats.count)")
+            })
             .subscribe(onNext: { [weak self] data in
+                print("🔍 [StasticsViewController] subscribe onNext - updateUI 호출 직전")
                 self?.updateUI(with: data)
             })
             .disposed(by: disposeBag)
+
+        print("🔍 [StasticsViewController] currentPeriodData 구독 완료")
         
         Observable.combineLatest(output.isLeftArrowEnabled, output.isRightArrowEnabled)
             .observe(on: MainScheduler.instance)
