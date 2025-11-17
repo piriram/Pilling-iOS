@@ -13,13 +13,13 @@ import SnapKit
 final class SideEffectTagsView: UIView {
     
     // MARK: - Properties
-    
+
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private var sideEffectTags: [SideEffectTag] = []
-    private var selectedTagIndices: Set<Int> = []
-    
+    private var selectedTagIds: Set<String> = []
+
     // MARK: - Observables
-    
+
     let addButtonTapped = PublishRelay<Void>()
     
     // MARK: - UI Components
@@ -109,14 +109,24 @@ final class SideEffectTagsView: UIView {
     }
     
     // MARK: - Public Methods
-    
+
     func reloadTags() {
         loadSideEffectTags()
         collectionView.reloadData()
     }
-    
-    func getSelectedTags() -> [String] {
-        return selectedTagIndices.map { sideEffectTags[$0].name }
+
+    func getSelectedTagIds() -> [String] {
+        return Array(selectedTagIds)
+    }
+
+    func setSelectedTagIds(_ ids: [String]) {
+        selectedTagIds = Set(ids)
+        collectionView.reloadData()
+    }
+
+    func clearSelection() {
+        selectedTagIds.removeAll()
+        collectionView.reloadData()
     }
     
     // MARK: - Private Methods
@@ -140,10 +150,10 @@ extension SideEffectTagsView: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectAddButtonCell.identifier, for: indexPath) as! SideEffectAddButtonCell
             return cell
         }
-        
+
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectTagCell.identifier, for: indexPath) as! SideEffectTagCell
         let tag = sideEffectTags[indexPath.item]
-        let isSelected = selectedTagIndices.contains(indexPath.item)
+        let isSelected = selectedTagIds.contains(tag.id)
         cell.configure(with: tag.name, isSelected: isSelected)
         return cell
     }
@@ -158,13 +168,14 @@ extension SideEffectTagsView: UICollectionViewDelegate {
             addButtonTapped.accept(())
             return
         }
-        
-        if selectedTagIndices.contains(indexPath.item) {
-            selectedTagIndices.remove(indexPath.item)
+
+        let tag = sideEffectTags[indexPath.item]
+        if selectedTagIds.contains(tag.id) {
+            selectedTagIds.remove(tag.id)
         } else {
-            selectedTagIndices.insert(indexPath.item)
+            selectedTagIds.insert(tag.id)
         }
-        
+
         collectionView.reloadItems(at: [indexPath])
     }
 }

@@ -79,15 +79,24 @@ final class DashboardSheetViewController: UIViewController {
         self.onDataChanged = onDataChanged
         self.onTimeChanged = onTimeChanged
         self.userDefaultsManager = userDefaultsManager
+
+        // 초기 메모에서 부작용 태그 파싱
+        let parsedMemo = PillRecordMemo.fromJSONString(initialMemo)
+
         self.viewModel = DefaultDashboardSheetViewModel(
             selectedDate: selectedDate,
-            initialMemo: initialMemo,
+            initialMemo: parsedMemo.text,
             initialStatus: initialStatus,
             takenAt: takenAt
         )
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
+
+        // 부작용 태그 선택 복원 (뷰가 생성된 후에 설정해야 함)
+        DispatchQueue.main.async { [weak self] in
+            self?.sideEffectTagsView.setSelectedTagIds(parsedMemo.sideEffectIds)
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -201,9 +210,17 @@ final class DashboardSheetViewController: UIViewController {
 //            .disposed(by: disposeBag)
 //        
         output.dismiss
-            .emit(onNext: { [weak self] status, memo in
+            .emit(onNext: { [weak self] status, memoText in
                 guard let self else { return }
-                self.onDataChanged(status, memo)
+
+                // 선택된 부작용 태그 ID 수집
+                let selectedTagIds = self.sideEffectTagsView.getSelectedTagIds()
+
+                // PillRecordMemo로 결합하여 JSON 저장
+                let pillMemo = PillRecordMemo(text: memoText, sideEffectIds: selectedTagIds)
+                let memoJSON = pillMemo.toJSONString()
+
+                self.onDataChanged(status, memoJSON)
                 self.sheetAnimator.hide()
             })
             .disposed(by: disposeBag)
