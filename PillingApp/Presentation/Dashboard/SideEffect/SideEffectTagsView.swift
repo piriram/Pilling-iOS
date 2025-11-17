@@ -159,7 +159,16 @@ final class SideEffectTagsView: UIView {
     }
 
     func setSelectedTagIds(_ ids: [String]) {
+        // 🔍 [디버깅] 태그 선택 상태 복원
+        print("🔍 [SideEffectTagsView] setSelectedTagIds 호출")
+        print("   🏷️ 전달받은 ids: \(ids)")
+        print("   📊 ids.count: \(ids.count)")
+
         selectedTagIds = Set(ids)
+
+        print("   💾 selectedTagIds: \(selectedTagIds)")
+        print("   📊 selectedTagIds.count: \(selectedTagIds.count)")
+
         collectionView.reloadData()
         setNeedsLayout()
         layoutIfNeeded()
@@ -197,6 +206,14 @@ extension SideEffectTagsView: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectTagCell.identifier, for: indexPath) as! SideEffectTagCell
         let tag = sideEffectTags[indexPath.item]
         let isSelected = selectedTagIds.contains(tag.id)
+
+        // 🔍 [디버깅] 셀 구성
+        print("🔍 [SideEffectTagsView] cellForItemAt [\(indexPath.item)]")
+        print("   🏷️ tag.name: '\(tag.name)'")
+        print("   🆔 tag.id: '\(tag.id)'")
+        print("   ✅ isSelected: \(isSelected)")
+        print("   📊 selectedTagIds: \(selectedTagIds)")
+
         cell.configure(with: tag.name, isSelected: isSelected)
         return cell
     }
