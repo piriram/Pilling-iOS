@@ -242,6 +242,14 @@ final class DashboardSheetViewController: UIViewController {
                 let pillMemo = PillRecordMemo(text: memoText, sideEffectIds: selectedTagIds)
                 let memoJSON = pillMemo.toJSONString()
 
+                // 🔍 [디버깅] 메모 데이터 확인
+                print("🔍 [DashboardSheet] 메모 저장 시작")
+                print("   📝 메모 텍스트: '\(memoText)'")
+                print("   🏷️ 선택된 태그 IDs: \(selectedTagIds)")
+                print("   📦 PillRecordMemo: text='\(pillMemo.text)', sideEffectIds=\(pillMemo.sideEffectIds)")
+                print("   💾 최종 JSON: '\(memoJSON)'")
+                print("   ✅ 상태: \(String(describing: status))")
+
                 self.onDataChanged(status, memoJSON)
                 self.sheetAnimator.hide()
             })
