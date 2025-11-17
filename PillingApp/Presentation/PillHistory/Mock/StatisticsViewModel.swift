@@ -40,6 +40,18 @@ final class StatisticsViewModel {
             .flatMapLatest { [weak self] _ -> Observable<[PeriodRecordDTO]> in
                 guard let self = self else { return .just([]) }
                 return self.fetchStatisticsDataUseCase.execute()
+                    .do(onNext: { periodList in
+                        // 🔍 [디버깅] UseCase에서 받은 데이터
+                        print("🔍 [StatisticsViewModel] UseCase에서 받은 데이터")
+                        print("   📊 periodList.count: \(periodList.count)")
+                        for (index, period) in periodList.enumerated() {
+                            print("   📅 [\(index)] startDate: \(period.startDate), endDate: \(period.endDate)")
+                            print("      🏷️ sideEffectStats.count: \(period.sideEffectStats.count)")
+                            for stat in period.sideEffectStats {
+                                print("         - \(stat.tagName): \(stat.count)회")
+                            }
+                        }
+                    })
                     .catch { error in
                         print("❌ Failed to fetch statistics data: \(error)")
                         return .just([])
@@ -67,6 +79,7 @@ final class StatisticsViewModel {
         let currentPeriodData = Observable.combineLatest(currentIndexSubject, dataListSubject)
             .map { index, dataList -> PeriodRecordDTO in
                 guard !dataList.isEmpty, index < dataList.count else {
+                    print("🔍 [StatisticsViewModel] currentPeriodData - 빈 데이터 반환")
                     return PeriodRecordDTO(
                         startDate: "",
                         endDate: "",
@@ -78,7 +91,16 @@ final class StatisticsViewModel {
                         isEmpty: true
                     )
                 }
-                return dataList[index]
+                let period = dataList[index]
+                // 🔍 [디버깅] 현재 표시할 period 데이터
+                print("🔍 [StatisticsViewModel] currentPeriodData 생성")
+                print("   📊 index: \(index), dataList.count: \(dataList.count)")
+                print("   📅 period.startDate: \(period.startDate), endDate: \(period.endDate)")
+                print("   🏷️ period.sideEffectStats.count: \(period.sideEffectStats.count)")
+                for stat in period.sideEffectStats {
+                    print("      - \(stat.tagName): \(stat.count)회")
+                }
+                return period
             }
 
         let isLeftArrowEnabled = currentIndexSubject
