@@ -95,6 +95,13 @@ final class DashboardSheetViewController: UIViewController {
         let parsedMemo = PillRecordMemo.fromJSONString(initialMemo)
         self.initialSideEffectIds = parsedMemo.sideEffectIds
 
+        // 🔍 [디버깅] 초기 메모 파싱
+        print("🔍 [DashboardSheet] init 호출 - 메모 파싱")
+        print("   📝 initialMemo: '\(initialMemo)'")
+        print("   📦 parsedMemo.text: '\(parsedMemo.text)'")
+        print("   🏷️ parsedMemo.sideEffectIds: \(parsedMemo.sideEffectIds)")
+        print("   💾 initialSideEffectIds: \(self.initialSideEffectIds)")
+
         self.viewModel = DefaultDashboardSheetViewModel(
             selectedDate: selectedDate,
             initialMemo: parsedMemo.text,
@@ -123,9 +130,17 @@ final class DashboardSheetViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
+        // 🔍 [디버깅] viewDidAppear에서 태그 복원
+        print("🔍 [DashboardSheet] viewDidAppear - 태그 복원 시도")
+        print("   🏷️ initialSideEffectIds: \(initialSideEffectIds)")
+        print("   📊 isEmpty: \(initialSideEffectIds.isEmpty)")
+
         // 부작용 태그 선택 복원 (뷰가 완전히 로드된 후에 설정)
         if !initialSideEffectIds.isEmpty {
+            print("   ✅ setSelectedTagIds 호출")
             sideEffectTagsView.setSelectedTagIds(initialSideEffectIds)
+        } else {
+            print("   ⚠️ initialSideEffectIds가 비어있어서 복원 안함")
         }
     }
 
