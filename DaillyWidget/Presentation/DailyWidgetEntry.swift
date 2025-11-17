@@ -12,12 +12,12 @@ import SwiftUI
 
 // MARK: - PillingDailyWidgetEntry
 
-struct PillingDailyWidgetEntry: TimelineEntry {
+struct DailyWidgetEntry: TimelineEntry {
     let date: Date
     let displayData: WidgetDisplayData
     
-    static var placeholder: PillingDailyWidgetEntry {
-        PillingDailyWidgetEntry(
+    static var placeholder: DailyWidgetEntry {
+        DailyWidgetEntry(
             date: Date(),
             displayData: WidgetDisplayData(
                 cycleDay: 1,
@@ -28,8 +28,8 @@ struct PillingDailyWidgetEntry: TimelineEntry {
         )
     }
     
-    static var empty: PillingDailyWidgetEntry {
-        PillingDailyWidgetEntry(
+    static var empty: DailyWidgetEntry {
+        DailyWidgetEntry(
             date: Date(),
             displayData: WidgetDisplayData(
                 cycleDay: 0,

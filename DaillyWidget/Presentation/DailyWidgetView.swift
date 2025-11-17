@@ -10,8 +10,8 @@ import WidgetKit
 
 // MARK: - PillingDailyWidgetView
 
-struct PillingDailyWidgetView: View {
-    let entry: PillingDailyWidgetEntry
+struct DailyWidgetView: View {
+    let entry: DailyWidgetEntry
     
     var body: some View {
         

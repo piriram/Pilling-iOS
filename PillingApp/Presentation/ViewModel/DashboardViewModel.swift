@@ -59,6 +59,7 @@ final class DashboardViewModel {
     
     private func autoMarkPastScheduledAsMissed() {
         guard let cycle = currentCycle.value else { return }
+        let calendar = Calendar.current
         let now = Date()
         let startOfToday = calendar.startOfDay(for: now)
         

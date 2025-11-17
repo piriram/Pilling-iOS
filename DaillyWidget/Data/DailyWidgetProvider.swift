@@ -9,18 +9,18 @@ import WidgetKit
 
 // MARK: - PillingDailyWidgetProvider
 
-struct PillingDailyWidgetProvider: TimelineProvider {
+struct DailyWidgetProvider: TimelineProvider {
     
     private let coreDataManager = SharedCoreDataManager.shared
     private let calculateMessageUseCase = CalculateMessageUseCase()
     
     // MARK: - TimelineProvider
     
-    func placeholder(in context: Context) -> PillingDailyWidgetEntry {
+    func placeholder(in context: Context) -> DailyWidgetEntry {
         return .placeholder
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (PillingDailyWidgetEntry) -> Void) {
+    func getSnapshot(in context: Context, completion: @escaping (DailyWidgetEntry) -> Void) {
         guard let cycle = coreDataManager.fetchCurrentCycle() else {
             completion(.empty)
             return
@@ -30,8 +30,8 @@ struct PillingDailyWidgetProvider: TimelineProvider {
         completion(entry)
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<PillingDailyWidgetEntry>) -> Void) {
-        var entries: [PillingDailyWidgetEntry] = []
+    func getTimeline(in context: Context, completion: @escaping (Timeline<DailyWidgetEntry>) -> Void) {
+        var entries: [DailyWidgetEntry] = []
         let calendar = Calendar.current
         let now = Date()
         
@@ -112,7 +112,7 @@ struct PillingDailyWidgetProvider: TimelineProvider {
         return record.scheduledDateTime
     }
     
-    private func createEntry(for date: Date, cycle: Cycle) -> PillingDailyWidgetEntry {
+    private func createEntry(for date: Date, cycle: Cycle) -> DailyWidgetEntry {
         // 공통 UseCase 사용
         let messageResult = calculateMessageUseCase.execute(cycle: cycle, for: date)
         let cycleDay = calculateCycleDay(from: cycle, for: date)
@@ -126,7 +126,7 @@ struct PillingDailyWidgetProvider: TimelineProvider {
             backgroundImageName: messageResult.backgroundImageName
         )
         
-        return PillingDailyWidgetEntry(date: date, displayData: displayData)
+        return DailyWidgetEntry(date: date, displayData: displayData)
     }
     
     private func calculateCycleDay(from cycle: Cycle, for date: Date) -> Int {

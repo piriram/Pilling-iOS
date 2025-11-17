@@ -10,9 +10,21 @@ import SnapKit
 
 final class DashboardCalendarView: UIView {
     
+    // MARK: - Section Definition
+    
+    enum Section: Hashable {
+        case calendar
+    }
+    
     // MARK: - Properties
+    
     private typealias str = AppStrings.Dashboard
-    private var dataSource: UICollectionViewDiffableDataSource<Int, DayItem>!
+    private typealias DataSource = UICollectionViewDiffableDataSource<Section, DayItem>
+    private typealias Snapshot = NSDiffableDataSourceSnapshot<Section, DayItem>
+    
+    private var dataSource: DataSource!
+    private var currentItems: [DayItem] = []
+    
     var onCellSelected: ((Int, DayItem) -> Void)?
     
     // MARK: - UI Components
@@ -93,7 +105,7 @@ final class DashboardCalendarView: UIView {
     // MARK: - Diffable DataSource
     
     private func configureDiffableDataSource() {
-        dataSource = UICollectionViewDiffableDataSource<Int, DayItem>(
+        dataSource = DataSource(
             collectionView: collectionView
         ) { collectionView, indexPath, item in
             guard let cell = collectionView.dequeueReusableCell(
@@ -108,13 +120,76 @@ final class DashboardCalendarView: UIView {
         }
     }
     
-    // MARK: - Public Methods
+    // MARK: - Public Methods - Smart Updates
     
-    func applySnapshot(with items: [DayItem]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Int, DayItem>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(items, toSection: 0)
-        dataSource.apply(snapshot, animatingDifferences: true)
+    /// Initial data load or complete refresh
+    func applySnapshot(with items: [DayItem], animated: Bool = true) {
+        currentItems = items
+        
+        var snapshot = Snapshot()
+        snapshot.appendSections([.calendar])
+        snapshot.appendItems(items, toSection: .calendar)
+        dataSource.apply(snapshot, animatingDifferences: animated)
+    }
+    
+    /// Update single item - most efficient for pill status changes
+    func updateItem(_ updatedItem: DayItem, animated: Bool = true) {
+        guard let existingIndex = currentItems.firstIndex(where: { $0.id == updatedItem.id }) else { return }
+        
+        currentItems[existingIndex] = updatedItem
+        
+        var snapshot = dataSource.snapshot()
+        
+        // Use reconfigureItems for optimal performance
+        if snapshot.itemIdentifiers.contains(where: { $0.id == updatedItem.id }) {
+            snapshot.reconfigureItems([updatedItem])
+        }
+        
+        dataSource.apply(snapshot, animatingDifferences: animated)
+    }
+    
+    /// Update multiple items - efficient for batch changes
+    func updateItems(_ updatedItems: [DayItem], animated: Bool = true) {
+        var snapshot = dataSource.snapshot()
+        var itemsToReconfigure: [DayItem] = []
+        
+        for updatedItem in updatedItems {
+            if let existingIndex = currentItems.firstIndex(where: { $0.id == updatedItem.id }) {
+                currentItems[existingIndex] = updatedItem
+                
+                if snapshot.itemIdentifiers.contains(where: { $0.id == updatedItem.id }) {
+                    itemsToReconfigure.append(updatedItem)
+                }
+            }
+        }
+        
+        if !itemsToReconfigure.isEmpty {
+            snapshot.reconfigureItems(itemsToReconfigure)
+        }
+        
+        dataSource.apply(snapshot, animatingDifferences: animated)
+    }
+    
+    /// Update item by date - convenient for pill recording
+    func updateItemForDate(_ date: Date, with newStatus: PillStatus, animated: Bool = true) {
+        guard let existingItem = currentItems.first(where: {
+            Calendar.current.isDate($0.date, inSameDayAs: date)
+        }) else { return }
+        
+        let updatedItem = DayItem(
+            id: existingItem.id,  // Preserve ID for reconfigureItems to work
+            cycleDay: existingItem.cycleDay,
+            date: existingItem.date,
+            status: newStatus,
+            scheduledDateTime: existingItem.scheduledDateTime
+        )
+        
+        updateItem(updatedItem, animated: animated)
+    }
+    
+    /// Reload all items - use when structure changes
+    func reloadAllItems(_ items: [DayItem], animated: Bool = false) {
+        applySnapshot(with: items, animated: animated)
     }
     
     func updateWeekdayStart(from startDate: Date) {
