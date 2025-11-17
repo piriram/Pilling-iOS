@@ -74,6 +74,7 @@ final class StatisticsViewModel {
                         medicineName: "",
                         records: [],
                         skippedCount: 0,
+                        sideEffectStats: [],
                         isEmpty: true
                     )
                 }
