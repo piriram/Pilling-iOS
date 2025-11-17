@@ -36,9 +36,9 @@ final class SideEffectTagsView: UIView {
         let layout = createCollectionViewLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
-        collectionView.showsVerticalScrollIndicator = true
+        collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.isScrollEnabled = true
+        collectionView.isScrollEnabled = false
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(SideEffectTagCell.self, forCellWithReuseIdentifier: SideEffectTagCell.identifier)
@@ -70,16 +70,24 @@ final class SideEffectTagsView: UIView {
     
     private func setupViews() {
         addSubview(containerStack)
-        
+
         containerStack.addArrangedSubview(sectionLabel)
         containerStack.addArrangedSubview(collectionView)
-        
+
         containerStack.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
-        collectionView.snp.makeConstraints { make in
-            make.height.equalTo(120)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        // CollectionView의 컨텐츠 크기에 맞게 높이 조정
+        let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
+        if contentHeight > 0 {
+            collectionView.snp.remakeConstraints { make in
+                make.height.equalTo(contentHeight)
+            }
         }
     }
     
@@ -113,6 +121,8 @@ final class SideEffectTagsView: UIView {
     func reloadTags() {
         loadSideEffectTags()
         collectionView.reloadData()
+        setNeedsLayout()
+        layoutIfNeeded()
     }
 
     func getSelectedTagIds() -> [String] {
@@ -122,11 +132,15 @@ final class SideEffectTagsView: UIView {
     func setSelectedTagIds(_ ids: [String]) {
         selectedTagIds = Set(ids)
         collectionView.reloadData()
+        setNeedsLayout()
+        layoutIfNeeded()
     }
 
     func clearSelection() {
         selectedTagIds.removeAll()
         collectionView.reloadData()
+        setNeedsLayout()
+        layoutIfNeeded()
     }
     
     // MARK: - Private Methods
