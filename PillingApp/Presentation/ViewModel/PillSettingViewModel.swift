@@ -150,7 +150,7 @@ final class PillSettingViewModel {
     // MARK: - Private Methods
 
     private func calculateDaysSinceStart(from startDate: Date) -> Int {
-        let components = timeProvider.dateComponents([.day], from: startDate, to: timeProvider.now)
+        let components = timeProvider.calendar.dateComponents([.day], from: startDate, to: timeProvider.now)
         return (components.day ?? 0) + 1 // 1일차부터 시작
     }
 
@@ -164,7 +164,7 @@ final class PillSettingViewModel {
         } else if selectedDay == today {
             return "\(dateText) (오늘)"
         } else {
-            let components = timeProvider.dateComponents([.day], from: today, to: selectedDay)
+            let components = timeProvider.calendar.dateComponents([.day], from: today, to: selectedDay)
             let daysRemaining = components.day ?? 0
             return "\(dateText) (\(daysRemaining)일 남음)"
         }
