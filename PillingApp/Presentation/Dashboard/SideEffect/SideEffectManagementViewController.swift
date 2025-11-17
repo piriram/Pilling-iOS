@@ -8,6 +8,21 @@
 import UIKit
 import SnapKit
 
+// MARK: - UISwitch Extension for ID Storage
+
+private var associatedTagIDKey: UInt8 = 0
+
+extension UISwitch {
+    var tagID: String? {
+        get {
+            return objc_getAssociatedObject(self, &associatedTagIDKey) as? String
+        }
+        set {
+            objc_setAssociatedObject(self, &associatedTagIDKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+}
+
 // MARK: - SideEffectManagementViewController
 final class SideEffectManagementViewController: UIViewController {
     
@@ -124,14 +139,14 @@ final class SideEffectManagementViewController: UIViewController {
             } else {
                 let toggle = UISwitch()
                 toggle.isOn = item.tag.isVisible
-                toggle.tag = indexPath.row
+                toggle.tagID = item.tag.id
                 toggle.addTarget(self, action: #selector(self.didToggleVisibility(_:)), for: .valueChanged)
-                
+
                 let toggleAccessory = UICellAccessory.CustomViewConfiguration(
                     customView: toggle,
                     placement: .trailing(displayed: .always)
                 )
-                
+
                 cell.accessories = [.customView(configuration: toggleAccessory)]
             }
         }
@@ -170,23 +185,24 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     @objc private func didToggleVisibility(_ sender: UISwitch) {
-        let index = sender.tag
-        guard index < tags.count else { return }
-        
-        let changedTagId = tags[index].id
+        guard let tagID = sender.tagID,
+              let index = tags.firstIndex(where: { $0.id == tagID }) else {
+            return
+        }
+
         tags[index].isVisible = sender.isOn
         sortTagsByVisibility()
         persistTags()
-        
+
         var snapshot = Snapshot()
         snapshot.appendSections([0])
         let items = tags.map(Item.init)
         snapshot.appendItems(items, toSection: 0)
-        
-        if let changedItem = items.first(where: { $0.tag.id == changedTagId }) {
+
+        if let changedItem = items.first(where: { $0.tag.id == tagID }) {
             snapshot.reconfigureItems([changedItem])
         }
-        
+
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     

@@ -80,6 +80,7 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
                 medicineName: pillInfo?.name ?? "",
                 records: [],
                 skippedCount: 0,
+                sideEffectStats: [],
                 isEmpty: true
             )
         }
@@ -147,6 +148,9 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
             ))
         }
 
+        // Calculate side effect statistics
+        let sideEffectStats = calculateSideEffectStats(from: activeDayRecords)
+
         return PeriodRecordDTO(
             startDate: startDateString,
             endDate: endDateString,
@@ -154,7 +158,32 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
             medicineName: pillInfo?.name ?? "",
             records: recordItems,
             skippedCount: 0, // Hard-coded as requested
+            sideEffectStats: sideEffectStats,
             isEmpty: false
         )
+    }
+
+    private func calculateSideEffectStats(from records: [DayRecord]) -> [SideEffectStatDTO] {
+        // Get side effect tags from UserDefaults
+        let sideEffectTags = userDefaultsManager.loadSideEffectTags()
+        let tagMap = Dictionary(uniqueKeysWithValues: sideEffectTags.map { ($0.id, $0.name) })
+
+        // Count side effect occurrences
+        var sideEffectCounts: [String: Int] = [:]
+
+        for record in records {
+            let parsedMemo = PillRecordMemo.fromJSONString(record.memo ?? "")
+            for tagId in parsedMemo.sideEffectIds {
+                sideEffectCounts[tagId, default: 0] += 1
+            }
+        }
+
+        // Convert to SideEffectStatDTO and sort by count (descending)
+        return sideEffectCounts
+            .compactMap { (tagId, count) -> SideEffectStatDTO? in
+                guard let tagName = tagMap[tagId] else { return nil }
+                return SideEffectStatDTO(tagId: tagId, tagName: tagName, count: count)
+            }
+            .sorted { $0.count > $1.count }
     }
 }
