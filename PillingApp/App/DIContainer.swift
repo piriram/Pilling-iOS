@@ -43,7 +43,11 @@ final class DIContainer {
     private lazy var settingsRepository: UserDefaultsProtocol = {
         return UserDefaultsRepository()
     }()
-    
+
+    private lazy var cycleHistoryRepository: CycleHistoryProtocol = {
+        return CycleHistoryRepository(context: coreDataManager.viewContext)
+    }()
+
     // MARK: - UseCases
     
     func makeFetchDashboardDataUseCase() -> FetchDashboardDataUseCaseProtocol {
@@ -81,7 +85,14 @@ final class DIContainer {
             userDefaultsManager: userDefaultsManager
         )
     }
-    
+
+    func makeFetchStatisticsDataUseCase() -> FetchStatisticsDataUseCaseProtocol {
+        return FetchStatisticsDataUseCase(
+            cycleHistoryRepository: cycleHistoryRepository,
+            userDefaultsManager: userDefaultsManager
+        )
+    }
+
     // MARK: - ViewModels
     
     func makeDashboardViewModel() -> DashboardViewModel {
@@ -134,7 +145,9 @@ final class DIContainer {
     }
     
     func makeStasticsViewModel() -> StatisticsViewModel {
-        return StatisticsViewModel()
+        return StatisticsViewModel(
+            fetchStatisticsDataUseCase: makeFetchStatisticsDataUseCase()
+        )
     }
     
     func getPillCycleRepository() -> CycleRepositoryProtocol {
