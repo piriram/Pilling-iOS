@@ -143,17 +143,28 @@ final class StatisticsContentView: UIView {
     // MARK: - Public Methods
     
     func configure(with data: PeriodRecordDTO) {
+        // 🔍 [디버깅] configure 호출
+        print("🔍 [StatisticsContentView] configure 호출")
+        print("   📅 period: \(data.startDate) - \(data.endDate)")
+        print("   📊 isEmpty: \(data.isEmpty)")
+        print("   🏷️ sideEffectStats.count: \(data.sideEffectStats.count)")
+        for stat in data.sideEffectStats {
+            print("      - \(stat.tagName): \(stat.count)회")
+        }
+
         periodButton.setTitle("\(data.startDate) - \(data.endDate)", for: .normal)
-        
+
         chartContainerView.configure(with: data)
-        
+
         if data.isEmpty {
+            print("   ⚠️ 빈 데이터 - UI 숨김")
             medicineLabel.isHidden = true
             recordListStackView.isHidden = true
         } else {
+            print("   ✅ 데이터 있음 - updateRecordList 호출")
             medicineLabel.isHidden = false
             recordListStackView.isHidden = false
-            
+
             let attributedString = NSMutableAttributedString()
             attributedString.append(NSAttributedString(
                 string: "복용약 ",
@@ -164,8 +175,8 @@ final class StatisticsContentView: UIView {
                 attributes: [.font: UIFont.systemFont(ofSize: 18, weight: .bold)]
             ))
             medicineLabel.attributedText = attributedString
-            
-            updateRecordList(records: data.records, skippedCount: data.skippedCount)
+
+            updateRecordList(records: data.records, skippedCount: data.skippedCount, sideEffectStats: data.sideEffectStats)
         }
     }
     
@@ -176,16 +187,28 @@ final class StatisticsContentView: UIView {
         )
     }
     
-    private func updateRecordList(records: [RecordItemDTO], skippedCount: Int) {
+    private func updateRecordList(records: [RecordItemDTO], skippedCount: Int, sideEffectStats: [SideEffectStatDTO]) {
+        print("🔍 [StatisticsContentView] updateRecordList 호출")
+        print("   📊 records.count: \(records.count)")
+        print("   🏷️ sideEffectStats.count: \(sideEffectStats.count)")
+
         recordListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
+        print("   🗑️ 기존 뷰 모두 제거 완료")
+
         for item in records {
             let itemView = createRecordItemView(item: item)
             recordListStackView.addArrangedSubview(itemView)
+            print("   ➕ Record 아이템 추가: \(item.category) - \(item.days)일")
         }
-        
-        let skippedView = createSkippedItemView(count: skippedCount)
-        recordListStackView.addArrangedSubview(skippedView)
+
+        // Add side effect statistics
+        print("   🏷️ 부작용 통계 추가 시작")
+        for (index, stat) in sideEffectStats.enumerated() {
+            let sideEffectView = createSideEffectItemView(stat: stat)
+            recordListStackView.addArrangedSubview(sideEffectView)
+            print("      [\(index)] 부작용 뷰 추가: \(stat.tagName) - \(stat.count)회")
+        }
+        print("   ✅ 총 \(recordListStackView.arrangedSubviews.count)개 뷰 추가 완료")
     }
     
     private func createRecordItemView(item: RecordItemDTO) -> UIView {
@@ -238,49 +261,49 @@ final class StatisticsContentView: UIView {
         return containerView
     }
     
-    private func createSkippedItemView(count: Int) -> UIView {
+    private func createSideEffectItemView(stat: SideEffectStatDTO) -> UIView {
         let containerView = UIView()
-        
+
         let iconImageView = UIImageView()
-        iconImageView.image = UIImage(systemName: "drop.fill")
-        iconImageView.tintColor = .gray
+        iconImageView.image = UIImage(systemName: "exclamationmark.circle.fill")
+        iconImageView.tintColor = AppColor.pillGreen600
         iconImageView.contentMode = .center
-        
+
         let categoryLabel = UILabel()
-        categoryLabel.text = "부정출혈"
+        categoryLabel.text = stat.tagName
         categoryLabel.font = .systemFont(ofSize: 16)
         categoryLabel.textColor = .black
-        
+
         let countLabel = UILabel()
-        countLabel.text = "\(count)회"
+        countLabel.text = "\(stat.count)회"
         countLabel.font = .systemFont(ofSize: 16)
         countLabel.textColor = .gray
-        
+
         containerView.addSubview(iconImageView)
         containerView.addSubview(categoryLabel)
         containerView.addSubview(countLabel)
-        
+
         iconImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(20)
             make.centerY.equalToSuperview()
             make.width.equalTo(60)
             make.height.equalTo(32)
         }
-        
+
         categoryLabel.snp.makeConstraints { make in
             make.leading.equalTo(iconImageView.snp.trailing).offset(12)
             make.centerY.equalToSuperview()
         }
-        
+
         countLabel.snp.makeConstraints { make in
             make.trailing.equalToSuperview().offset(-20)
             make.centerY.equalToSuperview()
         }
-        
+
         containerView.snp.makeConstraints { make in
             make.height.equalTo(48)
         }
-        
+
         return containerView
     }
 }

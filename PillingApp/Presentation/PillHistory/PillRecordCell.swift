@@ -29,21 +29,31 @@ final class DayRecordCell: UITableViewCell {
     }
     
     func configure(with record: DayRecord) {
+        // 🔍 [디버깅] 셀 구성
+        print("🔍 [DayRecordCell] configure 호출")
+        print("   📝 record.id: \(record.id)")
+        print("   📅 cycleDay: \(record.cycleDay)")
+        print("   💾 record.memo: '\(record.memo)'")
+        print("   📊 memo.isEmpty: \(record.memo.isEmpty)")
+
         titleLabel.text = "Record Day \(record.cycleDay) · \(record.status)"
         stack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
+
         let scheduled = record.scheduledDateTime.formatted(style: .dateTimeShort)
         let taken = record.takenAt?.formatted(style: .dateTimeShort) ?? "-"
         let created = record.createdAt.formatted(style: .dateTimeShort)
         let updated = record.updatedAt.formatted(style: .dateTimeShort)
-        
+
+        let memoDisplay = record.memo.isEmpty ? "-" : record.memo
+        print("   🖼️ 표시할 memo: '\(memoDisplay)'")
+
         let rows: [(String, String)] = [
             ("id", record.id.uuidString),
             ("cycleDay", "\(record.cycleDay)"),
             ("status", "\(record.status.rawValue) (\(record.status))"),
             ("scheduledDateTime", scheduled),
             ("takenAt", taken),
-            ("memo", record.memo.isEmpty ? "-" : record.memo),
+            ("memo", memoDisplay),
             ("createdAt", created),
             ("updatedAt", updated)
         ]

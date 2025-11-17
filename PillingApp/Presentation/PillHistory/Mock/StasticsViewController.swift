@@ -71,10 +71,15 @@ final class StasticsViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("🔍 [StasticsViewController] viewDidLoad 시작")
         setupUI()
+        print("🔍 [StasticsViewController] setupUI 완료")
         setupLayout()
+        print("🔍 [StasticsViewController] setupLayout 완료")
         bindViewModel()
+        print("🔍 [StasticsViewController] bindViewModel 완료")
         viewDidLoadSubject.onNext(())
+        print("🔍 [StasticsViewController] viewDidLoadSubject.onNext() 완료")
     }
     
     // MARK: - Setup
@@ -131,21 +136,35 @@ final class StasticsViewController: UIViewController {
     }
     
     private func bindViewModel() {
+        print("🔍 [StasticsViewController] bindViewModel 시작")
+
         let input = StatisticsViewModel.Input(
             viewDidLoad: viewDidLoadSubject.asObservable(),
             leftArrowTapped: leftArrowTappedSubject.asObservable(),
             rightArrowTapped: rightArrowTappedSubject.asObservable(),
             periodButtonTapped: periodButtonTappedSubject.asObservable()
         )
-        
+
+        print("🔍 [StasticsViewController] Input 생성 완료")
+
         let output = viewModel.transform(input: input)
-        
+
+        print("🔍 [StasticsViewController] Output 생성 완료, 구독 시작")
+
         output.currentPeriodData
             .observe(on: MainScheduler.instance)
+            .do(onNext: { data in
+                print("🔍 [StasticsViewController] currentPeriodData onNext 호출됨")
+                print("   📅 data: \(data.startDate) - \(data.endDate)")
+                print("   🏷️ sideEffectStats.count: \(data.sideEffectStats.count)")
+            })
             .subscribe(onNext: { [weak self] data in
+                print("🔍 [StasticsViewController] subscribe onNext - updateUI 호출 직전")
                 self?.updateUI(with: data)
             })
             .disposed(by: disposeBag)
+
+        print("🔍 [StasticsViewController] currentPeriodData 구독 완료")
         
         Observable.combineLatest(output.isLeftArrowEnabled, output.isRightArrowEnabled)
             .observe(on: MainScheduler.instance)
@@ -178,17 +197,28 @@ final class StasticsViewController: UIViewController {
     }
     
     private func updateUI(with data: PeriodRecordDTO) {
+        // 🔍 [디버깅] updateUI 호출
+        print("🔍 [StasticsViewController] updateUI 호출")
+        print("   📅 period: \(data.startDate) - \(data.endDate)")
+        print("   📊 isEmpty: \(data.isEmpty)")
+        print("   🏷️ sideEffectStats.count: \(data.sideEffectStats.count)")
+        for stat in data.sideEffectStats {
+            print("      - \(stat.tagName): \(stat.count)회")
+        }
+
         periodButton.setTitle("\(data.startDate) - \(data.endDate)", for: .normal)
-        
+
         chartContainerView.configure(with: data)
-        
+
         if data.isEmpty {
+            print("   ⚠️ 빈 데이터 - UI 숨김")
             medicineLabel.isHidden = true
             recordListStackView.isHidden = true
         } else {
+            print("   ✅ 데이터 있음 - UI 표시")
             medicineLabel.isHidden = false
             recordListStackView.isHidden = false
-            
+
             let attributedString = NSMutableAttributedString()
             attributedString.append(NSAttributedString(
                 string: "복용약 ",
@@ -205,18 +235,27 @@ final class StasticsViewController: UIViewController {
     }
     
     private func updateRecordList(records: [RecordItemDTO], skippedCount: Int, sideEffectStats: [SideEffectStatDTO]) {
+        print("🔍 [StasticsViewController] updateRecordList 호출")
+        print("   📊 records.count: \(records.count)")
+        print("   🏷️ sideEffectStats.count: \(sideEffectStats.count)")
+
         recordListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        print("   🗑️ 기존 뷰 모두 제거 완료")
 
         for item in records {
             let itemView = createRecordItemView(item: item)
             recordListStackView.addArrangedSubview(itemView)
+            print("   ➕ Record 아이템 추가: \(item.category) - \(item.days)일")
         }
 
         // Add side effect statistics
-        for stat in sideEffectStats {
+        print("   🏷️ 부작용 통계 추가 시작")
+        for (index, stat) in sideEffectStats.enumerated() {
             let sideEffectView = createSideEffectItemView(stat: stat)
             recordListStackView.addArrangedSubview(sideEffectView)
+            print("      [\(index)] 부작용 뷰 추가: \(stat.tagName) - \(stat.count)회")
         }
+        print("   ✅ 총 \(recordListStackView.arrangedSubviews.count)개 뷰 추가 완료")
     }
     
     private func createRecordItemView(item: RecordItemDTO) -> UIView {
