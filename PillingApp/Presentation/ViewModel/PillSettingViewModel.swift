@@ -82,11 +82,11 @@ final class PillSettingViewModel {
                 guard let info = pillInfo else { return nil }
                 return "\(info.name) (복용 \(info.takingDays)일 / 휴약 \(info.breakDays)일)"
             }
-        
+
         let selectedStartDateText = selectedStartDateRelay
-            .map { [weak self] date -> String? in
-                guard let date = date, let self = self else { return nil }
-                return self.formatDateWithDayInfo(date: date)
+            .map { [timeProvider] date -> String? in
+                guard let date = date else { return nil }
+                return PillSettingViewModel.formatDateWithDayInfo(date: date, timeProvider: timeProvider)
             }
         
         // userDefaultsManager를 캡처하여 사용
@@ -149,17 +149,13 @@ final class PillSettingViewModel {
     
     // MARK: - Private Methods
 
-    private func calculateDaysSinceStart(from startDate: Date) -> Int {
-        let components = timeProvider.calendar.dateComponents([.day], from: startDate, to: timeProvider.now)
-        return (components.day ?? 0) + 1 // 1일차부터 시작
-    }
-
-    private func formatDateWithDayInfo(date: Date) -> String {
+    private static func formatDateWithDayInfo(date: Date, timeProvider: TimeProvider) -> String {
         let dateText = date.formatted(style: .monthDay)
         let today = timeProvider.startOfDay(for: timeProvider.now)
         let selectedDay = timeProvider.startOfDay(for: date)
         if selectedDay < today {
-            let days = calculateDaysSinceStart(from: date)
+            let components = timeProvider.calendar.dateComponents([.day], from: date, to: timeProvider.now)
+            let days = (components.day ?? 0) + 1 // 1일차부터 시작
             return "\(dateText) (\(days)일째)"
         } else if selectedDay == today {
             return "\(dateText) (오늘)"
