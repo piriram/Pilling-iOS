@@ -158,9 +158,7 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
     /// 기본 부작용 태그 생성
     private func createDefaultSideEffectTags() -> [SideEffectTag] {
         let defaultNames = [
-            "두통", "메스꺼움", "유방통", "기분변화",
-            "체중증가", "불규칙출혈", "피로", "불면증",
-            "여드름", "성욕감소", "복통", "어지러움"
+           "부정출혈","메스꺼움","식욕 증가","우울","가슴 통증","피부 건조함","두통","여드름"
         ]
         
         return defaultNames.enumerated().map { index, name in
