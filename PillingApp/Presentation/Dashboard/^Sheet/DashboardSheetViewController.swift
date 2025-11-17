@@ -39,21 +39,28 @@ final class DashboardSheetViewController: UIViewController {
     )
     
     // MARK: - UI Components
-    
+
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        return scrollView
+    }()
+
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.font = Typography.headline5(.semibold)
         label.textColor = AppColor.textBlack
         return label
     }()
-    
+
     private lazy var contentStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 20
         return stack
     }()
-    
+
     private let timeSettingButton: SettingItemButton = {
         let button = SettingItemButton()
         button.configure(title: AppStrings.Setting.timeSettingTitle, iconSystemName: "clock")
@@ -120,26 +127,32 @@ final class DashboardSheetViewController: UIViewController {
     
     private func setupViews() {
         view.backgroundColor = .clear
-        
+
         sheetAnimator.setupViews(in: view)
-        
-        sheetAnimator.containerView.addSubview(contentStackView)
-        
+
+        sheetAnimator.containerView.addSubview(scrollView)
+        scrollView.addSubview(contentStackView)
+
         subtitleLabel.text = titleText ?? title
         contentStackView.addArrangedSubview(subtitleLabel)
         contentStackView.addArrangedSubview(statusSelectionView)
         contentStackView.addArrangedSubview(timeSettingButton)
         contentStackView.addArrangedSubview(sideEffectTagsView)
-        
+
         setupConstraints()
     }
-    
+
     private func setupConstraints() {
-        contentStackView.snp.makeConstraints { make in
+        scrollView.snp.makeConstraints { make in
             make.top.equalTo(sheetAnimator.handleBar.snp.bottom).offset(24)
-            make.leading.trailing.equalToSuperview().inset(24)
+            make.leading.trailing.bottom.equalToSuperview()
         }
-        
+
+        contentStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(24)
+            make.width.equalTo(scrollView).inset(24)
+        }
+
         timeSettingButton.snp.makeConstraints { make in
             make.height.equalTo(56)
         }
