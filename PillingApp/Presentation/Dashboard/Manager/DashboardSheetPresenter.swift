@@ -10,18 +10,21 @@ import UIKit
 final class DashboardSheetPresenter {
     
     // MARK: - Properties
-    
+
     private weak var viewController: UIViewController?
     private let userDefaultsManager: UserDefaultsManagerProtocol
-    
+    private let timeProvider: TimeProvider
+
     // MARK: - Initialization
-    
+
     init(
         viewController: UIViewController,
-        userDefaultsManager: UserDefaultsManagerProtocol
+        userDefaultsManager: UserDefaultsManagerProtocol,
+        timeProvider: TimeProvider
     ) {
         self.viewController = viewController
         self.userDefaultsManager = userDefaultsManager
+        self.timeProvider = timeProvider
     }
     
     // MARK: - Calendar Sheet Presentation
@@ -58,6 +61,7 @@ final class DashboardSheetPresenter {
             takenAt: currentTakenAt,
             initialStatus: item.status,
             userDefaultsManager: userDefaultsManager,
+            timeProvider: timeProvider,
             onDataChanged: { [weak self] chosenStatus, memo in
                 guard let self = self else { return }
                 // If status not chosen, maintain existing status

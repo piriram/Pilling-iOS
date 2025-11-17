@@ -61,10 +61,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let viewModel = DIContainer.shared.makeDashboardViewModel()
         let stasticsViewModel = DIContainer.shared.makeStasticsViewModel()
         let userDefaultsManager = DIContainer.shared.getUserDefaultsManager()
+        let timeProvider = DIContainer.shared.timeProvider
         let dashboardVC = DashboardViewController(
             viewModel: viewModel,
             stasticsViewModel: stasticsViewModel,
-            userDefaultsManager: userDefaultsManager
+            userDefaultsManager: userDefaultsManager,
+            timeProvider: timeProvider
         )
         let navigationController = UINavigationController(rootViewController: dashboardVC)
         window?.rootViewController = navigationController
