@@ -1,0 +1,74 @@
+/*
+  Localizable.strings (Korean)
+  PillingApp
+*/
+
+// MARK: - Common
+"Common.alertTitle" = "알림";
+"Common.okBtnTitle" = "확인";
+"Common.errorTitle" = "오류";
+"Common.cancelTitle" = "취소";
+"Common.confirmTitle" = "완료";
+
+// MARK: - PillSetting
+"PillSetting.mainTitle" = "복용하고 계신 약을 알려주세요!";
+"PillSetting.subtitle" = "설정은 추후에 변경가능합니다.";
+"PillSetting.btnTitle" = "약 종류";
+"PillSetting.ctnBtnTitle" = "복용 시작 날짜";
+"PillSetting.nextBtnTitle" = "다음으로";
+"PillSetting.navTitle" = "약 설정";
+"PillSetting.nameTitle" = "약 이름 (선택 사항)";
+"PillSetting.takingDays" = "복용일";
+"PillSetting.takingBtn" = "24일";
+"PillSetting.breakLabel" = "휴약일";
+"PillSetting.breakDay" = "4일";
+"PillSetting.warningLabel" = "복용일과 휴약일의 합은 28일 이하여야 해요.";
+"PillSetting.settingComplete" = "설정 완료";
+"PillSetting.titleLabel" = "복용 정보 입력";
+
+// MARK: - SettingFloating
+"SettingFloating.titleLabel" = "설정 완료!";
+"SettingFloating.subTitleLabel" = "매일 알림을 보내드릴게요";
+
+// MARK: - Setting
+"Setting.sectionLabel" = "약 설정";
+"Setting.newPillBtn" = "새 약 복용 시작하기";
+"Setting.navigationTitle" = "설정";
+"Setting.alarmSectionTitle" = "알림 설정";
+"Setting.timeSettingTitle" = "복용 시간";
+"Setting.timeSettingDefault" = "오전 9:00";
+"Setting.messageSettingTitle" = "알림 메시지";
+"Setting.messageSettingDefault" = "건강한 하루를 위해...";
+"Setting.messageEditorTitle" = "알림 메시지 수정";
+"Setting.messageEditorDescription" = "받고 싶은 알림 메시지를 입력해주세요";
+"Setting.messageEditorPlaceholder" = "알림 메시지 입력";
+"Setting.newPillCycleTitle" = "새 약 복용 시작";
+"Setting.newPillCycleMessage" = "현재 기록된 복용 정보가 모두 삭제됩니다.\n정말로 새로운 약 복용을 시작하시겠습니까?";
+"Setting.newPillCycleConfirm" = "시작하기";
+"Setting.successTimeUpdated" = "복용 시간이 변경되었습니다";
+"Setting.successMessageUpdated" = "알림 메시지가 변경되었습니다";
+"Setting.errorTimeUpdateFailed" = "시간 변경에 실패했습니다";
+"Setting.errorMessageUpdateFailed" = "메시지 변경에 실패했습니다";
+"Setting.errorResetFailed" = "초기화에 실패했습니다";
+"Setting.permissionErrorGoToSettings" = "설정으로 이동";
+
+// MARK: - Dashboard
+"Dashboard.guideTitle" = "필링 가이드";
+"Dashboard.guideSubtitle" = "피임약 복용 상태를 잔디로 알려드려요!";
+"Dashboard.guideConfirmButton" = "확인";
+"Dashboard.guideTaken" = "피임약 복용";
+"Dashboard.guideTakenDouble" = "피임약 2알 복용";
+"Dashboard.guideMissed" = "미복용";
+"Dashboard.taken" = "복용";
+"Dashboard.takenDouble" = "2알 복용";
+"Dashboard.guideToday" = "현재";
+"Dashboard.takePillButton" = "잔디 심기";
+"Dashboard.takePillCompleted" = "심기 완료!";
+"Dashboard.restPeriod" = "휴약 기간";
+"Dashboard.monday" = "월";
+"Dashboard.tuesday" = "화";
+"Dashboard.wednesday" = "수";
+"Dashboard.thursday" = "목";
+"Dashboard.friday" = "금";
+"Dashboard.saturday" = "토";
+"Dashboard.sunday" = "일";

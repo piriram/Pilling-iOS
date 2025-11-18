@@ -1,0 +1,74 @@
+/*
+  Localizable.strings (English)
+  PillingApp
+*/
+
+// MARK: - Common
+"Common.alertTitle" = "Alert";
+"Common.okBtnTitle" = "OK";
+"Common.errorTitle" = "Error";
+"Common.cancelTitle" = "Cancel";
+"Common.confirmTitle" = "Done";
+
+// MARK: - PillSetting
+"PillSetting.mainTitle" = "Tell us about your medication!";
+"PillSetting.subtitle" = "Settings can be changed later.";
+"PillSetting.btnTitle" = "Pill Type";
+"PillSetting.ctnBtnTitle" = "Start Date";
+"PillSetting.nextBtnTitle" = "Next";
+"PillSetting.navTitle" = "Pill Settings";
+"PillSetting.nameTitle" = "Pill Name (Optional)";
+"PillSetting.takingDays" = "Taking Days";
+"PillSetting.takingBtn" = "24 days";
+"PillSetting.breakLabel" = "Break Days";
+"PillSetting.breakDay" = "4 days";
+"PillSetting.warningLabel" = "The sum of taking days and break days must be 28 days or less.";
+"PillSetting.settingComplete" = "Complete Setup";
+"PillSetting.titleLabel" = "Enter Medication Information";
+
+// MARK: - SettingFloating
+"SettingFloating.titleLabel" = "Setup Complete!";
+"SettingFloating.subTitleLabel" = "We'll send you daily reminders";
+
+// MARK: - Setting
+"Setting.sectionLabel" = "Pill Settings";
+"Setting.newPillBtn" = "Start New Medication";
+"Setting.navigationTitle" = "Settings";
+"Setting.alarmSectionTitle" = "Notification Settings";
+"Setting.timeSettingTitle" = "Taking Time";
+"Setting.timeSettingDefault" = "9:00 AM";
+"Setting.messageSettingTitle" = "Notification Message";
+"Setting.messageSettingDefault" = "For a healthy day...";
+"Setting.messageEditorTitle" = "Edit Notification Message";
+"Setting.messageEditorDescription" = "Please enter the notification message you want to receive";
+"Setting.messageEditorPlaceholder" = "Enter notification message";
+"Setting.newPillCycleTitle" = "Start New Medication";
+"Setting.newPillCycleMessage" = "All current medication records will be deleted.\nAre you sure you want to start a new medication?";
+"Setting.newPillCycleConfirm" = "Start";
+"Setting.successTimeUpdated" = "Taking time has been updated";
+"Setting.successMessageUpdated" = "Notification message has been updated";
+"Setting.errorTimeUpdateFailed" = "Failed to update time";
+"Setting.errorMessageUpdateFailed" = "Failed to update message";
+"Setting.errorResetFailed" = "Failed to reset";
+"Setting.permissionErrorGoToSettings" = "Go to Settings";
+
+// MARK: - Dashboard
+"Dashboard.guideTitle" = "Pilling Guide";
+"Dashboard.guideSubtitle" = "We show your pill-taking status as a grass chart!";
+"Dashboard.guideConfirmButton" = "OK";
+"Dashboard.guideTaken" = "Pill Taken";
+"Dashboard.guideTakenDouble" = "2 Pills Taken";
+"Dashboard.guideMissed" = "Missed";
+"Dashboard.taken" = "Taken";
+"Dashboard.takenDouble" = "2 Taken";
+"Dashboard.guideToday" = "Today";
+"Dashboard.takePillButton" = "Take Pill";
+"Dashboard.takePillCompleted" = "Completed!";
+"Dashboard.restPeriod" = "Rest Period";
+"Dashboard.monday" = "Mon";
+"Dashboard.tuesday" = "Tue";
+"Dashboard.wednesday" = "Wed";
+"Dashboard.thursday" = "Thu";
+"Dashboard.friday" = "Fri";
+"Dashboard.saturday" = "Sat";
+"Dashboard.sunday" = "Sun";
