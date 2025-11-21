@@ -203,10 +203,12 @@ final class TimeSettingViewController: UIViewController {
         let dashboardViewModel = DIContainer.shared.makeDashboardViewModel()
         let stasticsViewModel = DIContainer.shared.makeStasticsViewModel()
         let userDefaultsManager = DIContainer.shared.getUserDefaultsManager()
+        let timeProvider = DIContainer.shared.timeProvider
         let dashboardVC = DashboardViewController(
             viewModel: dashboardViewModel,
             stasticsViewModel: stasticsViewModel,
-            userDefaultsManager: userDefaultsManager
+            userDefaultsManager: userDefaultsManager,
+            timeProvider: timeProvider
         )
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,

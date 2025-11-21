@@ -15,6 +15,12 @@ struct RecordItemDTO {
     let colorHex: String
 }
 
+struct SideEffectStatDTO {
+    let tagId: String
+    let tagName: String
+    let count: Int
+}
+
 struct PeriodRecordDTO {
     let startDate: String
     let endDate: String
@@ -22,5 +28,6 @@ struct PeriodRecordDTO {
     let medicineName: String
     let records: [RecordItemDTO]
     let skippedCount: Int
+    let sideEffectStats: [SideEffectStatDTO]
     let isEmpty: Bool
 }

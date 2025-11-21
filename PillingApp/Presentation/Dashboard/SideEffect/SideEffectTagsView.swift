@@ -10,16 +10,55 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
+// MARK: - CenterAlignedCollectionViewFlowLayout
+
+final class CenterAlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        guard let attributes = super.layoutAttributesForElements(in: rect) else { return nil }
+
+        var rows: [[UICollectionViewLayoutAttributes]] = []
+        var currentRowY: CGFloat = -1
+
+        for attribute in attributes {
+            if currentRowY != attribute.frame.origin.y {
+                currentRowY = attribute.frame.origin.y
+                rows.append([])
+            }
+            rows[rows.count - 1].append(attribute)
+        }
+
+        for row in rows {
+            guard let collectionView = collectionView else { continue }
+
+            let totalWidth = row.reduce(0) { $0 + $1.frame.width }
+            let totalSpacing = CGFloat(row.count - 1) * minimumInteritemSpacing
+            let totalContentWidth = totalWidth + totalSpacing
+
+            let inset = (collectionView.bounds.width - totalContentWidth) / 2
+            var currentX = max(sectionInset.left, inset)
+
+            for attribute in row {
+                var frame = attribute.frame
+                frame.origin.x = currentX
+                attribute.frame = frame
+                currentX += frame.width + minimumInteritemSpacing
+            }
+        }
+
+        return attributes
+    }
+}
+
 final class SideEffectTagsView: UIView {
     
     // MARK: - Properties
-    
+
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private var sideEffectTags: [SideEffectTag] = []
-    private var selectedTagIndices: Set<Int> = []
-    
+    private var selectedTagIds: Set<String> = []
+
     // MARK: - Observables
-    
+
     let addButtonTapped = PublishRelay<Void>()
     
     // MARK: - UI Components
@@ -36,9 +75,9 @@ final class SideEffectTagsView: UIView {
         let layout = createCollectionViewLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
-        collectionView.showsVerticalScrollIndicator = true
+        collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.isScrollEnabled = true
+        collectionView.isScrollEnabled = false
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(SideEffectTagCell.self, forCellWithReuseIdentifier: SideEffectTagCell.identifier)
@@ -70,53 +109,76 @@ final class SideEffectTagsView: UIView {
     
     private func setupViews() {
         addSubview(containerStack)
-        
+
         containerStack.addArrangedSubview(sectionLabel)
         containerStack.addArrangedSubview(collectionView)
-        
+
         containerStack.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
+
+        // 초기 최소 높이 설정 (1~2줄 정도)
         collectionView.snp.makeConstraints { make in
-            make.height.equalTo(120)
+            make.height.greaterThanOrEqualTo(44)
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        // CollectionView의 컨텐츠 크기에 맞게 높이 조정
+        collectionView.layoutIfNeeded()
+        let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
+        if contentHeight > 0 {
+            collectionView.snp.remakeConstraints { make in
+                make.height.equalTo(contentHeight)
+            }
         }
     }
     
     private func createCollectionViewLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .estimated(80),
-            heightDimension: .absolute(36)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(36)
-        )
-        let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: groupSize,
-            subitems: [item]
-        )
-        group.interItemSpacing = .fixed(8)
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.interGroupSpacing = 8
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-        
-        let layout = UICollectionViewCompositionalLayout(section: section)
+        let layout = CenterAlignedCollectionViewFlowLayout()
+        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        layout.minimumInteritemSpacing = 8
+        layout.minimumLineSpacing = 8
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         return layout
     }
     
     // MARK: - Public Methods
-    
+
     func reloadTags() {
         loadSideEffectTags()
         collectionView.reloadData()
+        setNeedsLayout()
+        layoutIfNeeded()
     }
-    
-    func getSelectedTags() -> [String] {
-        return selectedTagIndices.map { sideEffectTags[$0].name }
+
+    func getSelectedTagIds() -> [String] {
+        return Array(selectedTagIds)
+    }
+
+    func setSelectedTagIds(_ ids: [String]) {
+        // 🔍 [디버깅] 태그 선택 상태 복원
+        print("🔍 [SideEffectTagsView] setSelectedTagIds 호출")
+        print("   🏷️ 전달받은 ids: \(ids)")
+        print("   📊 ids.count: \(ids.count)")
+
+        selectedTagIds = Set(ids)
+
+        print("   💾 selectedTagIds: \(selectedTagIds)")
+        print("   📊 selectedTagIds.count: \(selectedTagIds.count)")
+
+        collectionView.reloadData()
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+
+    func clearSelection() {
+        selectedTagIds.removeAll()
+        collectionView.reloadData()
+        setNeedsLayout()
+        layoutIfNeeded()
     }
     
     // MARK: - Private Methods
@@ -140,10 +202,18 @@ extension SideEffectTagsView: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectAddButtonCell.identifier, for: indexPath) as! SideEffectAddButtonCell
             return cell
         }
-        
+
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SideEffectTagCell.identifier, for: indexPath) as! SideEffectTagCell
         let tag = sideEffectTags[indexPath.item]
-        let isSelected = selectedTagIndices.contains(indexPath.item)
+        let isSelected = selectedTagIds.contains(tag.id)
+
+        // 🔍 [디버깅] 셀 구성
+        print("🔍 [SideEffectTagsView] cellForItemAt [\(indexPath.item)]")
+        print("   🏷️ tag.name: '\(tag.name)'")
+        print("   🆔 tag.id: '\(tag.id)'")
+        print("   ✅ isSelected: \(isSelected)")
+        print("   📊 selectedTagIds: \(selectedTagIds)")
+
         cell.configure(with: tag.name, isSelected: isSelected)
         return cell
     }
@@ -158,13 +228,14 @@ extension SideEffectTagsView: UICollectionViewDelegate {
             addButtonTapped.accept(())
             return
         }
-        
-        if selectedTagIndices.contains(indexPath.item) {
-            selectedTagIndices.remove(indexPath.item)
+
+        let tag = sideEffectTags[indexPath.item]
+        if selectedTagIds.contains(tag.id) {
+            selectedTagIds.remove(tag.id)
         } else {
-            selectedTagIndices.insert(indexPath.item)
+            selectedTagIds.insert(tag.id)
         }
-        
+
         collectionView.reloadItems(at: [indexPath])
     }
 }

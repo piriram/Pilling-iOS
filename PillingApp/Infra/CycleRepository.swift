@@ -46,17 +46,32 @@ final class CycleRepository: CycleRepositoryProtocol {
                 ]
             )
             .map { [weak self] entities in
+                print("🔍 [CycleRepository] fetchCurrentCycle 호출")
+                print("   📊 조회된 사이클 수: \(entities.count)")
+
                 let cycles = entities.map { $0.toDomain() }
                 let now = Date()
-                
+
                 // 진행 중 사이클 우선
                 if let ongoingCycle = cycles.first(where: {
                     self?.isOngoingCycle($0, at: now) ?? false
                 }) {
+                    print("   ✅ 진행 중 사이클 발견")
+                    print("   📝 레코드 수: \(ongoingCycle.records.count)")
+                    for (index, record) in ongoingCycle.records.enumerated() {
+                        print("      [\(index)] memo: '\(record.memo)'")
+                    }
                     return ongoingCycle
                 }
-                
+
                 // 없으면 최신 사이클
+                if let latestCycle = cycles.first {
+                    print("   ✅ 최신 사이클 반환")
+                    print("   📝 레코드 수: \(latestCycle.records.count)")
+                    for (index, record) in latestCycle.records.enumerated() {
+                        print("      [\(index)] memo: '\(record.memo)'")
+                    }
+                }
                 return cycles.first
             }
     }
@@ -116,44 +131,66 @@ final class CycleRepository: CycleRepositoryProtocol {
                 observer.onError(CoreDataError.contextNotAvailable)
                 return Disposables.create()
             }
-            
+
+            // 🔍 [디버깅] Repository 진입점
+            print("🔍 [CycleRepository] updateRecord 호출")
+            print("   🆔 cycleID: \(cycleID)")
+            print("   📝 record.id: \(record.id)")
+            print("   💾 record.memo: '\(record.memo)'")
+            print("   ✅ record.status: \(record.status)")
+
             let context = self.coreDataManager.viewContext
-            
+
             // 사이클 찾기
             let cycleFetchRequest: NSFetchRequest<PillCycleEntity> = NSFetchRequest(entityName: "PillCycleEntity")
             cycleFetchRequest.predicate = NSPredicate(format: "id == %@", cycleID as CVarArg)
-            
+
             do {
                 guard let PillCycleEntity = try context.fetch(cycleFetchRequest).first else {
+                    print("   ❌ Cycle을 찾을 수 없음: \(cycleID)")
                     observer.onError(CoreDataError.invalidData)
                     return Disposables.create()
                 }
-                
+
+                print("   ✅ Cycle 찾음")
+
                 // 레코드 찾기
                 let recordFetchRequest: NSFetchRequest<PillRecordEntity> = NSFetchRequest(entityName: "PillRecordEntity")
                 recordFetchRequest.predicate = NSPredicate(format: "id == %@", record.id as CVarArg)
-                
+
                 if let recordEntity = try context.fetch(recordFetchRequest).first {
                     // 업데이트
+                    print("   📝 기존 레코드 업데이트")
+                    print("      저장 전 Entity.memo: '\(recordEntity.memo ?? "nil")'")
                     recordEntity.update(from: record)
+                    print("      저장 후 Entity.memo: '\(recordEntity.memo ?? "nil")'")
                 } else {
                     // 새로 생성
+                    print("   🆕 새 레코드 생성")
                     let newRecordEntity = PillRecordEntity.from(domain: record, context: context)
                     newRecordEntity.cycle = PillCycleEntity
+                    print("      생성된 Entity.memo: '\(newRecordEntity.memo ?? "nil")'")
                 }
-                
+
                 try context.save()
-                
+                print("   💾 CoreData 저장 완료")
+
+                // 저장 후 검증
+                if let savedEntity = try context.fetch(recordFetchRequest).first {
+                    print("   🔍 저장 검증 - Entity.memo: '\(savedEntity.memo ?? "nil")'")
+                }
+
                 // ⭐️ 위젯 업데이트
                 WidgetCenter.shared.reloadAllTimelines()
                 print("💊 복용 기록 업데이트 완료 - 위젯 업데이트")
-                
+
                 observer.onNext(())
                 observer.onCompleted()
             } catch {
+                print("   ❌ CoreData 저장 실패: \(error)")
                 observer.onError(CoreDataError.saveFailed(error))
             }
-            
+
             return Disposables.create()
         }
     }

@@ -1,5 +1,5 @@
 //
-//  PillRecord.swift
+//  DayRecord.swift
 //  PillingApp
 //
 //  Created by 잠만보김쥬디 on 10/12/25.
@@ -12,6 +12,37 @@ struct PillInfo: Codable{
     let name: String
     let takingDays: Int
     let breakDays: Int
+}
+
+// MARK: - PillRecordMemo
+
+struct PillRecordMemo: Codable {
+    let text: String
+    let sideEffectIds: [String]
+
+    init(text: String, sideEffectIds: [String] = []) {
+        self.text = text
+        self.sideEffectIds = sideEffectIds
+    }
+
+    /// JSON 문자열로 인코딩
+    func toJSONString() -> String {
+        guard let data = try? JSONEncoder().encode(self),
+              let jsonString = String(data: data, encoding: .utf8) else {
+            return "{\"text\":\"\",\"sideEffectIds\":[]}"
+        }
+        return jsonString
+    }
+
+    /// JSON 문자열에서 디코딩
+    static func fromJSONString(_ jsonString: String) -> PillRecordMemo {
+        guard let data = jsonString.data(using: .utf8),
+              let memo = try? JSONDecoder().decode(PillRecordMemo.self, from: data) else {
+            // 기존 plain text 메모 호환성 처리
+            return PillRecordMemo(text: jsonString, sideEffectIds: [])
+        }
+        return memo
+    }
 }
 
 // MARK: - Domain/Entities/PillRecord.swift
@@ -27,4 +58,59 @@ struct DayRecord {
     let updatedAt: Date
 }
 
-// 
+// MARK: - DayRecord + SideEffect
+
+extension DayRecord {
+
+    /// 메모에서 PillRecordMemo 파싱
+    var parsedMemo: PillRecordMemo {
+        return PillRecordMemo.fromJSONString(memo)
+    }
+
+    /// 메모 텍스트만 추출
+    var memoText: String {
+        return parsedMemo.text
+    }
+
+    /// 부작용 태그 ID 목록 추출
+    var sideEffectIds: [String] {
+        return parsedMemo.sideEffectIds
+    }
+
+    /// 특정 부작용 태그가 포함되어 있는지 확인
+    func hasSideEffect(tagId: String) -> Bool {
+        return sideEffectIds.contains(tagId)
+    }
+}
+
+// MARK: - DayRecord Array + Statistics
+
+extension Array where Element == DayRecord {
+
+    /// 부작용별 발생 횟수 통계
+    func sideEffectStatistics() -> [String: Int] {
+        var stats: [String: Int] = [:]
+
+        for record in self {
+            for tagId in record.sideEffectIds {
+                stats[tagId, default: 0] += 1
+            }
+        }
+
+        return stats
+    }
+
+    /// 특정 부작용 태그를 가진 레코드 필터링
+    func filterBySideEffect(tagId: String) -> [DayRecord] {
+        return filter { $0.hasSideEffect(tagId: tagId) }
+    }
+
+    /// 날짜 범위 내에서 부작용 통계 (옵션)
+    func sideEffectStatistics(from startDate: Date, to endDate: Date) -> [String: Int] {
+        return filter { record in
+            record.scheduledDateTime >= startDate && record.scheduledDateTime <= endDate
+        }.sideEffectStatistics()
+    }
+}
+
+//
