@@ -42,21 +42,14 @@ final class StatisticsViewModel {
             input.viewDidLoad,
             input.dataChanged
         )
-        .do(onNext: { _ in
-            print("🔍 [StatisticsViewModel] viewDidLoad 또는 dataChanged 트리거됨")
-        })
         .flatMapLatest { [weak self] _ -> Observable<[PeriodRecordDTO]> in
             guard let self = self else { return .just([]) }
-            print("🔍 [StatisticsViewModel] fetchStatisticsDataUseCase 실행 시작")
             return self.fetchStatisticsDataUseCase.execute()
                 .catch { error in
                     print("❌ Failed to fetch statistics data: \(error)")
                     return .just([])
                 }
         }
-        .do(onNext: { periods in
-            print("🔍 [StatisticsViewModel] UseCase에서 받은 period 개수: \(periods.count)")
-        })
         .bind(to: dataListSubject)
         .disposed(by: disposeBag)
 
@@ -106,13 +99,7 @@ final class StatisticsViewModel {
 
         // 페이지 컨트롤 상태 (현재 인덱스, 전체 개수)
         let pageControlState = Observable.combineLatest(currentIndexSubject, dataListSubject)
-            .do(onNext: { index, dataList in
-                print("🔍 [StatisticsViewModel] pageControlState combineLatest: index=\(index), dataList.count=\(dataList.count)")
-            })
             .map { (currentIndex: $0, totalCount: $1.count) }
-            .do(onNext: { state in
-                print("🔍 [StatisticsViewModel] pageControlState map 결과: currentIndex=\(state.currentIndex), totalCount=\(state.totalCount)")
-            })
 
         return Output(
             currentPeriodData: currentPeriodData,

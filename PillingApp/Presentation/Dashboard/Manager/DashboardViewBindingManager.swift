@@ -209,31 +209,6 @@ final class DashboardViewBindingManager {
             })
             .disposed(by: disposeBag)
 
-        // 페이지 컨트롤 업데이트
-        output.pageControlState
-            .do(onNext: { state in
-                print("🔍 [페이지컨트롤 디버그] pageControlState emit: currentIndex=\(state.currentIndex), totalCount=\(state.totalCount)")
-            })
-            .debounce(.milliseconds(100), scheduler: MainScheduler.instance)
-            .do(onNext: { state in
-                print("🔍 [페이지컨트롤 디버그] debounce 후: currentIndex=\(state.currentIndex), totalCount=\(state.totalCount)")
-            })
-            .filter { state in
-                let pass = state.totalCount > 0
-                print("🔍 [페이지컨트롤 디버그] filter 결과: \(pass) (totalCount=\(state.totalCount))")
-                return pass
-            }
-            .distinctUntilChanged { prev, curr in
-                prev.currentIndex == curr.currentIndex && prev.totalCount == curr.totalCount
-            }
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { state in
-                print("🔍 [페이지컨트롤 디버그] UI 업데이트: numberOfPages=\(state.totalCount), currentPage=\(state.currentIndex)")
-                bottomView.pageControl.numberOfPages = max(1, state.totalCount)
-                bottomView.pageControl.currentPage = state.currentIndex
-            })
-            .disposed(by: disposeBag)
-
         stasticsView.leftArrowTapped = {
             leftArrowTappedSubject.onNext(())
         }
