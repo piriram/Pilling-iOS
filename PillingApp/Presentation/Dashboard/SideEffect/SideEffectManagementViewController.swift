@@ -62,6 +62,7 @@ final class SideEffectManagementViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("🔍 [SideEffectManagement] viewDidLoad 호출")
         setupNavigationBar()
         setupUI()
         configureDataSource()
@@ -72,8 +73,18 @@ final class SideEffectManagementViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        print("🔍 [SideEffectManagement] viewWillAppear 호출")
         navigationController?.navigationBar.isHidden = false
         navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("🔍 [SideEffectManagement] viewDidAppear 호출")
+        print("   📋 현재 tags 상태:")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
+        }
     }
     
     // MARK: - Setup
@@ -158,7 +169,12 @@ final class SideEffectManagementViewController: UIViewController {
     // MARK: - Data
     
     private func loadInitialData() {
+        print("🔍 [SideEffectManagement] loadInitialData 호출")
         tags = userDefaultsManager.loadSideEffectTags()
+        print("   📊 UserDefaults에서 로드한 tags.count: \(tags.count)")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
+        }
         sortTagsByVisibility()
     }
     
@@ -272,7 +288,20 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     private func persistTags() {
+        print("🔍 [SideEffectManagement] persistTags 호출")
+        print("   💾 저장할 tags.count: \(tags.count)")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
+        }
         userDefaultsManager.saveSideEffectTags(tags)
+        print("   ✅ UserDefaults에 저장 완료")
+
+        // 저장 후 즉시 다시 로드하여 확인
+        let reloadedTags = userDefaultsManager.loadSideEffectTags()
+        print("   🔄 저장 후 즉시 재로드한 tags.count: \(reloadedTags.count)")
+        for (i, tag) in reloadedTags.enumerated() {
+            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
+        }
     }
     
     // MARK: - Actions
