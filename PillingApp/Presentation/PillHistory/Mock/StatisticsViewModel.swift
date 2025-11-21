@@ -16,6 +16,7 @@ final class StatisticsViewModel {
         let leftArrowTapped: Observable<Void>
         let rightArrowTapped: Observable<Void>
         let periodButtonTapped: Observable<Void>
+        let dataChanged: Observable<Void>  // 데이터 변경 알림
     }
 
     struct Output {
@@ -35,30 +36,36 @@ final class StatisticsViewModel {
     }
     
     func transform(input: Input) -> Output {
-        // Load statistics data on viewDidLoad
-        input.viewDidLoad
-            .flatMapLatest { [weak self] _ -> Observable<[PeriodRecordDTO]> in
-                guard let self = self else { return .just([]) }
-                return self.fetchStatisticsDataUseCase.execute()
-                    .do(onNext: { periodList in
-                        // 🔍 [디버깅] UseCase에서 받은 데이터
-                        print("🔍 [StatisticsViewModel] UseCase에서 받은 데이터")
-                        print("   📊 periodList.count: \(periodList.count)")
-                        for (index, period) in periodList.enumerated() {
-                            print("   📅 [\(index)] startDate: \(period.startDate), endDate: \(period.endDate)")
-                            print("      🏷️ sideEffectStats.count: \(period.sideEffectStats.count)")
-                            for stat in period.sideEffectStats {
-                                print("         - \(stat.tagName): \(stat.count)회")
-                            }
+        // Load statistics data on viewDidLoad or when data changes
+        Observable.merge(
+            input.viewDidLoad,
+            input.dataChanged
+        )
+        .do(onNext: { _ in
+            print("🔍 [StatisticsViewModel] 데이터 로드 트리거")
+        })
+        .flatMapLatest { [weak self] _ -> Observable<[PeriodRecordDTO]> in
+            guard let self = self else { return .just([]) }
+            return self.fetchStatisticsDataUseCase.execute()
+                .do(onNext: { periodList in
+                    // 🔍 [디버깅] UseCase에서 받은 데이터
+                    print("🔍 [StatisticsViewModel] UseCase에서 받은 데이터")
+                    print("   📊 periodList.count: \(periodList.count)")
+                    for (index, period) in periodList.enumerated() {
+                        print("   📅 [\(index)] startDate: \(period.startDate), endDate: \(period.endDate)")
+                        print("      🏷️ sideEffectStats.count: \(period.sideEffectStats.count)")
+                        for stat in period.sideEffectStats {
+                            print("         - \(stat.tagName): \(stat.count)회")
                         }
-                    })
-                    .catch { error in
-                        print("❌ Failed to fetch statistics data: \(error)")
-                        return .just([])
                     }
-            }
-            .bind(to: dataListSubject)
-            .disposed(by: disposeBag)
+                })
+                .catch { error in
+                    print("❌ Failed to fetch statistics data: \(error)")
+                    return .just([])
+                }
+        }
+        .bind(to: dataListSubject)
+        .disposed(by: disposeBag)
 
         input.leftArrowTapped
             .withLatestFrom(currentIndexSubject)

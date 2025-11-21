@@ -158,14 +158,23 @@ final class DashboardViewBindingManager {
         let leftArrowTappedSubject = PublishSubject<Void>()
         let rightArrowTappedSubject = PublishSubject<Void>()
         let periodButtonTappedSubject = PublishSubject<Void>()
-        
+        let dataChangedSubject = PublishSubject<Void>()
+
+        // DashboardViewModel의 currentCycle 변경 감지하여 통계 새로고침
+        viewModel.currentCycle
+            .skip(1)  // 초기값 무시
+            .map { _ in () }
+            .bind(to: dataChangedSubject)
+            .disposed(by: disposeBag)
+
         let input = StatisticsViewModel.Input(
             viewDidLoad: viewDidLoadSubject.asObservable(),
             leftArrowTapped: leftArrowTappedSubject.asObservable(),
             rightArrowTapped: rightArrowTappedSubject.asObservable(),
-            periodButtonTapped: periodButtonTappedSubject.asObservable()
+            periodButtonTapped: periodButtonTappedSubject.asObservable(),
+            dataChanged: dataChangedSubject.asObservable()
         )
-        
+
         let output = stasticsViewModel.transform(input: input)
         
         output.currentPeriodData
