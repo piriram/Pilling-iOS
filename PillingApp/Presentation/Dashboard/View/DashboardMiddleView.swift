@@ -173,18 +173,23 @@ final class DashboardMiddleView: UIView {
     func configure(with cycle: Cycle) {
         let calendar = Calendar.current
         let now = Date()
-        
+
         let daysSinceStart = calendar.dateComponents([.day], from: cycle.startDate, to: now).day ?? 0
         let currentDay = daysSinceStart + 1
-        
+
         progressLabel.text = daysSinceStart < 0 ? "시작전": "\(currentDay)일차"
         progressLabel.textColor = AppColor.textBlack
         totalLabel.text = "/\(cycle.totalDays)"
-        timeLabel.text = cycle.scheduledTime
     }
-    
+
     func configure(with pillInfo: PillInfo) {
         dateLabel.text = "\(pillInfo.takingDays)/\(pillInfo.breakDays)"
+    }
+
+    func configure(with settings: UserSettings) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        timeLabel.text = formatter.string(from: settings.scheduledTime)
     }
     
     func configure(with message: DashboardMessage) {

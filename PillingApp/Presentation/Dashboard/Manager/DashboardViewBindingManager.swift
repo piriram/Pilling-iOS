@@ -87,7 +87,15 @@ final class DashboardViewBindingManager {
                 infoView.configure(with: pillInfo)
             })
             .disposed(by: disposeBag)
-        
+
+        // User settings (for scheduled time display)
+        viewModel.settings
+            .asDriver()
+            .drive(onNext: { settings in
+                infoView.configure(with: settings)
+            })
+            .disposed(by: disposeBag)
+
         // Current cycle
         viewModel.currentCycle
             .compactMap { $0 }
