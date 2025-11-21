@@ -13,8 +13,6 @@ final class CalculateMessageUseCase {
     private let timeProvider: TimeProvider
     
     init(timeProvider: TimeProvider = SystemTimeProvider()) {
-        print("순서:\(#fileID)")
-        
         self.timeProvider = timeProvider
     }
     

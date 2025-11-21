@@ -19,8 +19,6 @@ final class CalculateDashboardMessageUseCase: CalculateDashboardMessageUseCasePr
     private let timeProvider: TimeProvider
     
     init(timeProvider: TimeProvider) {
-        print("순서:\(#fileID)")
-        
         self.timeProvider = timeProvider
         self.calculateMessageUseCase = CalculateMessageUseCase(timeProvider: timeProvider)
     }

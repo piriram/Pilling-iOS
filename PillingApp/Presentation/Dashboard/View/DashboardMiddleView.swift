@@ -185,7 +185,6 @@ final class DashboardMiddleView: UIView {
     
     func configure(with pillInfo: PillInfo) {
         dateLabel.text = "\(pillInfo.takingDays)/\(pillInfo.breakDays)"
-        print("pillInfo:\(pillInfo.takingDays)")
     }
     
     func configure(with message: DashboardMessage) {

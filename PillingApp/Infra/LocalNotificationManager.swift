@@ -19,8 +19,6 @@ final class LocalNotificationManager: NotificationManagerProtocol {
     // MARK: - Initialization
     
     init(notificationCenter: UNUserNotificationCenter = .current()) {
-        print("순서:\(#fileID)")
-        
         self.notificationCenter = notificationCenter
     }
     

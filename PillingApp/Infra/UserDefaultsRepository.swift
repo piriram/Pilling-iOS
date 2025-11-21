@@ -21,8 +21,6 @@ final class UserDefaultsRepository: UserDefaultsProtocol {
     }
     
     init(userDefaults: UserDefaults = .standard) {
-        print("순서:\(#fileID)")
-        
         self.userDefaults = userDefaults
     }
     

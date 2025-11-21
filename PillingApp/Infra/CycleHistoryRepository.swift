@@ -11,8 +11,6 @@ protocol CycleHistoryProtocol {
 final class CycleHistoryRepository: CycleHistoryProtocol {
     private let context: NSManagedObjectContext?
     init(context: NSManagedObjectContext?) {
-        print("순서:\(#fileID)")
-        
         self.context = context
     }
     

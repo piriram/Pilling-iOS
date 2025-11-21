@@ -30,8 +30,6 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
     // MARK: - Initialization
     
     init(userDefaults: UserDefaults = .standard) {
-        print("순서:\(#fileID)")
-        
         self.userDefaults = userDefaults
         migrateIfNeeded()
     }

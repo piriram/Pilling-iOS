@@ -21,8 +21,6 @@ protocol TimeProvider {
 
 final class SystemTimeProvider: TimeProvider {
     var now: Date {
-        print("순서:\(#fileID)")
-        
         return Date()
     }
     

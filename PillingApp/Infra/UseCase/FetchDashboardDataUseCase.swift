@@ -29,13 +29,12 @@ final class FetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol {
     
     func execute() -> Observable<(cycle: Cycle?, settings: UserSettings)> {
         let cycleObservable = loadCycleWithFallback()
-        
+
         let settingsObservable = settingsRepository.fetchSettings()
             .catch { error -> Observable<UserSettings> in
-                print("⚠️ 설정 로드 실패, 기본값 사용: \(error)")
                 return .just(UserSettings.default)
             }
-        
+
         return Observable.zip(
             cycleObservable,
             settingsObservable
@@ -45,21 +44,17 @@ final class FetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol {
     
     private func loadCycleWithFallback() -> Observable<Cycle?> {
         guard let currentCycleID = userDefaultsManager.loadCurrentCycleID() else {
-            print("📌 currentCycleID 없음, 기본 로직으로 사이클 로드")
             return cycleRepository.fetchCurrentCycle()
         }
-        
-        print("📌 저장된 currentCycleID로 사이클 로드: \(currentCycleID)")
-        
+
         return cycleRepository.fetchCycle(by: currentCycleID)
             .flatMap { [weak self] cycle -> Observable<Cycle?> in
                 guard let self = self else { return .just(nil) }
-                
+
                 if cycle == nil {
-                    print("⚠️ 저장된 사이클 없음, 기본 로직으로 폴백")
                     return self.cycleRepository.fetchCurrentCycle()
                 }
-                
+
                 return .just(cycle)
             }
     }
