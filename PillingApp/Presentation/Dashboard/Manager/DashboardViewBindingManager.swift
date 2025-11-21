@@ -213,7 +213,18 @@ final class DashboardViewBindingManager {
 
         // 페이지 컨트롤 업데이트
         output.pageControlState
-            .skip(1)  // 초기 불완전한 데이터 무시 (viewDidLoad 전의 초기값)
+            .filter { state in
+                // 완전한 데이터가 로드될 때까지 대기 (totalCount > 0)
+                let isValid = state.totalCount > 0
+                if !isValid {
+                    print("🔍 [DashboardViewBindingManager] pageControlState 필터링됨 - totalCount: \(state.totalCount)")
+                }
+                return isValid
+            }
+            .distinctUntilChanged { prev, curr in
+                // 같은 값이 연속으로 오면 무시
+                prev.currentIndex == curr.currentIndex && prev.totalCount == curr.totalCount
+            }
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { state in
                 print("🔍 [DashboardViewBindingManager] pageControlState 업데이트")
@@ -235,8 +246,10 @@ final class DashboardViewBindingManager {
         stasticsView.periodButtonTapped = {
             periodButtonTappedSubject.onNext(())
         }
-        
+
+        // 즉시 데이터 로드 trigger (DashboardViewController 로드 시점에)
         viewDidLoadSubject.onNext(())
+        print("🔍 [DashboardViewBindingManager] viewDidLoadSubject.onNext() 호출 완료")
     }
     
     private func bindTopButtons(
