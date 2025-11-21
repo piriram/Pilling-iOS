@@ -138,10 +138,13 @@ final class DashboardViewController: UIViewController {
             infoView: infoView,
             statisticsView: stasticsView
         )
-        
+
         transitionManager?.onViewIndexChanged = { [weak self] index in
             self?.handleViewIndexChanged(index)
         }
+
+        // 초기 페이지 컨트롤 상태 설정
+        handleViewIndexChanged(.calendar)
     }
     
     private func setupBindingManager() {
