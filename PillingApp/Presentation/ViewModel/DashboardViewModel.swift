@@ -137,23 +137,13 @@ final class DashboardViewModel {
     }
     
     private func updateItems() {
-        print("🔍 [DashboardViewModel] updateItems 호출")
-
         guard let cycle = currentCycle.value else {
-            print("   ⚠️ currentCycle이 nil이므로 반환")
             return
         }
 
-        print("   📊 cycle.records.count: \(cycle.records.count)")
-
         let maxItems = 28
         let visibleRecords = Array(cycle.records.prefix(maxItems))
-
-        print("   📊 maxItems: \(maxItems)")
-        print("   📊 visibleRecords.count: \(visibleRecords.count)")
-
         let now = Date()
-
         let currentScheduledTime = settings.value.scheduledTime
 
         let dayItems = visibleRecords.map { record in
@@ -199,9 +189,7 @@ final class DashboardViewModel {
             )
         }
 
-        print("   📊 생성된 dayItems.count: \(dayItems.count)")
         items.accept(dayItems)
-        print("   ✅ items.accept 완료 - 최종 items.count: \(dayItems.count)")
     }
     
     private func calculateTodayScheduledTime(

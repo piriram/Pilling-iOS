@@ -42,24 +42,9 @@ final class StatisticsViewModel {
             input.viewDidLoad,
             input.dataChanged
         )
-        .do(onNext: { _ in
-            print("🔍 [StatisticsViewModel] 데이터 로드 트리거")
-        })
         .flatMapLatest { [weak self] _ -> Observable<[PeriodRecordDTO]> in
             guard let self = self else { return .just([]) }
             return self.fetchStatisticsDataUseCase.execute()
-                .do(onNext: { periodList in
-                    // 🔍 [디버깅] UseCase에서 받은 데이터
-                    print("🔍 [StatisticsViewModel] UseCase에서 받은 데이터")
-                    print("   📊 periodList.count: \(periodList.count)")
-                    for (index, period) in periodList.enumerated() {
-                        print("   📅 [\(index)] startDate: \(period.startDate), endDate: \(period.endDate)")
-                        print("      🏷️ sideEffectStats.count: \(period.sideEffectStats.count)")
-                        for stat in period.sideEffectStats {
-                            print("         - \(stat.tagName): \(stat.count)회")
-                        }
-                    }
-                })
                 .catch { error in
                     print("❌ Failed to fetch statistics data: \(error)")
                     return .just([])
@@ -87,7 +72,6 @@ final class StatisticsViewModel {
         let currentPeriodData = Observable.combineLatest(currentIndexSubject, dataListSubject)
             .map { index, dataList -> PeriodRecordDTO in
                 guard !dataList.isEmpty, index < dataList.count else {
-                    print("🔍 [StatisticsViewModel] currentPeriodData - 빈 데이터 반환")
                     return PeriodRecordDTO(
                         startDate: "",
                         endDate: "",
@@ -99,16 +83,7 @@ final class StatisticsViewModel {
                         isEmpty: true
                     )
                 }
-                let period = dataList[index]
-                // 🔍 [디버깅] 현재 표시할 period 데이터
-                print("🔍 [StatisticsViewModel] currentPeriodData 생성")
-                print("   📊 index: \(index), dataList.count: \(dataList.count)")
-                print("   📅 period.startDate: \(period.startDate), endDate: \(period.endDate)")
-                print("   🏷️ period.sideEffectStats.count: \(period.sideEffectStats.count)")
-                for stat in period.sideEffectStats {
-                    print("      - \(stat.tagName): \(stat.count)회")
-                }
-                return period
+                return dataList[index]
             }
 
         let isLeftArrowEnabled = currentIndexSubject
@@ -125,10 +100,6 @@ final class StatisticsViewModel {
         // 페이지 컨트롤 상태 (현재 인덱스, 전체 개수)
         let pageControlState = Observable.combineLatest(currentIndexSubject, dataListSubject)
             .map { (currentIndex: $0, totalCount: $1.count) }
-            .do(onNext: { state in
-                print("🔍 [StatisticsViewModel] pageControlState 업데이트")
-                print("   📄 currentIndex: \(state.currentIndex), totalCount: \(state.totalCount)")
-            })
 
         return Output(
             currentPeriodData: currentPeriodData,

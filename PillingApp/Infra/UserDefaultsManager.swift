@@ -138,37 +138,18 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
     
     /// 부작용 태그 저장
     func saveSideEffectTags(_ tags: [SideEffectTag]) {
-        print("🔍 [UserDefaultsManager] saveSideEffectTags 호출")
-        print("   📥 전달받은 tags.count: \(tags.count)")
-        for (i, tag) in tags.enumerated() {
-            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
-
         if let encoded = try? JSONEncoder().encode(tags) {
-            print("   ✅ JSON 인코딩 성공, 데이터 크기: \(encoded.count) bytes")
             userDefaults.set(encoded, forKey: UserDefaultsKey.sideEffectTags.rawValue)
-            print("   ✅ UserDefaults.set 호출 완료")
-        } else {
-            print("   ❌ JSON 인코딩 실패")
         }
     }
     
     /// 부작용 태그 로드 (기본값 포함)
     func loadSideEffectTags() -> [SideEffectTag] {
-        print("🔍 [UserDefaultsManager] loadSideEffectTags 호출")
-
-        // 저장된 데이터 확인
         if let data = userDefaults.data(forKey: UserDefaultsKey.sideEffectTags.rawValue),
            let tags = try? JSONDecoder().decode([SideEffectTag].self, from: data) {
-            print("   ✅ UserDefaults에서 로드 성공, tags.count: \(tags.count)")
-            for (i, tag) in tags.enumerated() {
-                print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-            }
             return tags
         }
 
-        // 저장된 데이터가 없으면 기본 태그 반환
-        print("   ⚠️ 저장된 데이터가 없어서 기본 태그 반환")
         return createDefaultSideEffectTags()
     }
     

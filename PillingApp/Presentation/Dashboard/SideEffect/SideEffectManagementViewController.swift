@@ -62,7 +62,6 @@ final class SideEffectManagementViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("🔍 [SideEffectManagement] viewDidLoad 호출")
         setupNavigationBar()
         setupUI()
         configureDataSource()
@@ -70,21 +69,15 @@ final class SideEffectManagementViewController: UIViewController {
         loadInitialData()
         applySnapshot(animating: false)
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("🔍 [SideEffectManagement] viewWillAppear 호출")
         navigationController?.navigationBar.isHidden = false
         navigationController?.setNavigationBarHidden(false, animated: false)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print("🔍 [SideEffectManagement] viewDidAppear 호출")
-        print("   📋 현재 tags 상태:")
-        for (i, tag) in tags.enumerated() {
-            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
     }
     
     // MARK: - Setup
@@ -169,12 +162,7 @@ final class SideEffectManagementViewController: UIViewController {
     // MARK: - Data
     
     private func loadInitialData() {
-        print("🔍 [SideEffectManagement] loadInitialData 호출")
         tags = userDefaultsManager.loadSideEffectTags()
-        print("   📊 UserDefaults에서 로드한 tags.count: \(tags.count)")
-        for (i, tag) in tags.enumerated() {
-            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
         sortTagsByVisibility()
     }
     
@@ -189,30 +177,16 @@ final class SideEffectManagementViewController: UIViewController {
         // UISwitch의 위치로부터 실제 IndexPath 찾기 (sender.tag는 신뢰할 수 없음)
         guard let cell = sender.superview?.superview as? UICollectionViewCell,
               let indexPath = collectionView.indexPath(for: cell) else {
-            print("⚠️ [SideEffectManagement] UISwitch의 IndexPath를 찾을 수 없음")
             return
         }
 
         let index = indexPath.row
         guard index < tags.count else {
-            print("⚠️ [SideEffectManagement] index(\(index))가 tags.count(\(tags.count))를 초과함")
             return
         }
 
         let changedTagId = tags[index].id
-        let wasVisible = tags[index].isVisible
         let nowVisible = sender.isOn
-
-        // 🔍 [디버깅] 토글 전 상태
-        print("🔍 [SideEffectManagement] didToggleVisibility")
-        print("   🏷️ 태그: '\(tags[index].name)' (id: \(changedTagId))")
-        print("   📊 index: \(index) (실제 indexPath로 찾음)")
-        print("   📊 sender.tag: \(sender.tag) (사용 안함)")
-        print("   ⬅️ wasVisible: \(wasVisible) → nowVisible: \(nowVisible)")
-        print("   📋 토글 전 tags 순서:")
-        for (i, tag) in tags.enumerated() {
-            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
 
         // 토글된 태그를 배열에서 제거
         var changedTag = tags.remove(at: index)
@@ -234,12 +208,6 @@ final class SideEffectManagementViewController: UIViewController {
         // order 값 재설정
         for i in tags.indices {
             tags[i].order = i
-        }
-
-        // 🔍 [디버깅] 토글 후 상태
-        print("   📋 토글 후 tags 순서:")
-        for (i, tag) in tags.enumerated() {
-            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
         }
 
         persistTags()
@@ -266,12 +234,6 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     private func sortTagsByVisibility() {
-        // 🔍 [디버깅] 정렬 전
-        print("🔍 [SideEffectManagement] sortTagsByVisibility - 정렬 전")
-        for (i, tag) in tags.enumerated() {
-            print("   [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
-
         let visibleTags = tags.filter { $0.isVisible }.sorted { $0.order < $1.order }
         let hiddenTags = tags.filter { !$0.isVisible }.sorted { $0.order < $1.order }
         tags = visibleTags + hiddenTags
@@ -279,29 +241,10 @@ final class SideEffectManagementViewController: UIViewController {
         for index in tags.indices {
             tags[index].order = index
         }
-
-        // 🔍 [디버깅] 정렬 후
-        print("🔍 [SideEffectManagement] sortTagsByVisibility - 정렬 후")
-        for (i, tag) in tags.enumerated() {
-            print("   [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
     }
     
     private func persistTags() {
-        print("🔍 [SideEffectManagement] persistTags 호출")
-        print("   💾 저장할 tags.count: \(tags.count)")
-        for (i, tag) in tags.enumerated() {
-            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
         userDefaultsManager.saveSideEffectTags(tags)
-        print("   ✅ UserDefaults에 저장 완료")
-
-        // 저장 후 즉시 다시 로드하여 확인
-        let reloadedTags = userDefaultsManager.loadSideEffectTags()
-        print("   🔄 저장 후 즉시 재로드한 tags.count: \(reloadedTags.count)")
-        for (i, tag) in reloadedTags.enumerated() {
-            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
-        }
     }
     
     // MARK: - Actions
@@ -330,10 +273,6 @@ final class SideEffectManagementViewController: UIViewController {
                   let name = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !name.isEmpty else { return }
 
-            // 🔍 [디버깅] 새 태그 추가
-            print("🔍 [SideEffectManagement] 새 태그 추가: '\(name)'")
-            print("   📊 추가 전 tags.count: \(self.tags.count)")
-
             // visible 태그 개수 확인 (새 태그는 visible 그룹 맨 뒤에 들어가야 함)
             let visibleCount = self.tags.filter { $0.isVisible }.count
 
@@ -354,12 +293,6 @@ final class SideEffectManagementViewController: UIViewController {
             // order 재설정
             for i in self.tags.indices {
                 self.tags[i].order = i
-            }
-
-            print("   📊 추가 후 tags.count: \(self.tags.count)")
-            print("   📋 추가 후 tags 순서:")
-            for (i, tag) in self.tags.enumerated() {
-                print("      [\(i)] \(tag.name) (visible: \(tag.isVisible), order: \(tag.order))")
             }
 
             self.persistTags()
