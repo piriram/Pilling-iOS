@@ -20,6 +20,7 @@ final class StasticsViewController: UIViewController {
     private let leftArrowTappedSubject = PublishSubject<Void>()
     private let rightArrowTappedSubject = PublishSubject<Void>()
     private let periodButtonTappedSubject = PublishSubject<Void>()
+    private let dataChangedSubject = PublishSubject<Void>()
     
     // MARK: - UI Components
     private let scrollView = UIScrollView()
@@ -142,7 +143,8 @@ final class StasticsViewController: UIViewController {
             viewDidLoad: viewDidLoadSubject.asObservable(),
             leftArrowTapped: leftArrowTappedSubject.asObservable(),
             rightArrowTapped: rightArrowTappedSubject.asObservable(),
-            periodButtonTapped: periodButtonTappedSubject.asObservable()
+            periodButtonTapped: periodButtonTappedSubject.asObservable(),
+            dataChanged: dataChangedSubject.asObservable()
         )
 
         print("🔍 [StasticsViewController] Input 생성 완료")
@@ -153,12 +155,12 @@ final class StasticsViewController: UIViewController {
 
         output.currentPeriodData
             .observe(on: MainScheduler.instance)
-            .do(onNext: { data in
+            .do(onNext: { (data: PeriodRecordDTO) in
                 print("🔍 [StasticsViewController] currentPeriodData onNext 호출됨")
                 print("   📅 data: \(data.startDate) - \(data.endDate)")
                 print("   🏷️ sideEffectStats.count: \(data.sideEffectStats.count)")
             })
-            .subscribe(onNext: { [weak self] data in
+            .subscribe(onNext: { [weak self] (data: PeriodRecordDTO) in
                 print("🔍 [StasticsViewController] subscribe onNext - updateUI 호출 직전")
                 self?.updateUI(with: data)
             })
