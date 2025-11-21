@@ -64,13 +64,26 @@ final class DashboardBottomView: UIView {
     // MARK: - Public Methods
     
     func updatePageControl(for itemCount: Int) {
+        print("🔍 [DashboardBottomView] updatePageControl 호출")
+        print("   📊 itemCount: \(itemCount)")
+
         let columns = 7
         let rows = Int(ceil(Double(itemCount) / Double(columns)))
         let rowsPerPage = 4
         let numberOfPages = Int(ceil(Double(rows) / Double(rowsPerPage)))
-        
+
+        print("   📐 계산:")
+        print("      - columns: \(columns) (한 줄에 7개)")
+        print("      - rows: \(rows) (itemCount \(itemCount) ÷ \(columns) = \(Double(itemCount) / Double(columns)) → 올림)")
+        print("      - rowsPerPage: \(rowsPerPage) (한 페이지에 4줄)")
+        print("      - numberOfPages (계산): \(rows) ÷ \(rowsPerPage) = \(Double(rows) / Double(rowsPerPage)) → 올림 = \(numberOfPages)")
+        print("      - numberOfPages (최종): max(1, \(numberOfPages)) = \(max(1, numberOfPages))")
+
         pageControl.numberOfPages = max(1, numberOfPages)
         pageControl.currentPage = 0
+
+        print("   ✅ pageControl.numberOfPages 설정 완료: \(pageControl.numberOfPages)")
+        print("   ✅ pageControl.currentPage 설정 완료: \(pageControl.currentPage)")
     }
     
     func updateButton(canTake: Bool, cycle: Cycle?, environment: DateEnvironment = .default) {

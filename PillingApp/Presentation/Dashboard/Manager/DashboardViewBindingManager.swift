@@ -74,6 +74,8 @@ final class DashboardViewBindingManager {
         viewModel.items
             .asDriver()
             .drive(onNext: { items in
+                print("🔍 [DashboardViewBindingManager] viewModel.items 업데이트")
+                print("   📊 items.count: \(items.count)")
                 infoView.applyCalendarSnapshot(with: items)
                 bottomView.updatePageControl(for: items.count)
             })
