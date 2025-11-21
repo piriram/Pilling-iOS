@@ -217,15 +217,18 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
         // Convert to SideEffectStatDTO and sort by count (descending)
         let result = sideEffectCounts
             .map { (tagId, count) -> SideEffectStatDTO in
-                // 우선순위: 1) 저장된 이름, 2) 현재 태그 이름, 3) "삭제된 부작용"
+                // 우선순위: 1) 현재 태그 이름, 2) 저장된 이름, 3) "삭제된 부작용"
                 let tagName: String
-                if let savedName = savedTagNames[tagId] {
-                    tagName = savedName
-                    print("   ✅ 통계 생성 (저장된 이름 사용): \(tagName) - \(count)회")
-                } else if let currentName = tagMap[tagId] {
+                if let currentName = tagMap[tagId] {
+                    // 현재 태그가 존재하면 현재 이름 사용 (태그 이름이 변경되었을 수 있음)
                     tagName = currentName
                     print("   ✅ 통계 생성 (현재 태그 이름 사용): \(tagName) - \(count)회")
+                } else if let savedName = savedTagNames[tagId] {
+                    // 태그가 삭제되었지만 저장된 이름이 있으면 사용
+                    tagName = savedName
+                    print("   ✅ 통계 생성 (저장된 이름 사용, 태그 삭제됨): \(tagName) - \(count)회")
                 } else {
+                    // 저장된 이름도 없으면 fallback
                     tagName = "삭제된 부작용"
                     print("   ⚠️ tagId '\(tagId)'에 해당하는 태그 이름을 찾을 수 없음 -> '삭제된 부작용'으로 표시")
                 }
