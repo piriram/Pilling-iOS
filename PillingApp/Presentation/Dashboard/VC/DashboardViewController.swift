@@ -144,7 +144,7 @@ final class DashboardViewController: UIViewController {
         }
 
         // 초기 페이지 컨트롤 상태 설정
-        handleViewIndexChanged(.calendar)
+        handleViewIndexChanged(.dashboard)
     }
     
     private func setupBindingManager() {
