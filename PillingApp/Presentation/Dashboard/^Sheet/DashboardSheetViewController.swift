@@ -95,12 +95,6 @@ final class DashboardSheetViewController: UIViewController {
         let parsedMemo = PillRecordMemo.fromJSONString(initialMemo)
         self.initialSideEffectIds = parsedMemo.sideEffectIds
 
-        // 🔍 [디버깅] 초기 메모 파싱
-        print("🔍 [DashboardSheet] init 호출 - 메모 파싱")
-        print("   📝 initialMemo: '\(initialMemo)'")
-        print("   📦 parsedMemo.text: '\(parsedMemo.text)'")
-        print("   🏷️ parsedMemo.sideEffectIds: \(parsedMemo.sideEffectIds)")
-        print("   💾 initialSideEffectIds: \(self.initialSideEffectIds)")
 
         self.viewModel = DefaultDashboardSheetViewModel(
             selectedDate: selectedDate,
@@ -130,8 +124,6 @@ final class DashboardSheetViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        // 🔍 [디버깅] viewWillAppear에서 태그 reload
-        print("🔍 [DashboardSheet] viewWillAppear - 태그 새로고침")
 
         // 부작용 관리에서 돌아올 때를 대비해 태그 목록을 다시 로드
         // (태그 추가/삭제/순서변경/visibility 변경 반영)
@@ -141,17 +133,6 @@ final class DashboardSheetViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        // 🔍 [디버깅] viewDidAppear에서 태그 복원
-        print("🔍 [DashboardSheet] viewDidAppear - 태그 선택 복원 시도")
-        print("   🏷️ initialSideEffectIds: \(initialSideEffectIds)")
-        print("   📊 isEmpty: \(initialSideEffectIds.isEmpty)")
-
-        // 부작용 태그 선택 복원 (뷰가 완전히 로드된 후에 설정)
-        if !initialSideEffectIds.isEmpty {
-            print("   ✅ setSelectedTagIds 호출")
-            sideEffectTagsView.setSelectedTagIds(initialSideEffectIds)
-        } else {
-            print("   ⚠️ initialSideEffectIds가 비어있어서 복원 안함")
         }
     }
 
@@ -277,14 +258,6 @@ final class DashboardSheetViewController: UIViewController {
                 )
                 let memoJSON = pillMemo.toJSONString()
 
-                // 🔍 [디버깅] 메모 데이터 확인
-                print("🔍 [DashboardSheet] 메모 저장 시작")
-                print("   📝 메모 텍스트: '\(memoText)'")
-                print("   🏷️ 선택된 태그 IDs: \(selectedTagIds)")
-                print("   📛 선택된 태그 이름들: \(sideEffectNames)")
-                print("   📦 PillRecordMemo: text='\(pillMemo.text)', sideEffectIds=\(pillMemo.sideEffectIds), sideEffectNames=\(pillMemo.sideEffectNames ?? [:])")
-                print("   💾 최종 JSON: '\(memoJSON)'")
-                print("   ✅ 상태: \(String(describing: status))")
 
                 self.onDataChanged(status, memoJSON)
                 self.sheetAnimator.hide()
