@@ -33,16 +33,20 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
             }
 
             do {
+                print("🔍 [FetchStatisticsDataUseCase] execute 시작")
                 let cycles = try self.cycleHistoryRepository.fetchAllCycles()
+                print("🔍 [FetchStatisticsDataUseCase] fetchAllCycles 결과: \(cycles.count)개 사이클")
                 let pillInfo = self.userDefaultsManager.loadPillInfo()
 
                 let periodRecords = cycles.map { cycle in
                     self.mapCycleToPeriodRecord(cycle: cycle, pillInfo: pillInfo)
                 }
+                print("🔍 [FetchStatisticsDataUseCase] 변환 완료: \(periodRecords.count)개 PeriodRecordDTO")
 
                 observer.onNext(periodRecords)
                 observer.onCompleted()
             } catch {
+                print("❌ [FetchStatisticsDataUseCase] 에러: \(error)")
                 observer.onError(error)
             }
 
