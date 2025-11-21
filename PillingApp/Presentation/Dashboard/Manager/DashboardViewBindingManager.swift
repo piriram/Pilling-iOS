@@ -213,6 +213,7 @@ final class DashboardViewBindingManager {
 
         // 페이지 컨트롤 업데이트
         output.pageControlState
+            .skip(1)  // 초기 불완전한 데이터 무시 (viewDidLoad 전의 초기값)
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { state in
                 print("🔍 [DashboardViewBindingManager] pageControlState 업데이트")
