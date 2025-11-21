@@ -51,13 +51,6 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
     }
 
     private func mapCycleToPeriodRecord(cycle: Cycle, pillInfo: PillInfo?) -> PeriodRecordDTO {
-        // 🔍 [디버깅] 사이클 -> 기간 레코드 변환 시작
-        print("🔍 [FetchStatisticsDataUseCase] mapCycleToPeriodRecord 호출")
-        print("   🆔 cycle.id: \(cycle.id)")
-        print("   📅 activeDays: \(cycle.activeDays)")
-        print("   📅 totalDays: \(cycle.totalDays)")
-        print("   📊 전체 레코드 수: \(cycle.records.count)")
-
         let calendar = Calendar.current
 
         // Calculate date range
@@ -74,11 +67,6 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
         // Filter only active days (exclude rest days)
         let activeDayRecords = cycle.records.filter { record in
             record.cycleDay <= cycle.activeDays
-        }
-
-        print("   📊 Active Day 레코드 수: \(activeDayRecords.count)")
-        for (index, record) in activeDayRecords.enumerated() {
-            print("      [\(index)] cycleDay: \(record.cycleDay), status: \(record.status), memo: '\(record.memo)'")
         }
 
         // Check if period is empty (no records or all scheduled)
@@ -176,43 +164,26 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
     }
 
     private func calculateSideEffectStats(from records: [DayRecord]) -> [SideEffectStatDTO] {
-        // 🔍 [디버깅] 부작용 통계 계산 시작
-        print("🔍 [FetchStatisticsDataUseCase] calculateSideEffectStats 호출")
-        print("   📊 전달받은 records.count: \(records.count)")
-
         // Get side effect tags from UserDefaults
         let sideEffectTags = userDefaultsManager.loadSideEffectTags()
         let tagMap = Dictionary(uniqueKeysWithValues: sideEffectTags.map { ($0.id, $0.name) })
-
-        print("   🏷️ 등록된 부작용 태그 수: \(sideEffectTags.count)")
-        print("   🏷️ 태그 맵: \(tagMap)")
 
         // Count side effect occurrences and collect saved tag names
         var sideEffectCounts: [String: Int] = [:]
         var savedTagNames: [String: String] = [:]  // tagId -> 저장된 이름 (삭제된 태그 대비)
 
-        for (index, record) in records.enumerated() {
-            print("   📝 [\(index)] record.memo: '\(record.memo)'")
-
+        for record in records {
             let parsedMemo = PillRecordMemo.fromJSONString(record.memo)
-            print("      📦 parsedMemo.text: '\(parsedMemo.text)'")
-            print("      🏷️ parsedMemo.sideEffectIds: \(parsedMemo.sideEffectIds)")
-            print("      📛 parsedMemo.sideEffectNames: \(parsedMemo.sideEffectNames ?? [:])")
 
             for tagId in parsedMemo.sideEffectIds {
                 sideEffectCounts[tagId, default: 0] += 1
-                print("         ➕ tagId '\(tagId)' 카운트: \(sideEffectCounts[tagId]!)")
 
                 // 저장된 태그 이름 보존 (삭제된 태그 대비)
                 if let savedName = parsedMemo.sideEffectNames?[tagId] {
                     savedTagNames[tagId] = savedName
-                    print("         📛 저장된 이름: '\(savedName)'")
                 }
             }
         }
-
-        print("   📊 최종 sideEffectCounts: \(sideEffectCounts)")
-        print("   📛 최종 savedTagNames: \(savedTagNames)")
 
         // Convert to SideEffectStatDTO and sort by count (descending)
         let result = sideEffectCounts
@@ -222,24 +193,16 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
                 if let currentName = tagMap[tagId] {
                     // 현재 태그가 존재하면 현재 이름 사용 (태그 이름이 변경되었을 수 있음)
                     tagName = currentName
-                    print("   ✅ 통계 생성 (현재 태그 이름 사용): \(tagName) - \(count)회")
                 } else if let savedName = savedTagNames[tagId] {
                     // 태그가 삭제되었지만 저장된 이름이 있으면 사용
                     tagName = savedName
-                    print("   ✅ 통계 생성 (저장된 이름 사용, 태그 삭제됨): \(tagName) - \(count)회")
                 } else {
                     // 저장된 이름도 없으면 fallback
                     tagName = "삭제된 부작용"
-                    print("   ⚠️ tagId '\(tagId)'에 해당하는 태그 이름을 찾을 수 없음 -> '삭제된 부작용'으로 표시")
                 }
                 return SideEffectStatDTO(tagId: tagId, tagName: tagName, count: count)
             }
             .sorted { $0.count > $1.count }
-
-        print("   🎯 최종 반환 결과 개수: \(result.count)")
-        for stat in result {
-            print("      - \(stat.tagName): \(stat.count)회")
-        }
 
         return result
     }

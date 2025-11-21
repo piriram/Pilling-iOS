@@ -137,8 +137,6 @@ final class StasticsViewController: UIViewController {
     }
     
     private func bindViewModel() {
-        print("🔍 [StasticsViewController] bindViewModel 시작")
-
         let input = StatisticsViewModel.Input(
             viewDidLoad: viewDidLoadSubject.asObservable(),
             leftArrowTapped: leftArrowTappedSubject.asObservable(),
@@ -147,26 +145,14 @@ final class StasticsViewController: UIViewController {
             dataChanged: dataChangedSubject.asObservable()
         )
 
-        print("🔍 [StasticsViewController] Input 생성 완료")
-
         let output = viewModel.transform(input: input)
-
-        print("🔍 [StasticsViewController] Output 생성 완료, 구독 시작")
 
         output.currentPeriodData
             .observe(on: MainScheduler.instance)
-            .do(onNext: { (data: PeriodRecordDTO) in
-                print("🔍 [StasticsViewController] currentPeriodData onNext 호출됨")
-                print("   📅 data: \(data.startDate) - \(data.endDate)")
-                print("   🏷️ sideEffectStats.count: \(data.sideEffectStats.count)")
-            })
-            .subscribe(onNext: { [weak self] (data: PeriodRecordDTO) in
-                print("🔍 [StasticsViewController] subscribe onNext - updateUI 호출 직전")
+            .subscribe(onNext: { [weak self] data in
                 self?.updateUI(with: data)
             })
             .disposed(by: disposeBag)
-
-        print("🔍 [StasticsViewController] currentPeriodData 구독 완료")
         
         Observable.combineLatest(output.isLeftArrowEnabled, output.isRightArrowEnabled)
             .observe(on: MainScheduler.instance)

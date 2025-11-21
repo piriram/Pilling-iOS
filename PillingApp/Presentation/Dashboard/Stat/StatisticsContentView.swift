@@ -143,25 +143,14 @@ final class StatisticsContentView: UIView {
     // MARK: - Public Methods
     
     func configure(with data: PeriodRecordDTO) {
-        // 🔍 [디버깅] configure 호출
-        print("🔍 [StatisticsContentView] configure 호출")
-        print("   📅 period: \(data.startDate) - \(data.endDate)")
-        print("   📊 isEmpty: \(data.isEmpty)")
-        print("   🏷️ sideEffectStats.count: \(data.sideEffectStats.count)")
-        for stat in data.sideEffectStats {
-            print("      - \(stat.tagName): \(stat.count)회")
-        }
-
         periodButton.setTitle("\(data.startDate) - \(data.endDate)", for: .normal)
 
         chartContainerView.configure(with: data)
 
         if data.isEmpty {
-            print("   ⚠️ 빈 데이터 - UI 숨김")
             medicineLabel.isHidden = true
             recordListStackView.isHidden = true
         } else {
-            print("   ✅ 데이터 있음 - updateRecordList 호출")
             medicineLabel.isHidden = false
             recordListStackView.isHidden = false
 
@@ -188,27 +177,18 @@ final class StatisticsContentView: UIView {
     }
     
     private func updateRecordList(records: [RecordItemDTO], skippedCount: Int, sideEffectStats: [SideEffectStatDTO]) {
-        print("🔍 [StatisticsContentView] updateRecordList 호출")
-        print("   📊 records.count: \(records.count)")
-        print("   🏷️ sideEffectStats.count: \(sideEffectStats.count)")
-
         recordListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        print("   🗑️ 기존 뷰 모두 제거 완료")
 
         for item in records {
             let itemView = createRecordItemView(item: item)
             recordListStackView.addArrangedSubview(itemView)
-            print("   ➕ Record 아이템 추가: \(item.category) - \(item.days)일")
         }
 
         // Add side effect statistics
-        print("   🏷️ 부작용 통계 추가 시작")
-        for (index, stat) in sideEffectStats.enumerated() {
+        for stat in sideEffectStats {
             let sideEffectView = createSideEffectItemView(stat: stat)
             recordListStackView.addArrangedSubview(sideEffectView)
-            print("      [\(index)] 부작용 뷰 추가: \(stat.tagName) - \(stat.count)회")
         }
-        print("   ✅ 총 \(recordListStackView.arrangedSubviews.count)개 뷰 추가 완료")
     }
     
     private func createRecordItemView(item: RecordItemDTO) -> UIView {
