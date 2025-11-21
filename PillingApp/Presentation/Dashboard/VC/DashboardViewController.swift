@@ -71,11 +71,12 @@ final class DashboardViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupViews()
         setupConstraints()
         setupTransitionManager()
         setupBindingManager()
+        setupAppLifecycleObserver()
         updateBackgroundForToday()
     }
     
@@ -168,7 +169,17 @@ final class DashboardViewController: UIViewController {
             }
         )
     }
-    
+
+    private func setupAppLifecycleObserver() {
+        NotificationCenter.default.rx
+            .notification(UIApplication.willEnterForegroundNotification)
+            .subscribe(onNext: { [weak self] _ in
+                self?.viewModel.reloadData()
+                self?.updateBackgroundForToday()
+            })
+            .disposed(by: disposeBag)
+    }
+
     // MARK: - UI Updates
     
     private func updateBackgroundForToday() {
