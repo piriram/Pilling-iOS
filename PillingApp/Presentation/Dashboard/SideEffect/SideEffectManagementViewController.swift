@@ -170,8 +170,18 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     @objc private func didToggleVisibility(_ sender: UISwitch) {
-        let index = sender.tag
-        guard index < tags.count else { return }
+        // UISwitch의 위치로부터 실제 IndexPath 찾기 (sender.tag는 신뢰할 수 없음)
+        guard let cell = sender.superview?.superview as? UICollectionViewCell,
+              let indexPath = collectionView.indexPath(for: cell) else {
+            print("⚠️ [SideEffectManagement] UISwitch의 IndexPath를 찾을 수 없음")
+            return
+        }
+
+        let index = indexPath.row
+        guard index < tags.count else {
+            print("⚠️ [SideEffectManagement] index(\(index))가 tags.count(\(tags.count))를 초과함")
+            return
+        }
 
         let changedTagId = tags[index].id
         let wasVisible = tags[index].isVisible
@@ -180,7 +190,8 @@ final class SideEffectManagementViewController: UIViewController {
         // 🔍 [디버깅] 토글 전 상태
         print("🔍 [SideEffectManagement] didToggleVisibility")
         print("   🏷️ 태그: '\(tags[index].name)' (id: \(changedTagId))")
-        print("   📊 index: \(index)")
+        print("   📊 index: \(index) (실제 indexPath로 찾음)")
+        print("   📊 sender.tag: \(sender.tag) (사용 안함)")
         print("   ⬅️ wasVisible: \(wasVisible) → nowVisible: \(nowVisible)")
         print("   📋 토글 전 tags 순서:")
         for (i, tag) in tags.enumerated() {
