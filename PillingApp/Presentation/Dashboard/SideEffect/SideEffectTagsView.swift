@@ -148,7 +148,20 @@ final class SideEffectTagsView: UIView {
     // MARK: - Public Methods
 
     func reloadTags() {
+        // 🔍 [디버깅] 태그 새로고침
+        print("🔍 [SideEffectTagsView] reloadTags 호출")
+        print("   📊 reload 전 tags.count: \(sideEffectTags.count)")
+        print("   🏷️ reload 전 selectedTagIds: \(selectedTagIds)")
+
         loadSideEffectTags()
+
+        print("   📊 reload 후 tags.count: \(sideEffectTags.count)")
+        print("   📋 reload 후 tags 목록:")
+        for (i, tag) in sideEffectTags.enumerated() {
+            print("      [\(i)] \(tag.name) (visible: \(tag.isVisible))")
+        }
+        print("   🏷️ reload 후 selectedTagIds (유지됨): \(selectedTagIds)")
+
         collectionView.reloadData()
         setNeedsLayout()
         layoutIfNeeded()

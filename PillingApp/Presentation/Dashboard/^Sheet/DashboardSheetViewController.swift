@@ -127,11 +127,22 @@ final class DashboardSheetViewController: UIViewController {
         bindViewModel()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        // 🔍 [디버깅] viewWillAppear에서 태그 reload
+        print("🔍 [DashboardSheet] viewWillAppear - 태그 새로고침")
+
+        // 부작용 관리에서 돌아올 때를 대비해 태그 목록을 다시 로드
+        // (태그 추가/삭제/순서변경/visibility 변경 반영)
+        sideEffectTagsView.reloadTags()
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
         // 🔍 [디버깅] viewDidAppear에서 태그 복원
-        print("🔍 [DashboardSheet] viewDidAppear - 태그 복원 시도")
+        print("🔍 [DashboardSheet] viewDidAppear - 태그 선택 복원 시도")
         print("   🏷️ initialSideEffectIds: \(initialSideEffectIds)")
         print("   📊 isEmpty: \(initialSideEffectIds.isEmpty)")
 
