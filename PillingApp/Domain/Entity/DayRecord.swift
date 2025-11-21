@@ -19,10 +19,12 @@ struct PillInfo: Codable{
 struct PillRecordMemo: Codable {
     let text: String
     let sideEffectIds: [String]
+    let sideEffectNames: [String: String]?  // Optional: tagId -> tagName mapping (삭제된 태그 이름 보존용)
 
-    init(text: String, sideEffectIds: [String] = []) {
+    init(text: String, sideEffectIds: [String] = [], sideEffectNames: [String: String]? = nil) {
         self.text = text
         self.sideEffectIds = sideEffectIds
+        self.sideEffectNames = sideEffectNames
     }
 
     /// JSON 문자열로 인코딩
@@ -39,7 +41,7 @@ struct PillRecordMemo: Codable {
         guard let data = jsonString.data(using: .utf8),
               let memo = try? JSONDecoder().decode(PillRecordMemo.self, from: data) else {
             // 기존 plain text 메모 호환성 처리
-            return PillRecordMemo(text: jsonString, sideEffectIds: [])
+            return PillRecordMemo(text: jsonString, sideEffectIds: [], sideEffectNames: nil)
         }
         return memo
     }

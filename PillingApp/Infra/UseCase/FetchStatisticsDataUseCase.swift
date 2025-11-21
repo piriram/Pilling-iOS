@@ -187,8 +187,9 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
         print("   🏷️ 등록된 부작용 태그 수: \(sideEffectTags.count)")
         print("   🏷️ 태그 맵: \(tagMap)")
 
-        // Count side effect occurrences
+        // Count side effect occurrences and collect saved tag names
         var sideEffectCounts: [String: Int] = [:]
+        var savedTagNames: [String: String] = [:]  // tagId -> 저장된 이름 (삭제된 태그 대비)
 
         for (index, record) in records.enumerated() {
             print("   📝 [\(index)] record.memo: '\(record.memo)'")
@@ -196,22 +197,34 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
             let parsedMemo = PillRecordMemo.fromJSONString(record.memo)
             print("      📦 parsedMemo.text: '\(parsedMemo.text)'")
             print("      🏷️ parsedMemo.sideEffectIds: \(parsedMemo.sideEffectIds)")
+            print("      📛 parsedMemo.sideEffectNames: \(parsedMemo.sideEffectNames ?? [:])")
 
             for tagId in parsedMemo.sideEffectIds {
                 sideEffectCounts[tagId, default: 0] += 1
                 print("         ➕ tagId '\(tagId)' 카운트: \(sideEffectCounts[tagId]!)")
+
+                // 저장된 태그 이름 보존 (삭제된 태그 대비)
+                if let savedName = parsedMemo.sideEffectNames?[tagId] {
+                    savedTagNames[tagId] = savedName
+                    print("         📛 저장된 이름: '\(savedName)'")
+                }
             }
         }
 
         print("   📊 최종 sideEffectCounts: \(sideEffectCounts)")
+        print("   📛 최종 savedTagNames: \(savedTagNames)")
 
         // Convert to SideEffectStatDTO and sort by count (descending)
         let result = sideEffectCounts
             .map { (tagId, count) -> SideEffectStatDTO in
+                // 우선순위: 1) 저장된 이름, 2) 현재 태그 이름, 3) "삭제된 부작용"
                 let tagName: String
-                if let name = tagMap[tagId] {
-                    tagName = name
-                    print("   ✅ 통계 생성: \(tagName) - \(count)회")
+                if let savedName = savedTagNames[tagId] {
+                    tagName = savedName
+                    print("   ✅ 통계 생성 (저장된 이름 사용): \(tagName) - \(count)회")
+                } else if let currentName = tagMap[tagId] {
+                    tagName = currentName
+                    print("   ✅ 통계 생성 (현재 태그 이름 사용): \(tagName) - \(count)회")
                 } else {
                     tagName = "삭제된 부작용"
                     print("   ⚠️ tagId '\(tagId)'에 해당하는 태그 이름을 찾을 수 없음 -> '삭제된 부작용'으로 표시")

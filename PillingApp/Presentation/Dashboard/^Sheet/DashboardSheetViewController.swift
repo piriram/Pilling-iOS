@@ -264,15 +264,25 @@ final class DashboardSheetViewController: UIViewController {
                 // 선택된 부작용 태그 ID 수집
                 let selectedTagIds = self.sideEffectTagsView.getSelectedTagIds()
 
+                // 선택된 태그의 이름을 함께 저장 (삭제된 태그 대비)
+                let allTags = self.userDefaultsManager.loadSideEffectTags()
+                let selectedTags = allTags.filter { selectedTagIds.contains($0.id) }
+                let sideEffectNames = Dictionary(uniqueKeysWithValues: selectedTags.map { ($0.id, $0.name) })
+
                 // PillRecordMemo로 결합하여 JSON 저장
-                let pillMemo = PillRecordMemo(text: memoText, sideEffectIds: selectedTagIds)
+                let pillMemo = PillRecordMemo(
+                    text: memoText,
+                    sideEffectIds: selectedTagIds,
+                    sideEffectNames: sideEffectNames.isEmpty ? nil : sideEffectNames
+                )
                 let memoJSON = pillMemo.toJSONString()
 
                 // 🔍 [디버깅] 메모 데이터 확인
                 print("🔍 [DashboardSheet] 메모 저장 시작")
                 print("   📝 메모 텍스트: '\(memoText)'")
                 print("   🏷️ 선택된 태그 IDs: \(selectedTagIds)")
-                print("   📦 PillRecordMemo: text='\(pillMemo.text)', sideEffectIds=\(pillMemo.sideEffectIds)")
+                print("   📛 선택된 태그 이름들: \(sideEffectNames)")
+                print("   📦 PillRecordMemo: text='\(pillMemo.text)', sideEffectIds=\(pillMemo.sideEffectIds), sideEffectNames=\(pillMemo.sideEffectNames ?? [:])")
                 print("   💾 최종 JSON: '\(memoJSON)'")
                 print("   ✅ 상태: \(String(describing: status))")
 
