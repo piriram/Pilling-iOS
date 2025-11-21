@@ -62,8 +62,6 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
             userDefaults.removeObject(forKey: UserDefaultsKey.pillName.rawValue)
             userDefaults.removeObject(forKey: UserDefaultsKey.pillTakingDays.rawValue)
             userDefaults.removeObject(forKey: UserDefaultsKey.pillBreakDays.rawValue)
-            
-            print("✅ PillInfo 마이그레이션 완료")
         }
     }
     

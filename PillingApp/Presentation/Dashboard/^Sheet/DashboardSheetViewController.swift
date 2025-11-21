@@ -14,16 +14,16 @@ import SnapKit
 final class DashboardSheetViewController: UIViewController {
     
     // MARK: - Properties
-
+    
     private let onDataChanged: (PillStatus?, String) -> Void
     private let onTimeChanged: ((Date) -> Void)?
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let timeProvider: TimeProvider
     private let disposeBag = DisposeBag()
     private var initialSideEffectIds: [String] = []
-
+    
     var titleText: String?
-
+    
     private typealias str = AppStrings.Dashboard
     
     // MARK: - Components
@@ -40,28 +40,28 @@ final class DashboardSheetViewController: UIViewController {
     )
     
     // MARK: - UI Components
-
+    
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         return scrollView
     }()
-
+    
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.font = Typography.headline5(.semibold)
         label.textColor = AppColor.textBlack
         return label
     }()
-
+    
     private lazy var contentStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 20
         return stack
     }()
-
+    
     private let timeSettingButton: SettingItemButton = {
         let button = SettingItemButton()
         button.configure(title: AppStrings.Setting.timeSettingTitle, iconSystemName: "clock")
@@ -90,12 +90,12 @@ final class DashboardSheetViewController: UIViewController {
         self.onTimeChanged = onTimeChanged
         self.userDefaultsManager = userDefaultsManager
         self.timeProvider = timeProvider
-
+        
         // 초기 메모에서 부작용 태그 파싱
         let parsedMemo = PillRecordMemo.fromJSONString(initialMemo)
         self.initialSideEffectIds = parsedMemo.sideEffectIds
-
-
+        
+        
         self.viewModel = DefaultDashboardSheetViewModel(
             selectedDate: selectedDate,
             initialMemo: parsedMemo.text,
@@ -112,7 +112,7 @@ final class DashboardSheetViewController: UIViewController {
     }
     
     // MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
@@ -120,52 +120,52 @@ final class DashboardSheetViewController: UIViewController {
         bindComponents()
         bindViewModel()
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
-
+        
+        
         // 부작용 관리에서 돌아올 때를 대비해 태그 목록을 다시 로드
         // (태그 추가/삭제/순서변경/visibility 변경 반영)
         sideEffectTagsView.reloadTags()
     }
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
-        }
+        
     }
-
+    
+    
     // MARK: - Setup
     
     private func setupViews() {
         view.backgroundColor = .clear
-
+        
         sheetAnimator.setupViews(in: view)
-
+        
         sheetAnimator.containerView.addSubview(scrollView)
         scrollView.addSubview(contentStackView)
-
+        
         subtitleLabel.text = titleText ?? title
         contentStackView.addArrangedSubview(subtitleLabel)
         contentStackView.addArrangedSubview(statusSelectionView)
         contentStackView.addArrangedSubview(timeSettingButton)
         contentStackView.addArrangedSubview(sideEffectTagsView)
-
+        
         setupConstraints()
     }
-
+    
     private func setupConstraints() {
         scrollView.snp.makeConstraints { make in
             make.top.equalTo(sheetAnimator.handleBar.snp.bottom).offset(24)
             make.leading.trailing.bottom.equalToSuperview()
         }
-
+        
         contentStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(24)
             make.width.equalTo(scrollView).inset(24)
         }
-
+        
         timeSettingButton.snp.makeConstraints { make in
             make.height.equalTo(56)
         }
@@ -234,22 +234,22 @@ final class DashboardSheetViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-//        output.isMemoPlaceholderHidden
-//            .drive()
-//            .disposed(by: disposeBag)
-//
+        //        output.isMemoPlaceholderHidden
+        //            .drive()
+        //            .disposed(by: disposeBag)
+        //
         output.dismiss
             .emit(onNext: { [weak self] status, memoText in
                 guard let self else { return }
-
+                
                 // 선택된 부작용 태그 ID 수집
                 let selectedTagIds = self.sideEffectTagsView.getSelectedTagIds()
-
+                
                 // 선택된 태그의 이름을 함께 저장 (삭제된 태그 대비)
                 let allTags = self.userDefaultsManager.loadSideEffectTags()
                 let selectedTags = allTags.filter { selectedTagIds.contains($0.id) }
                 let sideEffectNames = Dictionary(uniqueKeysWithValues: selectedTags.map { ($0.id, $0.name) })
-
+                
                 // PillRecordMemo로 결합하여 JSON 저장
                 let pillMemo = PillRecordMemo(
                     text: memoText,
@@ -257,8 +257,8 @@ final class DashboardSheetViewController: UIViewController {
                     sideEffectNames: sideEffectNames.isEmpty ? nil : sideEffectNames
                 )
                 let memoJSON = pillMemo.toJSONString()
-
-
+                
+                
                 self.onDataChanged(status, memoJSON)
                 self.sheetAnimator.hide()
             })

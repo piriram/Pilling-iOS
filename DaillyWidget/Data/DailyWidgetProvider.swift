@@ -138,7 +138,6 @@ struct DailyWidgetProvider: TimelineProvider {
            print("day 없음")
             return 0
         }
-        print("days:\(days)")
         return days + 1 // 1일차부터 시작
     }
 }

@@ -50,11 +50,8 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
                 scheduledTime: scheduledTime
             )
             
-            print("🆕 새 사이클 생성 - ID: \(cycle.id), StartDate: \(startDate)")
-            
             // 새 사이클 ID 저장
             self.userDefaultsManager.saveCurrentCycleID(cycle.id)
-            print("💾 currentCycleID 저장: \(cycle.id)")
             
             return self.cycleRepository.saveCycle(cycle)
                 .do(onNext: { _ in
