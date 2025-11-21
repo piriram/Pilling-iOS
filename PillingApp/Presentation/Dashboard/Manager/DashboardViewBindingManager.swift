@@ -213,21 +213,25 @@ final class DashboardViewBindingManager {
 
         // 페이지 컨트롤 업데이트
         output.pageControlState
+            .do(onNext: { state in
+                print("🔍 [DashboardViewBindingManager] pageControlState 원본 emit - currentIndex: \(state.currentIndex), totalCount: \(state.totalCount)")
+            })
+            .debounce(.milliseconds(100), scheduler: MainScheduler.instance)
             .filter { state in
                 // 완전한 데이터가 로드될 때까지 대기 (totalCount > 0)
                 let isValid = state.totalCount > 0
-                if !isValid {
-                    print("🔍 [DashboardViewBindingManager] pageControlState 필터링됨 - totalCount: \(state.totalCount)")
-                }
+                print("🔍 [DashboardViewBindingManager] pageControlState 필터 - totalCount: \(state.totalCount), isValid: \(isValid)")
                 return isValid
             }
             .distinctUntilChanged { prev, curr in
                 // 같은 값이 연속으로 오면 무시
-                prev.currentIndex == curr.currentIndex && prev.totalCount == curr.totalCount
+                let isDuplicate = prev.currentIndex == curr.currentIndex && prev.totalCount == curr.totalCount
+                print("🔍 [DashboardViewBindingManager] distinctUntilChanged - prev: (\(prev.currentIndex), \(prev.totalCount)), curr: (\(curr.currentIndex), \(curr.totalCount)), isDuplicate: \(isDuplicate)")
+                return isDuplicate
             }
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { state in
-                print("🔍 [DashboardViewBindingManager] pageControlState 업데이트")
+                print("🔍 [DashboardViewBindingManager] pageControl 최종 업데이트")
                 print("   📄 currentIndex: \(state.currentIndex), totalCount: \(state.totalCount)")
                 bottomView.pageControl.numberOfPages = max(1, state.totalCount)
                 bottomView.pageControl.currentPage = state.currentIndex
