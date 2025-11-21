@@ -24,6 +24,7 @@ final class StatisticsViewModel {
         let isLeftArrowEnabled: Observable<Bool>
         let isRightArrowEnabled: Observable<Bool>
         let periodList: Observable<[PeriodRecordDTO]>
+        let pageControlState: Observable<(currentIndex: Int, totalCount: Int)>  // 페이지 컨트롤용
     }
 
     private let fetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol
@@ -121,11 +122,20 @@ final class StatisticsViewModel {
         let periodList = input.periodButtonTapped
             .withLatestFrom(dataListSubject)
 
+        // 페이지 컨트롤 상태 (현재 인덱스, 전체 개수)
+        let pageControlState = Observable.combineLatest(currentIndexSubject, dataListSubject)
+            .map { (currentIndex: $0, totalCount: $1.count) }
+            .do(onNext: { state in
+                print("🔍 [StatisticsViewModel] pageControlState 업데이트")
+                print("   📄 currentIndex: \(state.currentIndex), totalCount: \(state.totalCount)")
+            })
+
         return Output(
             currentPeriodData: currentPeriodData,
             isLeftArrowEnabled: isLeftArrowEnabled,
             isRightArrowEnabled: isRightArrowEnabled,
-            periodList: periodList
+            periodList: periodList,
+            pageControlState: pageControlState
         )
     }
 

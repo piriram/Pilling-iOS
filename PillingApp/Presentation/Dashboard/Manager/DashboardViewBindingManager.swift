@@ -48,6 +48,7 @@ final class DashboardViewBindingManager {
         
         bindStasticsViewModel(
             stasticsView: stasticsView,
+            bottomView: bottomView,
             sheetPresenter: sheetPresenter
         )
         
@@ -77,7 +78,6 @@ final class DashboardViewBindingManager {
                 print("🔍 [DashboardViewBindingManager] viewModel.items 업데이트")
                 print("   📊 items.count: \(items.count)")
                 infoView.applyCalendarSnapshot(with: items)
-                bottomView.updatePageControl(for: items.count)
             })
             .disposed(by: disposeBag)
         
@@ -154,6 +154,7 @@ final class DashboardViewBindingManager {
     
     private func bindStasticsViewModel(
         stasticsView: StatisticsContentView,
+        bottomView: DashboardBottomView,
         sheetPresenter: DashboardSheetPresenter
     ) {
         let viewDidLoadSubject = PublishSubject<Void>()
@@ -209,7 +210,19 @@ final class DashboardViewBindingManager {
                 )
             })
             .disposed(by: disposeBag)
-        
+
+        // 페이지 컨트롤 업데이트
+        output.pageControlState
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { state in
+                print("🔍 [DashboardViewBindingManager] pageControlState 업데이트")
+                print("   📄 currentIndex: \(state.currentIndex), totalCount: \(state.totalCount)")
+                bottomView.pageControl.numberOfPages = max(1, state.totalCount)
+                bottomView.pageControl.currentPage = state.currentIndex
+                print("   ✅ pageControl 설정 완료 - numberOfPages: \(bottomView.pageControl.numberOfPages), currentPage: \(bottomView.pageControl.currentPage)")
+            })
+            .disposed(by: disposeBag)
+
         stasticsView.leftArrowTapped = {
             leftArrowTappedSubject.onNext(())
         }
