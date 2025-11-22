@@ -50,12 +50,13 @@ final class CenterAlignedCollectionViewFlowLayout: UICollectionViewFlowLayout {
 }
 
 final class SideEffectTagsView: UIView {
-    
+
     // MARK: - Properties
 
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private var sideEffectTags: [SideEffectTag] = []
     private var selectedTagIds: Set<String> = []
+    private var collectionViewHeightConstraint: Constraint?
 
     // MARK: - Observables
 
@@ -99,6 +100,12 @@ final class SideEffectTagsView: UIView {
         super.init(frame: .zero)
         setupViews()
         loadSideEffectTags()
+        collectionView.reloadData()
+
+        // 초기 높이 설정을 다음 runloop로 지연 (레이아웃 계산 완료 대기)
+        DispatchQueue.main.async { [weak self] in
+            self?.updateCollectionViewHeight()
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -116,27 +123,10 @@ final class SideEffectTagsView: UIView {
         containerStack.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-    }
 
-    override var intrinsicContentSize: CGSize {
-        // 컨텐츠 스택의 intrinsic size를 기반으로 계산
-        let labelHeight = sectionLabel.intrinsicContentSize.height
-        let spacing: CGFloat = 12 // containerStack.spacing
-
-        collectionView.layoutIfNeeded()
-        let collectionHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
-
-        let totalHeight = labelHeight + spacing + max(collectionHeight, 44)
-        return CGSize(width: UIView.noIntrinsicMetric, height: totalHeight)
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        // CollectionView의 컨텐츠 크기 변경 감지
-        let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
-        if contentHeight > 0 {
-            invalidateIntrinsicContentSize()
+        // CollectionView 초기 높이 설정 (최소 높이)
+        collectionView.snp.makeConstraints { make in
+            collectionViewHeightConstraint = make.height.equalTo(44).constraint
         }
     }
     
@@ -163,8 +153,7 @@ final class SideEffectTagsView: UIView {
         }
 
         collectionView.reloadData()
-        collectionView.layoutIfNeeded()
-        invalidateIntrinsicContentSize()
+        updateCollectionViewHeight()
         print("   ✅ reloadTags 완료")
     }
 
@@ -175,15 +164,13 @@ final class SideEffectTagsView: UIView {
     func setSelectedTagIds(_ ids: [String]) {
         selectedTagIds = Set(ids)
         collectionView.reloadData()
-        collectionView.layoutIfNeeded()
-        invalidateIntrinsicContentSize()
+        updateCollectionViewHeight()
     }
 
     func clearSelection() {
         selectedTagIds.removeAll()
         collectionView.reloadData()
-        collectionView.layoutIfNeeded()
-        invalidateIntrinsicContentSize()
+        updateCollectionViewHeight()
     }
     
     // MARK: - Private Methods
@@ -202,6 +189,22 @@ final class SideEffectTagsView: UIView {
         for (i, tag) in sideEffectTags.enumerated() {
             print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
         }
+    }
+
+    private func updateCollectionViewHeight() {
+        // CollectionView의 layout을 강제로 업데이트하여 contentSize 계산
+        collectionView.layoutIfNeeded()
+
+        // contentSize를 기반으로 높이 계산
+        let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
+        let finalHeight = max(contentHeight, 44) // 최소 높이 44
+
+        // Constraint 업데이트
+        collectionViewHeightConstraint?.update(offset: finalHeight)
+
+        // 부모 뷰에게 레이아웃 업데이트 알림
+        setNeedsLayout()
+        layoutIfNeeded()
     }
 }
 
@@ -231,7 +234,7 @@ extension SideEffectTagsView: UICollectionViewDataSource {
 // MARK: - UICollectionViewDelegate
 
 extension SideEffectTagsView: UICollectionViewDelegate {
-    
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.item == sideEffectTags.count {
             addButtonTapped.accept(())
@@ -246,5 +249,9 @@ extension SideEffectTagsView: UICollectionViewDelegate {
         }
 
         collectionView.reloadItems(at: [indexPath])
+        // 태그 선택 시 높이 변화는 없지만, 안정성을 위해 호출
+        DispatchQueue.main.async { [weak self] in
+            self?.updateCollectionViewHeight()
+        }
     }
 }
