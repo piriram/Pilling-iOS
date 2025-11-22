@@ -12,19 +12,20 @@ import RxCocoa
 // MARK: - DashboardViewModel
 
 final class DashboardViewModel {
-    
+
     private let fetchDashboardDataUseCase: FetchDashboardDataUseCaseProtocol
     private let takePillUseCase: TakePillUseCaseProtocol
     private let updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol
     private let calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let settingsRepository: UserDefaultsProtocol
-    
+    private let notificationManager: NotificationManagerProtocol
+
     private let disposeBag = DisposeBag()
     private let calendar = Calendar.current
-    
+
     // MARK: - Outputs
-    
+
     let settings = BehaviorRelay<UserSettings>(value: .default)
     let currentCycle = BehaviorRelay<Cycle?>(value: nil)
     let items = BehaviorRelay<[DayItem]>(value: [])
@@ -32,6 +33,7 @@ final class DashboardViewModel {
     let canTakePill = BehaviorRelay<Bool>(value: false)
     let pillInfo = BehaviorRelay<PillInfo?>(value: nil)
     let showRetryAlert = PublishRelay<Void>()
+    let showNewCycleAlert = PublishRelay<Void>()
     
     // MARK: - Initialization
     
@@ -41,7 +43,8 @@ final class DashboardViewModel {
         updatePillStatusUseCase: UpdatePillStatusUseCaseProtocol,
         calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
-        settingsRepository: UserDefaultsProtocol
+        settingsRepository: UserDefaultsProtocol,
+        notificationManager: NotificationManagerProtocol
     ) {
         self.fetchDashboardDataUseCase = fetchDashboardDataUseCase
         self.takePillUseCase = takePillUseCase
@@ -49,8 +52,9 @@ final class DashboardViewModel {
         self.calculateDashboardMessageUseCase = calculateDashboardMessageUseCase
         self.userDefaultsManager = userDefaultsManager
         self.settingsRepository = settingsRepository
-        
-        
+        self.notificationManager = notificationManager
+
+
         loadDashboardData()
         loadPillInfo()
     }
@@ -299,13 +303,20 @@ final class DashboardViewModel {
     func takePill() {
         guard let cycle = currentCycle.value else { return }
         let takenAt = Date()
-        
+
         takePillUseCase.execute(cycle: cycle, settings: settings.value, takenAt: takenAt)
             .subscribe(onNext: { [weak self] updatedCycle in
-                self?.currentCycle.accept(updatedCycle)
-                self?.updateItems()
-                self?.updateDashboardMessage()
-                self?.updateCanTakePill()
+                guard let self = self else { return }
+                self.currentCycle.accept(updatedCycle)
+                self.updateItems()
+                self.updateDashboardMessage()
+                self.updateCanTakePill()
+
+                // 알림 업데이트 (위약 기간 반영)
+                self.updateNotificationMessage(with: updatedCycle)
+
+                // 사이클 완료 확인
+                self.checkCycleCompletion(updatedCycle)
             })
             .disposed(by: disposeBag)
     }
@@ -334,7 +345,7 @@ final class DashboardViewModel {
             print("❌ updateState: cycle이 nil입니다")
             return
         }
-        
+
         updatePillStatusUseCase.execute(
             cycle: cycle,
             recordIndex: index,
@@ -344,22 +355,49 @@ final class DashboardViewModel {
         )
         .subscribe(
             onNext: { [weak self] updatedCycle in
-                
+                guard let self = self else { return }
+
                 if index < updatedCycle.records.count {
                 }
-                
-                self?.currentCycle.accept(updatedCycle)
-                
-                self?.updateItems()
-                
-                self?.updateDashboardMessage()
-                
-                self?.updateCanTakePill()
+
+                self.currentCycle.accept(updatedCycle)
+
+                self.updateItems()
+
+                self.updateDashboardMessage()
+
+                self.updateCanTakePill()
+
+                // 알림 업데이트 (위약 기간 반영)
+                self.updateNotificationMessage(with: updatedCycle)
+
+                // 사이클 완료 확인
+                self.checkCycleCompletion(updatedCycle)
             },
             onError: { error in
                 print("❌ UseCase 에러: \(error)")
             }
         )
         .disposed(by: disposeBag)
+    }
+
+    // MARK: - Notification & Cycle Completion
+
+    private func updateNotificationMessage(with cycle: Cycle) {
+        let currentSettings = settings.value
+        notificationManager.scheduleDailyNotification(
+            at: currentSettings.scheduledTime,
+            isEnabled: currentSettings.notificationEnabled,
+            message: currentSettings.notificationMessage,
+            cycle: cycle
+        )
+        .subscribe()
+        .disposed(by: disposeBag)
+    }
+
+    private func checkCycleCompletion(_ cycle: Cycle) {
+        if cycle.isCycleCompleted() {
+            showNewCycleAlert.accept(())
+        }
     }
 }

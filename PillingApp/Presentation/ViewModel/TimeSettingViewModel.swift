@@ -127,7 +127,8 @@ final class TimeSettingViewModel {
                 return self.notificationManager.scheduleDailyNotification(
                     at: self.selectedTime.value,
                     isEnabled: self.isAlarmEnabled.value,
-                    message: UserSettings.default.notificationMessage
+                    message: UserSettings.default.notificationMessage,
+                    cycle: nil
                 )
             }
             .flatMap { [weak self] _ -> Observable<Void> in

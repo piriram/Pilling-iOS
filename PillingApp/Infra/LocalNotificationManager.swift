@@ -45,27 +45,35 @@ final class LocalNotificationManager: NotificationManagerProtocol {
         }
     }
     
-    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String) -> Observable<Void> {
+    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String, cycle: Cycle? = nil) -> Observable<Void> {
         return Observable.create { [weak self] observer in
             guard let self = self else {
                 observer.onError(NotificationError.schedulingFailed)
                 return Disposables.create()
             }
-            
+
             // 기존 알림 삭제
             self.notificationCenter.removePendingNotificationRequests(withIdentifiers: [self.notificationIdentifier])
-            
+
             // 알림이 비활성화된 경우 바로 완료
             guard isEnabled else {
                 observer.onNext(())
                 observer.onCompleted()
                 return Disposables.create()
             }
-            
+
+            // 위약 기간인지 확인하여 메시지 결정
+            let finalMessage: String
+            if let cycle = cycle, cycle.isCurrentlyInBreakPeriod() {
+                finalMessage = "지금은 휴식 기간이에요"
+            } else {
+                finalMessage = message
+            }
+
             // 알림 콘텐츠 설정
             let content = UNMutableNotificationContent()
             content.title = "잔디 타임"
-            content.body = message
+            content.body = finalMessage
             content.sound = .default
             content.badge = 1
             
@@ -122,7 +130,7 @@ final class LocalNotificationManager: NotificationManagerProtocol {
 
 protocol NotificationManagerProtocol {
     func requestAuthorization() -> Observable<Bool>
-    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String) -> Observable<Void>
+    func scheduleDailyNotification(at time: Date, isEnabled: Bool, message: String, cycle: Cycle?) -> Observable<Void>
     func cancelAllNotifications()
     func checkAuthorizationStatus() -> Observable<Bool>
 }

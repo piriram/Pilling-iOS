@@ -182,7 +182,8 @@ final class SettingViewModel {
                 return self.notificationManager.scheduleDailyNotification(
                     at: date,
                     isEnabled: currentSettings.notificationEnabled,
-                    message: currentSettings.notificationMessage
+                    message: currentSettings.notificationMessage,
+                    cycle: nil
                 )
             }
             .do(onNext: { [weak self] in
@@ -212,7 +213,8 @@ final class SettingViewModel {
                 return self.notificationManager.scheduleDailyNotification(
                     at: currentSettings.scheduledTime,
                     isEnabled: currentSettings.notificationEnabled,
-                    message: message
+                    message: message,
+                    cycle: nil
                 )
             }
             .do(onNext: { [weak self] in
@@ -262,7 +264,8 @@ final class SettingViewModel {
                 return self.notificationManager.scheduleDailyNotification(
                     at: currentSettings.scheduledTime,
                     isEnabled: isEnabled,
-                    message: currentSettings.notificationMessage
+                    message: currentSettings.notificationMessage,
+                    cycle: nil
                 )
             }
             .flatMap { [weak self] _ -> Observable<Void> in

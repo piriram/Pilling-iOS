@@ -37,7 +37,8 @@ final class DashboardViewBindingManager {
         coordinator: DashboardCoordinator,
         sheetPresenter: DashboardSheetPresenter,
         onBackgroundUpdate: @escaping () -> Void,
-        onRetryAlert: @escaping (@escaping () -> Void) -> Void
+        onRetryAlert: @escaping (@escaping () -> Void) -> Void,
+        onNewCycleAlert: @escaping () -> Void
     ) {
         bindViewModel(
             infoView: infoView,
@@ -45,22 +46,22 @@ final class DashboardViewBindingManager {
             sheetPresenter: sheetPresenter,
             onBackgroundUpdate: onBackgroundUpdate
         )
-        
+
         bindStasticsViewModel(
             stasticsView: stasticsView,
             bottomView: bottomView,
             sheetPresenter: sheetPresenter
         )
-        
+
         bindTopButtons(
             topButtonsView: topButtonsView,
             coordinator: coordinator,
             sheetPresenter: sheetPresenter
         )
-        
+
         bindBottomView(bottomView: bottomView)
-        
-        bindAlert(onRetryAlert: onRetryAlert)
+
+        bindAlert(onRetryAlert: onRetryAlert, onNewCycleAlert: onNewCycleAlert)
     }
     
     // MARK: - Private Binding Methods
@@ -265,7 +266,7 @@ final class DashboardViewBindingManager {
             .disposed(by: disposeBag)
     }
     
-    private func bindAlert(onRetryAlert: @escaping (@escaping () -> Void) -> Void) {
+    private func bindAlert(onRetryAlert: @escaping (@escaping () -> Void) -> Void, onNewCycleAlert: @escaping () -> Void) {
         viewModel.showRetryAlert
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] in
@@ -273,6 +274,13 @@ final class DashboardViewBindingManager {
                 onRetryAlert { [weak self] in
                     self?.viewModel.reloadData()
                 }
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.showNewCycleAlert
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: {
+                onNewCycleAlert()
             })
             .disposed(by: disposeBag)
     }
