@@ -148,10 +148,20 @@ final class SideEffectTagsView: UIView {
     // MARK: - Public Methods
 
     func reloadTags() {
+        print("🔍 [SideEffectTagsView] reloadTags() 호출")
+        print("   📊 reload 전 sideEffectTags.count: \(sideEffectTags.count)")
+
         loadSideEffectTags()
+
+        print("   📊 reload 후 sideEffectTags.count: \(sideEffectTags.count)")
+        for (i, tag) in sideEffectTags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+        }
+
         collectionView.reloadData()
         setNeedsLayout()
         layoutIfNeeded()
+        print("   ✅ reloadTags 완료")
     }
 
     func getSelectedTagIds() -> [String] {
@@ -175,8 +185,19 @@ final class SideEffectTagsView: UIView {
     // MARK: - Private Methods
     
     private func loadSideEffectTags() {
+        print("🔍 [SideEffectTagsView] loadSideEffectTags() 호출")
+
         let allTags = userDefaultsManager.loadSideEffectTags()
+        print("   📦 userDefaultsManager에서 받은 태그: \(allTags.count)개")
+        for (i, tag) in allTags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+        }
+
         sideEffectTags = allTags.filter { $0.isVisible }.sorted { $0.order < $1.order }
+        print("   🔍 visible만 필터링: \(sideEffectTags.count)개")
+        for (i, tag) in sideEffectTags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+        }
     }
 }
 

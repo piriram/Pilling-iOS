@@ -134,19 +134,46 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
     
     /// 부작용 태그 저장
     func saveSideEffectTags(_ tags: [SideEffectTag]) {
+        print("🔍 [UserDefaultsManager] saveSideEffectTags() 호출")
+        print("   💾 저장할 태그: \(tags.count)개")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order), id: \(tag.id)")
+        }
+
         if let encoded = try? JSONEncoder().encode(tags) {
             userDefaults.set(encoded, forKey: UserDefaultsKey.sideEffectTags.rawValue)
+            print("   ✅ UserDefaults에 저장 성공")
+
+            // 저장 직후 다시 읽어서 확인
+            if let savedData = userDefaults.data(forKey: UserDefaultsKey.sideEffectTags.rawValue),
+               let savedTags = try? JSONDecoder().decode([SideEffectTag].self, from: savedData) {
+                print("   🔍 저장 검증: \(savedTags.count)개 읽음")
+                for (i, tag) in savedTags.enumerated() {
+                    print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+                }
+            }
+        } else {
+            print("   ❌ JSON 인코딩 실패")
         }
     }
     
     /// 부작용 태그 로드 (기본값 포함)
     func loadSideEffectTags() -> [SideEffectTag] {
+        print("🔍 [UserDefaultsManager] loadSideEffectTags() 호출")
+
         if let data = userDefaults.data(forKey: UserDefaultsKey.sideEffectTags.rawValue),
            let tags = try? JSONDecoder().decode([SideEffectTag].self, from: data) {
+            print("   📦 UserDefaults에서 로드: \(tags.count)개")
+            for (i, tag) in tags.enumerated() {
+                print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order), id: \(tag.id)")
+            }
             return tags
         }
 
-        return createDefaultSideEffectTags()
+        print("   ⚠️ UserDefaults에 데이터 없음, 기본 태그 생성")
+        let defaultTags = createDefaultSideEffectTags()
+        print("   🆕 기본 태그 \(defaultTags.count)개 생성")
+        return defaultTags
     }
     
     /// 기본 부작용 태그 생성

@@ -162,8 +162,14 @@ final class SideEffectManagementViewController: UIViewController {
     // MARK: - Data
     
     private func loadInitialData() {
+        print("🔍 [부작용 관리] loadInitialData() 호출")
         tags = userDefaultsManager.loadSideEffectTags()
+        print("   📦 로드된 태그: \(tags.count)개")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+        }
         sortTagsByVisibility()
+        print("   ✅ sortTagsByVisibility 완료")
     }
     
     private func applySnapshot(animating: Bool = true) {
@@ -177,16 +183,27 @@ final class SideEffectManagementViewController: UIViewController {
         // UISwitch의 위치로부터 실제 IndexPath 찾기 (sender.tag는 신뢰할 수 없음)
         guard let cell = sender.superview?.superview as? UICollectionViewCell,
               let indexPath = collectionView.indexPath(for: cell) else {
+            print("🔍 [부작용 토글] ❌ cell 또는 indexPath를 찾을 수 없음")
             return
         }
 
         let index = indexPath.row
         guard index < tags.count else {
+            print("🔍 [부작용 토글] ❌ index(\(index))가 tags.count(\(tags.count))를 초과")
             return
         }
 
         let changedTagId = tags[index].id
+        let changedTagName = tags[index].name
         let nowVisible = sender.isOn
+
+        print("🔍 [부작용 토글] 토글 시작")
+        print("   📝 태그: '\(changedTagName)' (id: \(changedTagId))")
+        print("   🔄 변경: \(tags[index].isVisible) → \(nowVisible)")
+        print("   📊 토글 전 tags 상태: \(tags.count)개")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+        }
 
         // 토글된 태그를 배열에서 제거
         var changedTag = tags.remove(at: index)
@@ -210,6 +227,11 @@ final class SideEffectManagementViewController: UIViewController {
             tags[i].order = i
         }
 
+        print("   📊 토글 후 tags 상태: \(tags.count)개")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+        }
+
         persistTags()
 
         var snapshot = Snapshot()
@@ -222,6 +244,7 @@ final class SideEffectManagementViewController: UIViewController {
         }
 
         dataSource.apply(snapshot, animatingDifferences: true)
+        print("   ✅ 토글 완료 및 스냅샷 적용")
     }
     
     private func syncArrayFromSnapshot() {
@@ -244,7 +267,13 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     private func persistTags() {
+        print("🔍 [부작용 관리] persistTags() 호출 - 저장 시작")
+        print("   💾 저장할 태그 수: \(tags.count)")
+        for (i, tag) in tags.enumerated() {
+            print("      [\(i)] \(tag.name) - visible: \(tag.isVisible), order: \(tag.order)")
+        }
         userDefaultsManager.saveSideEffectTags(tags)
+        print("   ✅ saveSideEffectTags 호출 완료")
     }
     
     // MARK: - Actions
