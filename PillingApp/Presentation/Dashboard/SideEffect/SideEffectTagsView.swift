@@ -116,23 +116,27 @@ final class SideEffectTagsView: UIView {
         containerStack.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+    }
 
-        // 초기 최소 높이 설정 (1~2줄 정도)
-        collectionView.snp.makeConstraints { make in
-            make.height.greaterThanOrEqualTo(44)
-        }
+    override var intrinsicContentSize: CGSize {
+        // 컨텐츠 스택의 intrinsic size를 기반으로 계산
+        let labelHeight = sectionLabel.intrinsicContentSize.height
+        let spacing: CGFloat = 12 // containerStack.spacing
+
+        collectionView.layoutIfNeeded()
+        let collectionHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
+
+        let totalHeight = labelHeight + spacing + max(collectionHeight, 44)
+        return CGSize(width: UIView.noIntrinsicMetric, height: totalHeight)
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
 
-        // CollectionView의 컨텐츠 크기에 맞게 높이 조정
-        collectionView.layoutIfNeeded()
+        // CollectionView의 컨텐츠 크기 변경 감지
         let contentHeight = collectionView.collectionViewLayout.collectionViewContentSize.height
         if contentHeight > 0 {
-            collectionView.snp.remakeConstraints { make in
-                make.height.equalTo(contentHeight)
-            }
+            invalidateIntrinsicContentSize()
         }
     }
     
@@ -159,8 +163,8 @@ final class SideEffectTagsView: UIView {
         }
 
         collectionView.reloadData()
-        setNeedsLayout()
-        layoutIfNeeded()
+        collectionView.layoutIfNeeded()
+        invalidateIntrinsicContentSize()
         print("   ✅ reloadTags 완료")
     }
 
@@ -171,15 +175,15 @@ final class SideEffectTagsView: UIView {
     func setSelectedTagIds(_ ids: [String]) {
         selectedTagIds = Set(ids)
         collectionView.reloadData()
-        setNeedsLayout()
-        layoutIfNeeded()
+        collectionView.layoutIfNeeded()
+        invalidateIntrinsicContentSize()
     }
 
     func clearSelection() {
         selectedTagIds.removeAll()
         collectionView.reloadData()
-        setNeedsLayout()
-        layoutIfNeeded()
+        collectionView.layoutIfNeeded()
+        invalidateIntrinsicContentSize()
     }
     
     // MARK: - Private Methods
