@@ -180,10 +180,25 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     @objc private func didToggleVisibility(_ sender: UISwitch) {
-        // UISwitch의 위치로부터 실제 IndexPath 찾기 (sender.tag는 신뢰할 수 없음)
-        guard let cell = sender.superview?.superview as? UICollectionViewCell,
+        // UISwitch의 위치로부터 실제 IndexPath 찾기
+        var currentView: UIView? = sender
+        var cell: UICollectionViewCell?
+
+        // 뷰 계층을 올라가면서 UICollectionViewCell 찾기
+        while currentView != nil {
+            if let foundCell = currentView as? UICollectionViewCell {
+                cell = foundCell
+                break
+            }
+            currentView = currentView?.superview
+        }
+
+        guard let cell = cell,
               let indexPath = collectionView.indexPath(for: cell) else {
             print("🔍 [부작용 토글] ❌ cell 또는 indexPath를 찾을 수 없음")
+            print("   sender.superview: \(String(describing: sender.superview))")
+            print("   sender.superview?.superview: \(String(describing: sender.superview?.superview))")
+            print("   sender.superview?.superview?.superview: \(String(describing: sender.superview?.superview?.superview))")
             return
         }
 
