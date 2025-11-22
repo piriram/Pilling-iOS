@@ -166,8 +166,49 @@ final class DashboardViewController: UIViewController {
             },
             onRetryAlert: { [weak self] retryHandler in
                 self?.presentRetryAlert(retryHandler: retryHandler)
+            },
+            onNewCycleAlert: { [weak self] in
+                self?.presentNewCycleAlert()
             }
         )
+    }
+
+    private func presentNewCycleAlert() {
+        let alert = UIAlertController(
+            title: "새 약 설정하기",
+            message: "사이클이 완료되었습니다.\n새로운 약을 설정하시겠습니까?",
+            preferredStyle: .alert
+        )
+
+        let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            self?.coordinator.navigateToPillSetting()
+        }
+
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+
+        present(alert, animated: true)
+    }
+
+    private func presentRetryAlert(retryHandler: @escaping () -> Void) {
+        let alert = UIAlertController(
+            title: "오류",
+            message: "데이터를 불러오는데 실패했습니다.\n다시 시도하시겠습니까?",
+            preferredStyle: .alert
+        )
+
+        let retryAction = UIAlertAction(title: "재시도", style: .default) { _ in
+            retryHandler()
+        }
+
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+
+        alert.addAction(cancelAction)
+        alert.addAction(retryAction)
+
+        present(alert, animated: true)
     }
 
     private func setupAppLifecycleObserver() {

@@ -102,7 +102,8 @@ final class DIContainer {
             updatePillStatusUseCase: makeUpdatePillStatusUseCase(),
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase(),
             userDefaultsManager: userDefaultsManager,
-            settingsRepository: settingsRepository
+            settingsRepository: settingsRepository,
+            notificationManager: notificationManager
         )
     }
     

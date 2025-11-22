@@ -38,4 +38,13 @@ final class DashboardCoordinator {
         let viewController = CycleHistoryViewController(viewModel: viewModel)
         navigationController.pushViewController(viewController, animated: true)
     }
+
+    func navigateToPillSetting() {
+        guard let navigationController = navigationController else {
+            return
+        }
+        let viewModel = DIContainer.shared.makePillSettingViewModel()
+        let viewController = PillSettingViewController(viewModel: viewModel)
+        navigationController.pushViewController(viewController, animated: true)
+    }
 }
