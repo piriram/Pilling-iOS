@@ -243,7 +243,12 @@ final class DashboardViewController: UIViewController {
     private func handleViewIndexChanged(_ index: DashboardViewTransitionManager.ViewIndex) {
         bottomView.pageControl.numberOfPages = 2
         bottomView.pageControl.currentPage = index.rawValue
-        
-        topButtonsView.isHistoryButtonHidden = (index == .statistics)
+
+        // shouldHideHistoryButton이 true면 항상 숨김, 아니면 statistics 뷰일 때만 숨김
+        if shouldHideHistoryButton {
+            topButtonsView.isHistoryButtonHidden = true
+        } else {
+            topButtonsView.isHistoryButtonHidden = (index == .statistics)
+        }
     }
 }
