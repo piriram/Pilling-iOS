@@ -89,7 +89,7 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
             } else if dayDateStartOfDay > today {
                 status = .scheduled
             } else if dayDateStartOfDay == today {
-                status = .todayNotTaken
+                status = .notTaken
             } else {
                 status = .taken
             }
