@@ -45,11 +45,11 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
         
         let newStatus: PillStatus = {
             if isTooEarly {
-                return .todayTakenTooEarly
+                return .takenTooEarly
             } else if isWithinWindow {
-                return .todayTaken
+                return .taken
             } else {
-                return .todayTakenDelayed
+                return .takenDelayed
             }
         }()
         
