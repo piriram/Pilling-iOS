@@ -21,9 +21,9 @@ final class PillStatusFactory {
 
         if isRestDay {
             return PillStatusModel(
-                baseStatus: .rest,
+                baseStatus: PillStatus.rest,
                 timeContext: timeContext,
-                medicalTiming: .onTime,
+                medicalTiming: MedicalTiming.onTime,
                 scheduledDate: scheduledDate,
                 actionDate: actionDate
             )
@@ -51,27 +51,27 @@ final class PillStatusFactory {
         let scheduledDay = timeProvider.startOfDay(for: scheduledDate)
         let today = timeProvider.startOfDay(for: evaluationDate)
 
-        if scheduledDay < today { return .past }
-        if scheduledDay > today { return .future }
-        return .present
+        if scheduledDay < today { return TimeContext.past }
+        if scheduledDay > today { return TimeContext.future }
+        return TimeContext.present
     }
 
     private func determineMedicalTiming(timeElapsed: TimeInterval) -> MedicalTiming {
         switch timeElapsed {
         case ..<TimeThreshold.tooEarly:
-            return .tooEarly
+            return MedicalTiming.tooEarly
         case TimeThreshold.tooEarly..<0:
-            return .upcoming
+            return MedicalTiming.upcoming
         case 0..<TimeThreshold.normal:
-            return .onTime
+            return MedicalTiming.onTime
         case TimeThreshold.normal..<TimeThreshold.delayed:
-            return .slightDelay
+            return MedicalTiming.slightDelay
         case TimeThreshold.delayed..<TimeThreshold.critical:
-            return .moderate
+            return MedicalTiming.moderate
         case TimeThreshold.critical..<TimeThreshold.fullyMissed:
-            return .recent
+            return MedicalTiming.recent
         default:
-            return .missed
+            return MedicalTiming.missed
         }
     }
 
@@ -85,23 +85,23 @@ final class PillStatusFactory {
             let actionTimeDiff = actionDate.timeIntervalSince(scheduledDate)
 
             if actionTimeDiff < TimeThreshold.tooEarly {
-                return .takenTooEarly
+                return PillStatus.takenTooEarly
             } else if abs(actionTimeDiff) <= TimeThreshold.normal {
-                return .taken
+                return PillStatus.taken
             } else {
-                return .takenDelayed
+                return PillStatus.takenDelayed
             }
         }
 
         switch medicalTiming {
         case .tooEarly, .upcoming:
-            return .scheduled
+            return PillStatus.scheduled
         case .onTime, .slightDelay, .moderate:
-            return .notTaken
+            return PillStatus.notTaken
         case .recent:
-            return .recentlyMissed
+            return PillStatus.recentlyMissed
         case .missed:
-            return .missed
+            return PillStatus.missed
         }
     }
 }
