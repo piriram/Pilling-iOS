@@ -97,10 +97,10 @@ final class DashboardCalendarCell: UICollectionViewCell {
             innerBorderView.layer.cornerRadius = defaultCornerRadius - 3
         }
         
-        if item.status.isToday {
+        if item.isToday {
             backgroundShapeView.layer.borderWidth = 3
             backgroundShapeView.layer.borderColor = AppColor.pillBorder.cgColor
-            
+
             // inner shadow 대체: 안쪽에 반투명 녹색 border
             innerBorderView.isHidden = false
             innerBorderView.layer.borderColor = AppColor.pillGreen800.withAlphaComponent(0.3).cgColor
