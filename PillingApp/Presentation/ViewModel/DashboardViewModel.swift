@@ -144,44 +144,44 @@ final class DashboardViewModel {
         let currentScheduledTime = settings.value.scheduledTime
 
         let dayItems = visibleRecords.map { record in
-            var adjustedStatus = record.status.adjustedForDate(record.scheduledDateTime, calendar: calendar)
-            
+            var displayStatus = record.status
+
             if calendar.isDateInToday(record.scheduledDateTime) {
                 let todayScheduledDateTime = calculateTodayScheduledTime(
                     from: currentScheduledTime,
                     calendar: calendar
                 )
-                
-                if adjustedStatus != .rest {
+
+                if displayStatus != .rest {
                     if record.status == .takenDouble {
-                        adjustedStatus = .takenDouble
+                        displayStatus = .takenDouble
                     }
-                    else if !adjustedStatus.isTaken {
+                    else if !record.status.isTaken {
                         let timeInterval = now.timeIntervalSince(todayScheduledDateTime)
                         let twoHours: TimeInterval = 2 * 60 * 60
                         let fourHours: TimeInterval = 4 * 60 * 60
-                        
+
                         if timeInterval >= fourHours {
-                            adjustedStatus = .todayDelayedCritical
+                            displayStatus = .recentlyMissed
                         } else if timeInterval >= twoHours {
-                            adjustedStatus = .todayDelayed
+                            displayStatus = .takenDelayed
                         } else {
-                            adjustedStatus = .todayNotTaken
+                            displayStatus = .notTaken
                         }
                     }
                     else if let takenAt = record.takenAt {
-                        adjustedStatus = calculateTakenStatus(
+                        displayStatus = calculateTakenStatus(
                             takenAt: takenAt,
                             scheduledDateTime: todayScheduledDateTime
                         )
                     }
                 }
             }
-            
+
             return DayItem(
                 cycleDay: record.cycleDay,
                 date: record.scheduledDateTime,
-                status: adjustedStatus,
+                status: displayStatus,
                 scheduledDateTime: record.scheduledDateTime
             )
         }
@@ -213,15 +213,15 @@ final class DashboardViewModel {
     ) -> PillStatus {
         let timeInterval = takenAt.timeIntervalSince(scheduledDateTime)
         let twoHours: TimeInterval = 2 * 60 * 60
-        
+
         if timeInterval < -twoHours {
-            return .todayTakenTooEarly
+            return .takenTooEarly
         }
         else if timeInterval > twoHours {
-            return .todayTakenDelayed
+            return .takenDelayed
         }
         else {
-            return .todayTaken
+            return .taken
         }
     }
     
@@ -249,13 +249,12 @@ final class DashboardViewModel {
             canTakePill.accept(false)
             return
         }
-        
-        let adjustedStatus = todayRecord.status.adjustedForDate(todayRecord.scheduledDateTime, calendar: calendar)
-        if adjustedStatus.isTaken {
+
+        if todayRecord.status.isTaken {
             canTakePill.accept(false)
             return
         }
-        
+
         canTakePill.accept(true)
     }
     
