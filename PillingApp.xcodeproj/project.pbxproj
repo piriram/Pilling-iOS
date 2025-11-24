@@ -93,6 +93,7 @@
 				Domain/Entity/SetupError.swift,
 				Domain/Entity/SideEffectTag.swift,
 				Domain/Entity/UserDefaultsKey.swift,
+				Domain/Models/Pill/CoreDataPillStatusMapper.swift,
 				Domain/Models/Pill/MedicalTiming.swift,
 				Domain/Models/Pill/PillStatus.swift,
 				Domain/Models/Pill/PillStatusFactory.swift,
