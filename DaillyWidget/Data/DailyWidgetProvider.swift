@@ -3,9 +3,15 @@ import WidgetKit
 // MARK: - PillingDailyWidgetProvider
 
 struct DailyWidgetProvider: TimelineProvider {
-    
+
     private let coreDataManager = SharedCoreDataManager.shared
-    private let calculateMessageUseCase = CalculateMessageUseCase()
+    private let timeProvider = SystemTimeProvider()
+    private lazy var statusFactory: PillStatusFactory = {
+        PillStatusFactory(timeProvider: timeProvider)
+    }()
+    private lazy var calculateMessageUseCase: CalculateMessageUseCase = {
+        CalculateMessageUseCase(statusFactory: statusFactory, timeProvider: timeProvider)
+    }()
     
     // MARK: - TimelineProvider
     

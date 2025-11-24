@@ -9,25 +9,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
+
         configureIQKeyboardManager()
-        
-        // Window 생성
+
         let window = UIWindow(windowScene: windowScene)
         self.window = window
-        //        self.showTest()
-        //        window.makeKeyAndVisible()
-        // 기록 중인 사이클이 있는지 확인
+
+        let wasReset = VersionManager.shared.checkAndResetIfNeeded()
+
+        if wasReset {
+            showPillSetting()
+            window.makeKeyAndVisible()
+            return
+        }
+
         checkExistingCycle { hasExistingCycle in
             DispatchQueue.main.async {
                 if hasExistingCycle {
-                    // 기록 중인 사이클이 있으면 DashboardViewController
                     self.showDashboard()
                 } else {
-                    // 기록 중인 사이클이 없으면 PillSettingViewController
                     self.showPillSetting()
                 }
-                
+
                 window.makeKeyAndVisible()
             }
         }
