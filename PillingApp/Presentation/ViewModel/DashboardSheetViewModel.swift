@@ -67,16 +67,16 @@ final class DefaultDashboardSheetViewModel: DashboardSheetViewModel {
         // 상태 업데이트
         input.tapNotTaken
             .subscribe(onNext: { [weak self] in
-                self?.selectedStatus = .todayNotTaken
+                self?.selectedStatus = .notTaken
             })
             .disposed(by: disposeBag)
-        
+
         input.tapTaken
             .subscribe(onNext: { [weak self] in
-                self?.selectedStatus = .todayTaken
+                self?.selectedStatus = .taken
             })
             .disposed(by: disposeBag)
-        
+
         input.tapTakenDouble
             .subscribe(onNext: { [weak self] in
                 self?.selectedStatus = .takenDouble
