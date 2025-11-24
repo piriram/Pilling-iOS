@@ -111,6 +111,7 @@
 				Domain/UseCases/Message/MessageStrategy/Rules/YesterdayMissedRule.swift,
 				Infra/SystemTimeProvider.swift,
 				Infra/UseCase/CalculateMessageUseCase.swift,
+				Presentation/Dashboard/PillStatusMapper.swift,
 			);
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
 		};
