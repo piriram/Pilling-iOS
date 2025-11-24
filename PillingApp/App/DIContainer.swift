@@ -12,9 +12,15 @@ final class DIContainer {
     }()
     
     // MARK: - Time Provider
-    
+
     lazy var timeProvider: TimeProvider = {
         SystemTimeProvider()
+    }()
+
+    // MARK: - Factories
+
+    private lazy var pillStatusFactory: PillStatusFactory = {
+        PillStatusFactory(timeProvider: timeProvider)
     }()
     
     // MARK: - Managers(싱글톤)
@@ -67,6 +73,7 @@ final class DIContainer {
     
     func makeCalculateDashboardMessageUseCase() -> CalculateDashboardMessageUseCaseProtocol {
         return CalculateDashboardMessageUseCase(
+            statusFactory: pillStatusFactory,
             timeProvider: timeProvider
         )
     }
