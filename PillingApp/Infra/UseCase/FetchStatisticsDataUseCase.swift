@@ -85,19 +85,17 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
         var totalTaken = 0
 
         for record in activeDayRecords {
-            let adjustedStatus = record.status.adjustedForDate(record.scheduledDateTime, calendar: calendar)
-
-            switch adjustedStatus {
-            case .taken, .todayTaken:
+            switch record.status {
+            case .taken:
                 onTimeCount += 1
                 totalTaken += 1
-            case .takenDelayed, .todayTakenDelayed, .takenTooEarly, .todayTakenTooEarly:
+            case .takenDelayed, .takenTooEarly:
                 lateCount += 1
                 totalTaken += 1
             case .takenDouble:
                 missedOrDoubleCount += 1
                 totalTaken += 1
-            case .missed, .todayDelayed, .todayDelayedCritical, .todayNotTaken, .scheduled:
+            case .missed, .recentlyMissed, .notTaken, .scheduled:
                 missedOrDoubleCount += 1
             case .rest:
                 break
