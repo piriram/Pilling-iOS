@@ -1,6 +1,6 @@
 import Foundation
 
-enum PillStatusMapper {
+enum CoreDataPillStatusMapper {
 
     static func fromLegacyInt(_ value: Int) -> PillStatus {
         switch value {
