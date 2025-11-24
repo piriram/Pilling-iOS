@@ -90,7 +90,6 @@
 				Domain/Entity/MessageType.swift,
 				Domain/Entity/NotificationError.swift,
 				Domain/Entity/PillingApp.xcdatamodeld,
-				Domain/Entity/PillStatus.swift,
 				Domain/Entity/SetupError.swift,
 				Domain/Entity/SideEffectTag.swift,
 				Domain/Entity/UserDefaultsKey.swift,
