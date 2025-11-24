@@ -18,4 +18,17 @@ extension PillStatus {
             return AppColor.pillWhite
         }
     }
+
+    var backgroundImageName: String {
+        switch self {
+        case .taken, .takenDelayed, .takenTooEarly, .takenDouble:
+            return "background"
+        case .missed:
+            return "background_missed"
+        case .recentlyMissed:
+            return "background_warning"
+        case .scheduled, .notTaken, .rest:
+            return "background"
+        }
+    }
 }
