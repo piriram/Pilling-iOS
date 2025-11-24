@@ -228,9 +228,8 @@ final class DashboardViewController: UIViewController {
             backgroundImageView.image = UIImage(named: "background")
             return
         }
-        
-        let adjustedStatus = todayRecord.status.adjustedForDate(todayRecord.scheduledDateTime, calendar: calendar)
-        backgroundImageView.image = UIImage(named: adjustedStatus.backgroundImageName)
+
+        backgroundImageView.image = UIImage(named: todayRecord.status.backgroundImageName)
     }
     
     private func handleViewIndexChanged(_ index: DashboardViewTransitionManager.ViewIndex) {

@@ -79,7 +79,7 @@ final class DashboardGuideView: UIView {
         let guideItem1 = makeGuideItemWithCalendarCell(status: .taken, text: str.guideTaken)
         let guideItem2 = makeGuideItemWithCalendarCell(status: .takenDouble, text: str.guideTakenDouble)
         let guideItem3 = makeGuideItemWithCalendarCell(status: .missed, text: str.guideMissed)
-        let guideItem4 = makeGuideItemWithCalendarCell(status: .todayNotTaken, text: str.guideToday)
+        let guideItem4 = makeGuideItemWithCalendarCell(status: .notTaken, text: str.guideToday)
         
         [guideItem1, guideItem2, guideItem3, guideItem4].forEach { guideStackView.addArrangedSubview($0) }
         
