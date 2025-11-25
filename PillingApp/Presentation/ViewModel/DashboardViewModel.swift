@@ -163,18 +163,10 @@ final class DashboardViewModel {
                         displayStatus = .takenDouble
                     }
                     else if !record.status.isTaken {
-                        let timeInterval = now.timeIntervalSince(todayScheduledDateTime)
-                        let twoHours: TimeInterval = 2 * 60 * 60
-                        let fourHours: TimeInterval = 4 * 60 * 60
-
-                        if timeInterval >= fourHours {
-                            displayStatus = .recentlyMissed
-                        } else if timeInterval >= twoHours {
-                            displayStatus = .takenDelayed
-                        } else {
-                            displayStatus = .notTaken
-                        }
-                        print("   → 시간기반 재계산: \(displayStatus.rawValue)")
+                        // 오늘 날짜는 늦었어도 notTaken(회색)으로 표시
+                        // recentlyMissed는 과거 날짜에만 사용
+                        displayStatus = .notTaken
+                        print("   → 오늘은 미복용: notTaken")
                     }
                     else if let takenAt = record.takenAt {
                         displayStatus = calculateTakenStatus(
