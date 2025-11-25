@@ -48,7 +48,16 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         if newStatus == .scheduled || newStatus == .notTaken {
             let calendar = Calendar.current
             let startOfToday = calendar.startOfDay(for: now)
-            if record.scheduledDateTime < startOfToday {
+            let isPastDate = record.scheduledDateTime < startOfToday
+
+            print("🔍 [UpdatePillStatusUseCase] 과거 날짜 체크")
+            print("   현재시각: \(now)")
+            print("   오늘시작: \(startOfToday)")
+            print("   예정시각: \(record.scheduledDateTime)")
+            print("   과거날짜: \(isPastDate)")
+            print("   요청상태: \(newStatus.rawValue) → 최종: \(isPastDate ? "missed" : newStatus.rawValue)")
+
+            if isPastDate {
                 finalStatus = .missed
             } else {
                 finalStatus = newStatus
