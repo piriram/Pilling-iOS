@@ -23,7 +23,9 @@ final class DoubleDosingRule: MessageRule {
             }
 
             if !todayStatus.isTaken &&
-               todayStatus.medicalTiming == .onTime {
+               (todayStatus.medicalTiming == .onTime ||
+                todayStatus.medicalTiming == .upcoming ||
+                todayStatus.medicalTiming == .slightDelay) {
                 return .pilledTwo
             }
         }
