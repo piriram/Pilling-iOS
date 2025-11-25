@@ -145,8 +145,14 @@ final class DashboardViewModel {
 
         let dayItems = visibleRecords.map { record in
             var displayStatus = record.status
+            let isToday = calendar.isDateInToday(record.scheduledDateTime)
 
-            if calendar.isDateInToday(record.scheduledDateTime) {
+            if isToday {
+                print("🔍 [DashboardViewModel.updateItems] 오늘 레코드 발견")
+                print("   DB상태: \(record.status.rawValue)")
+                print("   예정시각: \(record.scheduledDateTime)")
+                print("   현재시각: \(now)")
+
                 let todayScheduledDateTime = calculateTodayScheduledTime(
                     from: currentScheduledTime,
                     calendar: calendar
@@ -168,12 +174,14 @@ final class DashboardViewModel {
                         } else {
                             displayStatus = .notTaken
                         }
+                        print("   → 시간기반 재계산: \(displayStatus.rawValue)")
                     }
                     else if let takenAt = record.takenAt {
                         displayStatus = calculateTakenStatus(
                             takenAt: takenAt,
                             scheduledDateTime: todayScheduledDateTime
                         )
+                        print("   → 복용시각 기반: \(displayStatus.rawValue)")
                     }
                 }
             }
