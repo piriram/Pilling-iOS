@@ -4,11 +4,18 @@ final class DoubleDosingRule: MessageRule {
     let priority = 200
 
     func shouldEvaluate(context: MessageContext) -> Bool {
-        guard let yesterday = context.yesterdayStatus else { return false }
+        guard let yesterday = context.yesterdayStatus else {
+            print("      [DoubleDosingRule] 어제 상태 없음")
+            return false
+        }
 
         let timeSinceMissed = context.currentDate.timeIntervalSince(yesterday.scheduledDate)
-        return !yesterday.isTaken &&
-               timeSinceMissed < TimeThreshold.critical + TimeThreshold.fullyMissed
+        let isNotTaken = !yesterday.isTaken
+        let isWithinWindow = timeSinceMissed < TimeThreshold.critical + TimeThreshold.fullyMissed
+
+        print("      [DoubleDosingRule] 어제복용=\(!isNotTaken), 시간차=\(timeSinceMissed/3600)h, 윈도우내=\(isWithinWindow)")
+
+        return isNotTaken && isWithinWindow
     }
 
     func evaluate(context: MessageContext) -> MessageType? {
@@ -17,8 +24,12 @@ final class DoubleDosingRule: MessageRule {
 
         let timeSinceYesterday = context.currentDate.timeIntervalSince(yesterdayStatus.scheduledDate)
 
+        print("      [DoubleDosingRule] 오늘상태=\(todayStatus.baseStatus.rawValue), medicalTiming=\(todayStatus.medicalTiming.rawValue)")
+        print("      [DoubleDosingRule] 오늘복용여부=\(!todayStatus.isTaken)")
+
         if timeSinceYesterday < TimeThreshold.critical + TimeThreshold.fullyMissed {
             if todayStatus.baseStatus == .takenDouble {
+                print("      [DoubleDosingRule] → .takenDoubleComplete")
                 return .takenDoubleComplete
             }
 
@@ -26,10 +37,12 @@ final class DoubleDosingRule: MessageRule {
                (todayStatus.medicalTiming == .onTime ||
                 todayStatus.medicalTiming == .upcoming ||
                 todayStatus.medicalTiming == .slightDelay) {
+                print("      [DoubleDosingRule] → .pilledTwo")
                 return .pilledTwo
             }
         }
 
+        print("      [DoubleDosingRule] → 조건 미충족")
         return nil
     }
 }
