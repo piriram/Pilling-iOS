@@ -4,43 +4,57 @@ final class TimeBasedRule: MessageRule {
     let priority = 500
 
     func shouldEvaluate(context: MessageContext) -> Bool {
-        guard let todayStatus = context.todayStatus else { return false }
-        return !todayStatus.isTaken &&
-               todayStatus.medicalTiming != .tooEarly &&
-               todayStatus.medicalTiming != .upcoming
+        guard let todayStatus = context.todayStatus else {
+            print("      [TimeBasedRule] 오늘 상태 없음")
+            return false
+        }
+
+        let notTaken = !todayStatus.isTaken
+        let notEarly = todayStatus.medicalTiming != .tooEarly
+        let notUpcoming = todayStatus.medicalTiming != .upcoming
+
+        print("      [TimeBasedRule] 복용안함=\(notTaken), medicalTiming=\(todayStatus.medicalTiming.rawValue)")
+
+        return notTaken && notEarly && notUpcoming
     }
 
     func evaluate(context: MessageContext) -> MessageType? {
         guard let status = context.todayStatus else { return nil }
 
         if status.isTaken {
+            let message: MessageType
             switch status.baseStatus {
             case .taken:
-                return .todayAfter
+                message = .todayAfter
             case .takenDelayed:
-                return .takenDelayedOk
+                message = .takenDelayedOk
             case .takenTooEarly:
-                return .takenTooEarly
+                message = .takenTooEarly
             case .takenDouble:
-                return .takenDoubleComplete
+                message = .takenDoubleComplete
             default:
-                return .todayAfter
+                message = .todayAfter
             }
+            print("      [TimeBasedRule] 복용함 → \(message)")
+            return message
         }
 
+        let message: MessageType
         switch status.medicalTiming {
         case .onTime:
-            return .plantingSeed
+            message = .plantingSeed
         case .slightDelay:
-            return .groomy
+            message = .groomy
         case .moderate:
-            return .fire
+            message = .fire
         case .recent:
-            return .waiting
+            message = .waiting
         case .missed:
-            return .waiting
+            message = .waiting
         default:
-            return .plantingSeed
+            message = .plantingSeed
         }
+        print("      [TimeBasedRule] 시간기반 → \(message)")
+        return message
     }
 }
