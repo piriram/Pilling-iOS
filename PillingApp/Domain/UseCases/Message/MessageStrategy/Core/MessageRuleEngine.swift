@@ -11,7 +11,7 @@ final class MessageRuleEngine {
         print("🔍 [MessageRuleEngine] 메시지 룰 평가 시작")
         print("   📅 오늘: \(context.todayStatus?.baseStatus.rawValue ?? "nil")")
         print("   📅 어제: \(context.yesterdayStatus?.baseStatus.rawValue ?? "nil")")
-        print("   📅 그저께: \(context.dayBeforeYesterdayStatus?.baseStatus.rawValue ?? "nil")")
+        print("   📊 연속미복용: \(context.consecutiveMissedDays)일")
         print("   ⏰ 현재 시각: \(context.currentDate)")
 
         for rule in rules {
