@@ -31,6 +31,6 @@ final class MessageRuleEngine {
         }
 
         print("   ❌ 모든 룰 미매칭 → 기본 메시지 (.plantingSeed)")
-        return .plantingSeed
+        return .empty
     }
 }
