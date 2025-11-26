@@ -98,22 +98,36 @@ final class CalculateMessageUseCase {
 
     private func calculateConsecutiveMissedDays(cycle: Cycle, upTo targetDate: Date) -> Int {
         var count = 0
-        
+
         let sortedRecords = cycle.records.sorted {
             $0.scheduledDateTime > $1.scheduledDateTime
         }
 
+        // 오늘 제외하고 어제부터 계산
+        var skipToday = true
+
         for record in sortedRecords {
+            let isToday = timeProvider.isDate(record.scheduledDateTime, inSameDayAs: targetDate)
+
+            // 오늘 레코드는 건너뛰기
+            if skipToday && isToday {
+                print("연속미복용 계산: 오늘 건너뜀 (status=\(record.status.rawValue))")
+                continue
+            }
+            skipToday = false
+
             let timeElapsed = targetDate.timeIntervalSince(record.scheduledDateTime)
 
             if timeElapsed >= TimeThreshold.fullyMissed && !record.status.isTaken {
                 count += 1
+                print("연속미복용 계산: +1 (total=\(count), status=\(record.status.rawValue))")
             } else if record.status.isTaken {
+                print("연속미복용 계산: 복용 발견, 중단 (status=\(record.status.rawValue))")
                 break
             }
-            print("연속:\(count)")
         }
 
+        print("연속미복용 계산 최종: \(count)일")
         return count
     }
 
