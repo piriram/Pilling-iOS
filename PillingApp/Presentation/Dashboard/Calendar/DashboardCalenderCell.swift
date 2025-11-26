@@ -97,7 +97,7 @@ final class DashboardCalendarCell: UICollectionViewCell {
             innerBorderView.layer.cornerRadius = defaultCornerRadius - 3
         }
         
-        if item.isToday {
+        if item.isToday && item.status != .takenDouble {
             backgroundShapeView.layer.borderWidth = 3
             backgroundShapeView.layer.borderColor = AppColor.pillBorder.cgColor
 
