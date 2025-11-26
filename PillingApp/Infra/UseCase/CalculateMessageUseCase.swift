@@ -41,6 +41,13 @@ final class CalculateMessageUseCase {
         let todayRecord = findTodayRecord(in: cycle, from: date)
         let yesterdayRecord = findYesterdayRecord(in: cycle, from: date)
 
+        if let today = todayRecord {
+            print("🔍 [CalculateMessageUseCase.buildContext] 오늘 레코드")
+            print("   DB 상태: \(today.status.rawValue)")
+            print("   복용시각: \(today.takenAt?.description ?? "nil")")
+            print("   예정시각: \(today.scheduledDateTime)")
+        }
+
         let todayStatus = todayRecord.map { record in
             statusFactory.createStatus(
                 scheduledDate: record.scheduledDateTime,
@@ -91,7 +98,7 @@ final class CalculateMessageUseCase {
 
     private func calculateConsecutiveMissedDays(cycle: Cycle, upTo targetDate: Date) -> Int {
         var count = 0
-
+        
         let sortedRecords = cycle.records.sorted {
             $0.scheduledDateTime > $1.scheduledDateTime
         }
@@ -104,6 +111,7 @@ final class CalculateMessageUseCase {
             } else if record.status.isTaken {
                 break
             }
+            print("연속:\(count)")
         }
 
         return count
