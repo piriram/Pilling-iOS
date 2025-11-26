@@ -30,11 +30,12 @@ extension MessageResult {
     func toDashboardMessage() -> DashboardMessage {
         let characterImage = DashboardUI.CharacterImage(rawValue: characterImageName) ?? .rest
         let icon = DashboardUI.MessageIconImage(rawValue: iconImageName) ?? .rest
-        
+
         return DashboardMessage(
             text: text,
             imageName: characterImage,
-            icon: icon
+            icon: icon,
+            backgroundImageName: backgroundImageName
         )
     }
 }

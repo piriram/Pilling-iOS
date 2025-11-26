@@ -217,19 +217,12 @@ final class DashboardViewController: UIViewController {
     // MARK: - UI Updates
     
     private func updateBackgroundForToday() {
-        guard let cycle = viewModel.currentCycle.value else { return }
-        
-        let calendar = Calendar.current
-        let now = Date()
-        
-        guard let todayRecord = cycle.records.first(where: {
-            calendar.isDate($0.scheduledDateTime, inSameDayAs: now)
-        }) else {
-            backgroundImageView.image = UIImage(named: "background")
+        guard let message = viewModel.dashboardMessage.value else {
+            backgroundImageView.image = UIImage(named: "background_rest")
             return
         }
 
-        backgroundImageView.image = UIImage(named: todayRecord.status.backgroundImageName)
+        backgroundImageView.image = UIImage(named: message.backgroundImageName)
     }
     
     private func handleViewIndexChanged(_ index: DashboardViewTransitionManager.ViewIndex) {
