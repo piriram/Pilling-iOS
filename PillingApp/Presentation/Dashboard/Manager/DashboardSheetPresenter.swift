@@ -59,7 +59,11 @@ final class DashboardSheetPresenter {
                 guard let self = self else { return }
                 // If status not chosen, maintain existing status
                 let finalStatus = chosenStatus ?? item.status
-                onStatusUpdate(index, finalStatus, memo, currentTakenAt)
+
+                // 복용 상태일 때만 takenAt 전달, 미복용 상태면 nil
+                let finalTakenAt = finalStatus.isTaken ? currentTakenAt : nil
+
+                onStatusUpdate(index, finalStatus, memo, finalTakenAt)
             },
             onTimeChanged: { [weak self] newTime in
                 guard let self = self else { return }
