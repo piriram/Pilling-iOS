@@ -9,13 +9,13 @@ final class TimeBasedRule: MessageRule {
             return false
         }
 
-        let notTaken = !todayStatus.isTaken
+        // TimeBasedRule은 기본 폴백 룰이므로, tooEarly와 upcoming만 제외
         let notEarly = todayStatus.medicalTiming != .tooEarly
         let notUpcoming = todayStatus.medicalTiming != .upcoming
 
-        print("      [TimeBasedRule] 복용안함=\(notTaken), medicalTiming=\(todayStatus.medicalTiming.rawValue)")
+        print("      [TimeBasedRule] 복용=\(todayStatus.isTaken ? "함" : "안함"), medicalTiming=\(todayStatus.medicalTiming.rawValue)")
 
-        return notTaken && notEarly && notUpcoming
+        return notEarly && notUpcoming
     }
 
     func evaluate(context: MessageContext) -> MessageType? {
