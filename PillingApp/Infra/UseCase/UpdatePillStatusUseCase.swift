@@ -88,9 +88,14 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
             createdAt: record.createdAt,
             updatedAt: now
         )
-        
+
+        print("✅ [UpdatePillStatusUseCase] 레코드 업데이트")
+        print("   인덱스: \(recordIndex)")
+        print("   이전 상태: \(record.status.rawValue)")
+        print("   최종 상태: \(finalStatus.rawValue)")
+
         updatedCycle.records[recordIndex] = updatedRecord
-        
+
         return cycleRepository.updateRecord(updatedRecord, in: cycle.id)
             .map { updatedCycle }
     }
