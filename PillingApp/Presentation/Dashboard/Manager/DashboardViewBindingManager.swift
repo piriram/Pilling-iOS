@@ -113,7 +113,7 @@ final class DashboardViewBindingManager {
         // Dashboard message
         viewModel.dashboardMessage
             .compactMap { $0 }
-            .asDriver(onErrorJustReturn: DashboardMessage(text: "", imageName: .rest, icon: .rest))
+            .asDriver(onErrorJustReturn: DashboardMessage(text: "", imageName: .rest, icon: .rest, backgroundImageName: "background_rest"))
             .drive(onNext: { message in
                 infoView.configure(with: message)
                 onBackgroundUpdate()
