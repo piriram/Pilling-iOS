@@ -56,17 +56,19 @@ final class CalculateMessageUseCase {
                 isRestDay: record.status == .rest
             )
 
-            // DB에 명시적으로 저장된 상태를 우선 적용
-            // notTaken으로 명시했는데 시간상 scheduled로 판단되는 경우 DB 우선
-            if record.status == .notTaken && status.baseStatus == .scheduled {
+            // DB에 명시적으로 저장된 특수 상태를 우선 적용
+            let needsDbOverride = (record.status == .notTaken && status.baseStatus == .scheduled) ||
+                                  (record.status == .takenDouble && status.baseStatus != .takenDouble)
+
+            if needsDbOverride {
                 status = PillStatusModel(
-                    baseStatus: .notTaken,
+                    baseStatus: record.status,
                     timeContext: status.timeContext,
                     medicalTiming: status.medicalTiming,
                     scheduledDate: status.scheduledDate,
                     actionDate: status.actionDate
                 )
-                print("   🔧 DB 상태 우선 적용: scheduled → notTaken")
+                print("   🔧 DB 상태 우선 적용: \(status.baseStatus.rawValue) → \(record.status.rawValue)")
             }
 
             return status

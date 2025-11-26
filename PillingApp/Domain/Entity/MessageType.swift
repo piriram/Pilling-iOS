@@ -12,6 +12,7 @@ enum MessageType {
     case overTwoHours
     case overFourHours
     case pilledTwo
+    case morePill
     case todayAfter
     case takingBeforeTwo
     case takingBefore
@@ -65,6 +66,8 @@ enum MessageType {
             return "2시간 지났어요"
         case .overFourHours:
             return "4시간 지났어요"
+        case .morePill:
+            return "한알 더!"
         }
     }
     
@@ -125,6 +128,8 @@ enum MessageType {
             return "icon_2hour"
         case .overFourHours:
             return "icon_4hour"
+        case .morePill:
+            return "icon_takingBeforeTwo"
         }
     }
     
@@ -136,7 +141,7 @@ enum MessageType {
             return "missed"
         case .plantingSeed, .pilledTwo, .takingBeforeTwo, .warning,.overTwoHours,.overFourHours:
             return "notTaken"
-        case .success, .todayAfter, .takingBefore, .takenDelayedOk, .takenTooEarly, .takenDoubleComplete:
+        case .success, .todayAfter, .takingBefore, .takenDelayedOk, .takenTooEarly, .takenDoubleComplete,.morePill:
             return "taken"
         case .beforeStart:
             return "rest"
