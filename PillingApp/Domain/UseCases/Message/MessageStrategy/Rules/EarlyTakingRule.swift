@@ -4,7 +4,7 @@ final class EarlyTakingRule: MessageRule {
     let priority = 50
 
     func shouldEvaluate(context: MessageContext) -> Bool {
-        let isTooEarly = context.todayStatus?.medicalTiming == .tooEarly
+        let isTooEarly = (context.todayStatus?.isTaken == true )&&(context.yesterdayIsMissed == false)&&(context.todayStatus?.medicalTiming == .tooEarly)
         print("      [EarlyTakingRule] medicalTiming=\(context.todayStatus?.medicalTiming.rawValue ?? "nil"), tooEarly=\(isTooEarly)")
         return isTooEarly
     }
