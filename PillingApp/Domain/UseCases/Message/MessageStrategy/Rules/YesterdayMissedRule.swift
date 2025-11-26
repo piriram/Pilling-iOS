@@ -9,9 +9,9 @@ final class YesterdayMissedRule: MessageRule {
             return false
         }
         let isMissed = yesterday.baseStatus == .missed
-        let isOnlyOneDay = context.consecutiveMissedDays == 1
+        // consecutiveMissedDays 조건 제거 - 어제만 놓쳤으면 됨
         print("      [YesterdayMissedRule] 어제=\(yesterday.baseStatus.rawValue), missed=\(isMissed), 연속=\(context.consecutiveMissedDays)일")
-        return isMissed && isOnlyOneDay
+        return isMissed
     }
 
     func evaluate(context: MessageContext) -> MessageType? {
