@@ -44,9 +44,9 @@ final class TimeBasedRule: MessageRule {
         case .onTime:
             message = .plantingSeed
         case .slightDelay:
-            message = .groomy
+            message = .overTwoHours
         case .moderate:
-            message = .fire
+            message = .overFourHours
         case .recent:
             message = .waiting
         case .missed:
