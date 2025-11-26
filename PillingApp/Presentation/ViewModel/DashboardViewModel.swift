@@ -226,7 +226,18 @@ final class DashboardViewModel {
     }
     
     private func updateDashboardMessage() {
-        let message = calculateDashboardMessageUseCase.execute(cycle: currentCycle.value)
+        guard let cycle = currentCycle.value else {
+            print("❌ [updateDashboardMessage] cycle이 nil")
+            return
+        }
+
+        let now = Date()
+        if let todayRecord = cycle.records.first(where: { calendar.isDate($0.scheduledDateTime, inSameDayAs: now) }) {
+            print("📬 [updateDashboardMessage] 메시지 계산 시작")
+            print("   오늘 레코드 상태: \(todayRecord.status.rawValue)")
+        }
+
+        let message = calculateDashboardMessageUseCase.execute(cycle: cycle)
         dashboardMessage.accept(message)
     }
     
@@ -338,6 +349,11 @@ final class DashboardViewModel {
             return
         }
 
+        print("🔄 [DashboardViewModel.updateState] 상태 변경 요청")
+        print("   인덱스: \(index)")
+        print("   변경 전: \(index < cycle.records.count ? cycle.records[index].status.rawValue : "범위초과")")
+        print("   변경 후: \(newStatus.rawValue)")
+
         updatePillStatusUseCase.execute(
             cycle: cycle,
             recordIndex: index,
@@ -350,6 +366,8 @@ final class DashboardViewModel {
                 guard let self = self else { return }
 
                 if index < updatedCycle.records.count {
+                    print("✅ [DashboardViewModel.updateState] DB 업데이트 완료")
+                    print("   업데이트된 상태: \(updatedCycle.records[index].status.rawValue)")
                 }
 
                 self.currentCycle.accept(updatedCycle)
