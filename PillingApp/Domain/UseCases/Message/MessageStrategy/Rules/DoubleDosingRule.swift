@@ -25,7 +25,7 @@ final class DoubleDosingRule: MessageRule {
         let timeSinceYesterday = context.currentDate.timeIntervalSince(yesterdayStatus.scheduledDate)
 
         print("      [DoubleDosingRule] 오늘상태=\(todayStatus.baseStatus.rawValue), medicalTiming=\(todayStatus.medicalTiming.rawValue)")
-        print("      [DoubleDosingRule] 오늘복용여부=\(!todayStatus.isTaken)")
+        print("      [DoubleDosingRule] 오늘복용=\(todayStatus.isTaken ? "함" : "안함")")
 
         if timeSinceYesterday < TimeThreshold.critical + TimeThreshold.fullyMissed {
             if todayStatus.baseStatus == .takenDouble {
