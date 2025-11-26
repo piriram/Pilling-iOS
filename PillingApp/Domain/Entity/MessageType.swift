@@ -9,6 +9,8 @@ enum MessageType {
     case success
     case groomy
     case fire
+    case overTwoHours
+    case overFourHours
     case pilledTwo
     case todayAfter
     case takingBeforeTwo
@@ -32,9 +34,9 @@ enum MessageType {
         case .success:
             return "꾸준히 잔디를 심어주세요."
         case .groomy:
-            return "잔디는 2시간을 초과하지 않게 심어주세요!"
+            return "기록안한지 2일째"
         case .fire:
-            return "복용 시간이 4시간 이상 지났어요"
+            return "기록안한지 3일째"
         case .pilledTwo:
             return "오늘은 두알을 복용하세요."
         case .todayAfter:
@@ -44,7 +46,7 @@ enum MessageType {
         case .takingBefore:
             return "매일 2시간 이내의 같은 시간에 복용해주세요."
         case .warning:
-            return "한알을 더 먹어야 해요"
+            return "한알 더 먹어야해요!"
         case .takenDelayedOk:
             return "2시간 지났지만 괜찮아요!"
         case .takenTooEarly:
@@ -59,6 +61,10 @@ enum MessageType {
             } else {
                 return "복용 시작까지 \(daysUntilStart)일 남았어요"
             }
+        case .overTwoHours:
+            return "2시간 지났어요"
+        case .overFourHours:
+            return "4시간 지났어요"
         }
     }
     
@@ -115,6 +121,10 @@ enum MessageType {
             return "icon_takingAfter"
         case .beforeStart:
             return "icon_plant"
+        case .overTwoHours:
+            return "icon_2hour"
+        case .overFourHours:
+            return "icon_4hour"
         }
     }
     
@@ -122,14 +132,12 @@ enum MessageType {
         switch self {
         case .empty, .resting:
             return "rest"
-        case .waiting:
+        case .waiting,.fire,.groomy:
             return "missed"
-        case .plantingSeed, .pilledTwo, .fire, .takingBeforeTwo, .warning:
+        case .plantingSeed, .pilledTwo, .takingBeforeTwo, .warning,.overTwoHours,.overFourHours:
             return "notTaken"
         case .success, .todayAfter, .takingBefore, .takenDelayedOk, .takenTooEarly, .takenDoubleComplete:
             return "taken"
-        case .groomy:
-            return "missed"
         case .beforeStart:
             return "rest"
         }
