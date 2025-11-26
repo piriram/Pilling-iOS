@@ -74,7 +74,7 @@ final class DashboardSheetPresenter {
         )
         
         sheetVC.titleText = dayText
-        sheetVC.title = dayText
+        sheetVC.title = ""
         
         // Initial selection is now handled automatically by ViewModel
         
