@@ -23,7 +23,7 @@ final class DashboardSheetViewController: UIViewController {
     
     private lazy var sheetAnimator = DashboardSheetAnimator(
         viewController: self,
-        sheetHeight: 480
+        sheetHeight: 400
     )
     
     private let statusSelectionView = StatusSelectionView()
@@ -43,7 +43,6 @@ final class DashboardSheetViewController: UIViewController {
     
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.font = Typography.headline5(.semibold)
         label.textColor = AppColor.textBlack
         return label
     }()
@@ -130,27 +129,71 @@ final class DashboardSheetViewController: UIViewController {
     
     
     // MARK: - Setup
-    
+
+    private func formatTitleText(_ text: String) -> NSAttributedString {
+        // "3일차/28" 형식을 파싱
+        let components = text.components(separatedBy: "/")
+
+        let attributedString = NSMutableAttributedString()
+
+        if components.count == 2 {
+            // "n일차" 부분: size 28, bold
+            let dayPart = NSAttributedString(
+                string: components[0],
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 28, weight: .bold),
+                    .foregroundColor: AppColor.textBlack
+                ]
+            )
+
+            // "/28" 부분: size 20, regular
+            let totalPart = NSAttributedString(
+                string: "/" + components[1],
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 20, weight: .regular),
+                    .foregroundColor: AppColor.textBlack
+                ]
+            )
+
+            attributedString.append(dayPart)
+            attributedString.append(totalPart)
+        } else {
+            // 파싱 실패 시 기본 스타일
+            return NSAttributedString(
+                string: text,
+                attributes: [
+                    .font: UIFont.systemFont(ofSize: 28, weight: .bold),
+                    .foregroundColor: AppColor.textBlack
+                ]
+            )
+        }
+
+        return attributedString
+    }
+
     private func setupViews() {
         view.backgroundColor = .clear
-        
+
         sheetAnimator.setupViews(in: view)
-        
+
         sheetAnimator.containerView.addSubview(scrollView)
         scrollView.addSubview(contentStackView)
-        
-        subtitleLabel.text = titleText ?? title
+
+        // titleText를 파싱해서 attributed string으로 설정
+        if let titleText = titleText ?? title {
+            subtitleLabel.attributedText = formatTitleText(titleText)
+        }
         contentStackView.addArrangedSubview(subtitleLabel)
         contentStackView.addArrangedSubview(statusSelectionView)
         contentStackView.addArrangedSubview(timeSettingButton)
         contentStackView.addArrangedSubview(sideEffectTagsView)
-        
+
         setupConstraints()
     }
     
     private func setupConstraints() {
         scrollView.snp.makeConstraints { make in
-            make.top.equalTo(sheetAnimator.handleBar.snp.bottom).offset(24)
+            make.top.equalTo(sheetAnimator.handleBar.snp.bottom).offset(48)
             make.leading.trailing.bottom.equalToSuperview()
         }
         
