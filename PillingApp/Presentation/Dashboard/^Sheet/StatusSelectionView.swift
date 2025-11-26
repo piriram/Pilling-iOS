@@ -63,7 +63,7 @@ final class StatusSelectionView: UIView {
         
         container.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.height.equalTo(48)
+            make.height.equalTo(44)
         }
         
         buttonsStack.snp.makeConstraints { make in
@@ -100,9 +100,9 @@ final class StatusSelectionView: UIView {
         let button = UIButton(type: .custom)
         button.setTitle(title, for: .normal)
         button.tag = tag
-        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
-        button.setTitleColor(AppColor.textGray, for: .normal)
-        button.setTitleColor(.white, for: .selected)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
+        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(.black, for: .selected)
         button.backgroundColor = .clear
         button.layer.cornerRadius = 10
         button.clipsToBounds = true
@@ -148,14 +148,14 @@ final class StatusSelectionView: UIView {
                 initialSpringVelocity: 0.5
             ) {
                 button.isSelected = isSelected
-                button.backgroundColor = isSelected ? AppColor.pillGreen800 : .clear
+                button.backgroundColor = isSelected ? AppColor.pillWhite : .clear
                 button.titleLabel?.font = isSelected
-                ? .systemFont(ofSize: 14, weight: .semibold)
-                : .systemFont(ofSize: 14, weight: .medium)
+                ? .systemFont(ofSize: 16, weight: .semibold)
+                : .systemFont(ofSize: 15, weight: .regular)
                 
                 if isSelected {
                     button.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-                    button.layer.shadowColor = AppColor.pillGreen800.cgColor
+                    button.layer.shadowColor = AppColor.pillWhite.cgColor
                     button.layer.shadowOffset = CGSize(width: 0, height: 2)
                     button.layer.shadowOpacity = 0.3
                     button.layer.shadowRadius = 4
