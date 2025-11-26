@@ -72,8 +72,10 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         let finalTakenAt: Date?
         if let providedTakenAt = takenAt {
             finalTakenAt = providedTakenAt
+            print("   takenAt: 명시적 제공 = \(providedTakenAt)")
         } else {
             finalTakenAt = finalStatus.isTaken ? (record.takenAt ?? now) : nil
+            print("   takenAt: isTaken=\(finalStatus.isTaken), 결과=\(finalTakenAt?.description ?? "nil")")
         }
 
         let finalMemo = memo ?? record.memo
