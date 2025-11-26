@@ -49,12 +49,27 @@ final class CalculateMessageUseCase {
         }
 
         let todayStatus = todayRecord.map { record in
-            statusFactory.createStatus(
+            var status = statusFactory.createStatus(
                 scheduledDate: record.scheduledDateTime,
                 actionDate: record.takenAt,
                 evaluationDate: date,
                 isRestDay: record.status == .rest
             )
+
+            // DB에 명시적으로 저장된 상태를 우선 적용
+            // notTaken으로 명시했는데 시간상 scheduled로 판단되는 경우 DB 우선
+            if record.status == .notTaken && status.baseStatus == .scheduled {
+                status = PillStatusModel(
+                    baseStatus: .notTaken,
+                    timeContext: status.timeContext,
+                    medicalTiming: status.medicalTiming,
+                    scheduledDate: status.scheduledDate,
+                    actionDate: status.actionDate
+                )
+                print("   🔧 DB 상태 우선 적용: scheduled → notTaken")
+            }
+
+            return status
         }
 
         let yesterdayStatus = yesterdayRecord.map { record in
