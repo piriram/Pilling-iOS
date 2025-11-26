@@ -145,6 +145,17 @@ enum MessageType {
     
     var backgroundImageName: String {
         switch self {
+        case .waiting, .groomy, .fire:
+            return "background_rest"
+        case .resting, .empty, .beforeStart:
+            return "background_rest"
+        default:
+            return "background_taken"
+        }
+    }
+
+    var widgetBackgroundImage: String {
+        switch self {
         case .waiting:
             return "widget_background_warning"
         case .groomy:
@@ -155,7 +166,7 @@ enum MessageType {
             return "widget_background_normal"
         }
     }
-    
+
     func toResult() -> MessageResult {
         return MessageResult(
             text: text,
