@@ -19,6 +19,7 @@ final class DonutChartView: UIView {
         chartView.rotationEnabled = true
         chartView.highlightPerTapEnabled = true
         chartView.legend.enabled = false
+        chartView.rotationAngle = 270
         return chartView
     }()
     

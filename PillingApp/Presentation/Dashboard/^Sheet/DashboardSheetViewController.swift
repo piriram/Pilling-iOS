@@ -23,7 +23,7 @@ final class DashboardSheetViewController: UIViewController {
     
     private lazy var sheetAnimator = DashboardSheetAnimator(
         viewController: self,
-        sheetHeight: 400
+        sheetHeight: 420
     )
     
     private let statusSelectionView = StatusSelectionView()
@@ -193,7 +193,7 @@ final class DashboardSheetViewController: UIViewController {
     
     private func setupConstraints() {
         scrollView.snp.makeConstraints { make in
-            make.top.equalTo(sheetAnimator.handleBar.snp.bottom).offset(48)
+            make.top.equalTo(sheetAnimator.handleBar.snp.bottom).offset(0)
             make.leading.trailing.bottom.equalToSuperview()
         }
         
