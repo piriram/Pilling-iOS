@@ -35,9 +35,9 @@ enum MessageType {
         case .success:
             return "꾸준히 잔디를 심어주세요."
         case .groomy:
-            return "기록안한지 2일째"
+            return "필링이가 찾아요..."
         case .fire:
-            return "기록안한지 3일째"
+            return "필링이 화남"
         case .pilledTwo:
             return "오늘은 두알을 복용하세요."
         case .todayAfter:
@@ -53,7 +53,7 @@ enum MessageType {
         case .takenTooEarly:
             return "예정보다 2시간 이상 일찍 복용했어요"
         case .takenDoubleComplete:
-            return "내일의 잔디도 부탁해요."
+            return "내일도 만나요!"
         case .beforeStart(let daysUntilStart):
             if daysUntilStart == 0 {
                 return "오늘부터 복용을 시작해요"
