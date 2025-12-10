@@ -37,8 +37,8 @@ final class CalculateMessageUseCaseTests: XCTestCase {
 
         let result = sut.execute(cycle: cycle, for: currentDate)
 
-        // Then: beforeStart 메시지 (날짜 계산 방식에 따라 4일로 계산됨)
-        let expectedText = MessageType.beforeStart(daysUntilStart: 4).text
+        // Then: beforeStart 메시지
+        let expectedText = MessageType.beforeStart(daysUntilStart: 5).text
         XCTAssertEqual(result.text, expectedText)
     }
 
@@ -104,16 +104,15 @@ final class CalculateMessageUseCaseTests: XCTestCase {
         mockTimeProvider.now = takenAt
         let result = sut.execute(cycle: cycle, for: takenAt)
 
-        // Then: 사이클 시작일보다 빠르면 beforeStart 메시지
-        // 실제 로직: 06:30은 사이클 시작(09:00)보다 이른 시각이므로 beforeStart로 판단
-        XCTAssertTrue(result.text.contains("복용") || result.text.contains("시작"))
+        // Then: takenTooEarly 메시지
+        XCTAssertEqual(result.text, MessageType.takenTooEarly.text)
     }
 
     func test_지연복용_TakenDelayedOk_메시지_반환() {
-        // Given: 2024-01-10 09:00에 복용 예정, 12:00에 복용 (3시간 늦음)
+        // Given: 2024-01-10 09:00에 복용 예정, 10:00에 복용
         let calendar = Calendar.current
         let scheduledDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 10, hour: 9))!
-        let takenAt = calendar.date(from: DateComponents(year: 2024, month: 1, day: 10, hour: 12))!
+        let takenAt = calendar.date(from: DateComponents(year: 2024, month: 1, day: 10, hour: 10))!
 
         let record = createRecord(
             scheduledDate: scheduledDate,
@@ -126,8 +125,8 @@ final class CalculateMessageUseCaseTests: XCTestCase {
         mockTimeProvider.now = takenAt
         let result = sut.execute(cycle: cycle, for: takenAt)
 
-        // Then: takenDelayed 상태는 todayAfter 또는 takenDelayedOk 메시지
-        XCTAssertTrue(result.text == MessageType.todayAfter.text || result.text == MessageType.takenDelayedOk.text)
+        // Then: takenDelayedOk 메시지
+        XCTAssertEqual(result.text, MessageType.takenDelayedOk.text)
     }
 
     // MARK: - 시간 기반 메시지 테스트
@@ -194,7 +193,7 @@ final class CalculateMessageUseCaseTests: XCTestCase {
 
     // MARK: - 어제 놓침 시나리오 테스트
 
-    func test_어제놓침_오늘미복용_연속미복용_메시지_반환() {
+    func test_어제놓침_오늘미복용_PilledTwo_메시지_반환() {
         // Given: 어제(01-09) missed, 오늘(01-10) 미복용
         let calendar = Calendar.current
         let yesterdayDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 9, hour: 9))!
@@ -215,11 +214,11 @@ final class CalculateMessageUseCaseTests: XCTestCase {
         mockTimeProvider.now = currentDate
         let result = sut.execute(cycle: cycle, for: currentDate)
 
-        // Then: 연속 미복용 1일이므로 groomy 메시지
-        XCTAssertEqual(result.text, MessageType.groomy.text)
+        // Then: pilledTwo 메시지 (2알 복용 권유)
+        XCTAssertEqual(result.text, MessageType.pilledTwo.text)
     }
 
-    func test_어제놓침_오늘1알복용_PilledTwo_메시지_반환() {
+    func test_어제놓침_오늘1알복용_Warning_메시지_반환() {
         // Given: 어제(01-09) missed, 오늘(01-10) 1알 복용
         let calendar = Calendar.current
         let yesterdayDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 9, hour: 9))!
@@ -241,11 +240,11 @@ final class CalculateMessageUseCaseTests: XCTestCase {
         mockTimeProvider.now = takenAt
         let result = sut.execute(cycle: cycle, for: takenAt)
 
-        // Then: 연속 미복용 규칙에 의해 pilledTwo 메시지 (2알 복용 권유)
-        XCTAssertEqual(result.text, MessageType.pilledTwo.text)
+        // Then: warning 메시지 (2알 복용 필요 경고)
+        XCTAssertEqual(result.text, MessageType.warning.text)
     }
 
-    func test_어제놓침_오늘2알복용_PilledTwo_메시지_반환() {
+    func test_어제놓침_오늘2알복용_TakingBefore_메시지_반환() {
         // Given: 어제(01-09) missed, 오늘(01-10) 2알 복용
         let calendar = Calendar.current
         let yesterdayDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 9, hour: 9))!
@@ -267,8 +266,8 @@ final class CalculateMessageUseCaseTests: XCTestCase {
         mockTimeProvider.now = takenAt
         let result = sut.execute(cycle: cycle, for: takenAt)
 
-        // Then: 연속 미복용 규칙에 의해 pilledTwo 메시지
-        XCTAssertEqual(result.text, MessageType.pilledTwo.text)
+        // Then: takingBefore 메시지 (보충 완료)
+        XCTAssertEqual(result.text, MessageType.takingBefore.text)
     }
 
     // MARK: - 연속 미복용 테스트
