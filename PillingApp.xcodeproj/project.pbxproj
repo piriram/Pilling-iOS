@@ -94,6 +94,7 @@
 				"Common/Extension/CycleEntity+CoreData.swift",
 				"Common/Extension/Date+.swift",
 				"Common/Extension/PillRecordEntity+.swift",
+				"Common/Extension/String+Localized.swift",
 				Domain/Entity/CoreDataEntity.swift,
 				Domain/Entity/Cycle.swift,
 				Domain/Entity/CycleError.swift,
@@ -531,7 +532,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.Pilltastic.Pilling;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -574,7 +575,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.Pilltastic.Pilling;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

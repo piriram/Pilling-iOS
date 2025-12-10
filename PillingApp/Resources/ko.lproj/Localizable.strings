@@ -1,36 +1,143 @@
 /*
   Localizable.strings (Korean)
-  새로운 번역 추가 시 여기에 추가하세요
+  PillingApp
 */
 
-// MARK: - 공통
-"common.confirm" = "확인";
-"common.cancel" = "취소";
-"common.delete" = "삭제";
-"common.save" = "저장";
-"common.edit" = "수정";
-"common.done" = "완료";
+// MARK: - Common
+"common.alert_title" = "알림";
+"common.ok_button" = "확인";
+"common.error_title" = "오류";
+"common.cancel_title" = "취소";
+"common.confirm_title" = "완료";
 
-// MARK: - 약 복용 상태
-"pill.status.taken" = "복용 완료";
-"pill.status.missed" = "미복용";
-"pill.status.scheduled" = "예정";
-"pill.status.delayed" = "지연 복용";
+// MARK: - Pill Setting
+"pill_setting.main_title" = "복용하고 계신 약을 알려주세요!";
+"pill_setting.subtitle" = "설정은 추후에 변경가능합니다.";
+"pill_setting.button_title" = "약 종류";
+"pill_setting.start_date_button" = "복용 시작 날짜";
+"pill_setting.next_button" = "다음으로";
+"pill_setting.nav_title" = "약 설정";
+"pill_setting.name_title" = "약 이름 (선택 사항)";
+"pill_setting.taking_days" = "복용일";
+"pill_setting.taking_button" = "24일";
+"pill_setting.break_label" = "휴약일";
+"pill_setting.break_day" = "4일";
+"pill_setting.warning_label" = "복용일과 휴약일의 합은 28일 이하여야 해요.";
+"pill_setting.setting_complete" = "설정 완료";
+"pill_setting.title_label" = "복용 정보 입력";
 
-// MARK: - 대시보드
-"dashboard.title" = "대시보드";
-"dashboard.today" = "오늘";
-"dashboard.take_pill" = "약 복용하기";
+// MARK: - Setting Floating
+"setting_floating.title" = "설정 완료!";
+"setting_floating.subtitle" = "매일 알림을 보내드릴게요";
 
-// MARK: - 설정
-"settings.title" = "설정";
-"settings.language" = "언어";
-"settings.notification" = "알림";
+// MARK: - Setting
+"setting.section_label" = "약 설정";
+"setting.new_pill_button" = "새 약 복용 시작하기";
+"setting.navigation_title" = "설정";
+"setting.alarm_section_title" = "알림 설정";
+"setting.time_setting_title" = "복용 시간";
+"setting.time_setting_default" = "오전 9:00";
+"setting.message_setting_title" = "알림 메시지";
+"setting.message_setting_default" = "건강한 하루를 위해...";
+"setting.message_editor_title" = "알림 메시지 수정";
+"setting.message_editor_description" = "받고 싶은 알림 메시지를 입력해주세요";
+"setting.message_editor_placeholder" = "알림 메시지 입력";
+"setting.new_pill_cycle_title" = "새 약 복용 시작";
+"setting.new_pill_cycle_message" = "현재 기록된 복용 정보가 모두 삭제됩니다.\n정말로 새로운 약 복용을 시작하시겠습니까?";
+"setting.new_pill_cycle_confirm" = "시작하기";
+"setting.success_time_updated" = "복용 시간이 변경되었습니다";
+"setting.success_message_updated" = "알림 메시지가 변경되었습니다";
+"setting.error_time_update_failed" = "시간 변경에 실패했습니다";
+"setting.error_message_update_failed" = "메시지 변경에 실패했습니다";
+"setting.error_reset_failed" = "초기화에 실패했습니다";
+"setting.permission_error_go_to_settings" = "설정으로 이동";
 
-// MARK: - 통계
-"statistics.title" = "통계";
-"statistics.adherence_rate" = "복용률";
+// MARK: - Dashboard
+"dashboard.guide_title" = "필링 가이드";
+"dashboard.guide_subtitle" = "피임약 복용 상태를 잔디로 알려드려요!";
+"dashboard.guide_confirm_button" = "확인";
+"dashboard.guide_taken" = "피임약 복용";
+"dashboard.guide_taken_double" = "피임약 2알 복용";
+"dashboard.guide_missed" = "미복용";
+"dashboard.taken" = "복용";
+"dashboard.taken_double" = "2알 복용";
+"dashboard.guide_today" = "현재";
+"dashboard.take_pill_button" = "잔디 심기";
+"dashboard.take_pill_completed" = "심기 완료!";
+"dashboard.rest_period" = "휴약 기간";
+"dashboard.weekday_mon" = "월";
+"dashboard.weekday_tue" = "화";
+"dashboard.weekday_wed" = "수";
+"dashboard.weekday_thu" = "목";
+"dashboard.weekday_fri" = "금";
+"dashboard.weekday_sat" = "토";
+"dashboard.weekday_sun" = "일";
 
-// MARK: - 에러
-"error.unknown" = "알 수 없는 오류가 발생했습니다";
-"error.network" = "네트워크 연결을 확인해주세요";
+// MARK: - Widget
+"widget.configuration_display_name" = "약 복용 위젯";
+"widget.configuration_description" = "오늘의 복용 상태를 확인하세요";
+"widget.message_plant_grass" = "잔디를 심어보세요!";
+"widget.message_setup_pill" = "약을 설정해주세요";
+"widget.message_grass_waiting" = "잔디가 기다려요";
+"widget.message_one_pill_complete" = "한알 심기 완료";
+"widget.message_rest_time" = "지금은 쉬는 시간";
+"widget.message_two_today" = "오늘은 두알";
+"widget.message_today_complete" = "오늘 복용 완료.";
+
+// MARK: - History
+"history.navigation_title" = "히스토리";
+"history.detail_title" = "사이클 상세";
+"history.empty_message" = "기록이 없어요";
+"history.start_label" = "시작:";
+"history.created_label" = "생성:";
+"history.scheduled_time_label" = "예정시각";
+// 복수형은 stringsdict에서 처리
+"history.active_days_format" = "복용 %d일";
+"history.break_days_format" = "휴약 %d일";
+"history.cell_meta_format" = "복용 %d일 · 휴약 %d일 · 예정시각 %@";
+
+// MARK: - Statistics
+"statistics.my_record_title" = "나의 기록";
+"statistics.taking_pill_label" = "복용약";
+"statistics.chart_title" = "필링타임";
+"statistics.period_selection_title" = "기간 선택";
+
+// MARK: - Message
+"message.setup_required" = "약을 설정해주세요";
+"message.rest_period" = "오늘은 잔디도 휴식중";
+"message.forgot_me" = "저를 잊었나요...?";
+"message.plant_today_grass" = "오늘의 잔디를 심어주세요";
+"message.plant_steadily" = "꾸준히 잔디를 심어주세요.";
+"message.pilling_searching" = "필링이가 찾아요...";
+"message.pilling_angry" = "필링이 화남";
+"message.take_two_pills" = "오늘은 두알을 복용하세요.";
+"message.grass_growing_well" = "잔디가 잘 자라고 있어요";
+"message.missed_yesterday_take_two" = "어제 미복용했다면 오늘은 2알!!";
+"message.take_within_two_hours" = "매일 2시간 이내의 같은 시간에 복용해주세요.";
+"message.need_one_pill_more" = "한알 더 먹어야해요!";
+"message.took_too_early" = "예정보다 2시간 이상 일찍 복용했어요";
+"message.see_tomorrow" = "내일도 만나요!";
+"message.start_taking_today" = "오늘부터 복용을 시작해요";
+"message.start_taking_tomorrow" = "내일부터 복용을 시작해요";
+// 복수형은 stringsdict에서 처리
+"message.days_until_start" = "복용 시작까지 %d일 남았어요";
+"message.one_pill_more" = "한알 더!";
+"message.widget_plant_grass" = "잔디를 심어보세요!";
+"message.widget_planting_complete" = "잔디 심기 완료!";
+"message.widget_grass_waiting" = "잔디가 기다려요";
+"message.widget_rest_time" = "지금은 쉬는 시간";
+
+// MARK: - Error
+"error.invalid_time_format" = "시간 형식이 올바르지 않습니다";
+"error.invalid_date_range" = "날짜 범위가 유효하지 않습니다";
+"error.unknown_error" = "오류";
+"error.permission_error" = "권한";
+"error.notification_permission_title" = "알림 설정 오류";
+
+// MARK: - Time Setting
+"time_setting.main_title" = "알람 받을 시간을 설정해주세요!";
+"time_setting.subtitle" = "설정은 추후에 변경가능합니다.";
+"time_setting.time_button_title" = "복용 시간";
+"time_setting.confirm_button" = "설정 완료!";
+"time_setting.picker_confirm_button" = "확인";
+"time_setting.navigation_title" = "시간 설정";
