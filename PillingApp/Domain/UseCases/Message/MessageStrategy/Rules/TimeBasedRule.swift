@@ -5,15 +5,12 @@ final class TimeBasedRule: MessageRule {
 
     func shouldEvaluate(context: MessageContext) -> Bool {
         guard let todayStatus = context.todayStatus else {
-            print("      [TimeBasedRule] 오늘 상태 없음")
             return false
         }
 
         // TimeBasedRule은 기본 폴백 룰이므로, tooEarly와 upcoming만 제외
         let notEarly = todayStatus.medicalTiming != .tooEarly
         let notUpcoming = todayStatus.medicalTiming != .upcoming
-
-        print("      [TimeBasedRule] 복용=\(todayStatus.isTaken ? "함" : "안함"), medicalTiming=\(todayStatus.medicalTiming.rawValue)")
 
         return notEarly && notUpcoming
     }
@@ -35,7 +32,6 @@ final class TimeBasedRule: MessageRule {
             default:
                 message = .todayAfter
             }
-            print("      [TimeBasedRule] 복용함 → \(message)")
             return message
         }
 
@@ -54,7 +50,6 @@ final class TimeBasedRule: MessageRule {
         default:
             message = .plantingSeed
         }
-        print("      [TimeBasedRule] 시간기반 → \(message)")
         return message
     }
 }

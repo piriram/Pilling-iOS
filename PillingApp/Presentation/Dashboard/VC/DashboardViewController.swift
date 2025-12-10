@@ -162,6 +162,9 @@ final class DashboardViewController: UIViewController {
             },
             onNewCycleAlert: { [weak self] in
                 self?.presentNewCycleAlert()
+            },
+            onCompletionFloatingView: { [weak self] in
+                self?.presentCompletionFloatingView()
             }
         )
     }
@@ -183,6 +186,17 @@ final class DashboardViewController: UIViewController {
         alert.addAction(confirmAction)
 
         present(alert, animated: true)
+    }
+
+    private func presentCompletionFloatingView() {
+        let pillName = viewModel.pillInfo.value?.name ?? "피임약"
+        let floatingView = CycleCompleteFloatingView(pillName: pillName)
+
+        floatingView.onStartNewCycle = { [weak self] in
+            self?.coordinator.navigateToPillSetting()
+        }
+
+        floatingView.show(in: view)
     }
 
     private func presentRetryAlert(retryHandler: @escaping () -> Void) {

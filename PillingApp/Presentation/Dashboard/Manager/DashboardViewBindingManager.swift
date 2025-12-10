@@ -31,7 +31,8 @@ final class DashboardViewBindingManager {
         sheetPresenter: DashboardSheetPresenter,
         onBackgroundUpdate: @escaping () -> Void,
         onRetryAlert: @escaping (@escaping () -> Void) -> Void,
-        onNewCycleAlert: @escaping () -> Void
+        onNewCycleAlert: @escaping () -> Void,
+        onCompletionFloatingView: @escaping () -> Void
     ) {
         bindViewModel(
             infoView: infoView,
@@ -54,7 +55,11 @@ final class DashboardViewBindingManager {
 
         bindBottomView(bottomView: bottomView)
 
-        bindAlert(onRetryAlert: onRetryAlert, onNewCycleAlert: onNewCycleAlert)
+        bindAlert(
+            onRetryAlert: onRetryAlert,
+            onNewCycleAlert: onNewCycleAlert,
+            onCompletionFloatingView: onCompletionFloatingView
+        )
     }
     
     // MARK: - Private Binding Methods
@@ -259,7 +264,11 @@ final class DashboardViewBindingManager {
             .disposed(by: disposeBag)
     }
     
-    private func bindAlert(onRetryAlert: @escaping (@escaping () -> Void) -> Void, onNewCycleAlert: @escaping () -> Void) {
+    private func bindAlert(
+        onRetryAlert: @escaping (@escaping () -> Void) -> Void,
+        onNewCycleAlert: @escaping () -> Void,
+        onCompletionFloatingView: @escaping () -> Void
+    ) {
         viewModel.showRetryAlert
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] in
@@ -274,6 +283,13 @@ final class DashboardViewBindingManager {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: {
                 onNewCycleAlert()
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.showCompletionFloatingView
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: {
+                onCompletionFloatingView()
             })
             .disposed(by: disposeBag)
     }

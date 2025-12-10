@@ -50,13 +50,6 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
             let startOfToday = calendar.startOfDay(for: now)
             let isPastDate = record.scheduledDateTime < startOfToday
 
-            print("🔍 [UpdatePillStatusUseCase] 과거 날짜 체크")
-            print("   현재시각: \(now)")
-            print("   오늘시작: \(startOfToday)")
-            print("   예정시각: \(record.scheduledDateTime)")
-            print("   과거날짜: \(isPastDate)")
-            print("   요청상태: \(newStatus.rawValue) → 최종: \(isPastDate ? "missed" : newStatus.rawValue)")
-
             if isPastDate {
                 finalStatus = .missed
             } else {
@@ -72,10 +65,8 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
         let finalTakenAt: Date?
         if let providedTakenAt = takenAt {
             finalTakenAt = providedTakenAt
-            print("   takenAt: 명시적 제공 = \(providedTakenAt)")
         } else {
             finalTakenAt = finalStatus.isTaken ? (record.takenAt ?? now) : nil
-            print("   takenAt: isTaken=\(finalStatus.isTaken), 결과=\(finalTakenAt?.description ?? "nil")")
         }
 
         let finalMemo = memo ?? record.memo
@@ -90,11 +81,6 @@ final class UpdatePillStatusUseCase: UpdatePillStatusUseCaseProtocol {
             createdAt: record.createdAt,
             updatedAt: now
         )
-
-        print("✅ [UpdatePillStatusUseCase] 레코드 업데이트")
-        print("   인덱스: \(recordIndex)")
-        print("   이전 상태: \(record.status.rawValue)")
-        print("   최종 상태: \(finalStatus.rawValue)")
 
         updatedCycle.records[recordIndex] = updatedRecord
 

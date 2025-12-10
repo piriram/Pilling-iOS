@@ -27,6 +27,7 @@ final class DashboardViewModel {
     let pillInfo = BehaviorRelay<PillInfo?>(value: nil)
     let showRetryAlert = PublishRelay<Void>()
     let showNewCycleAlert = PublishRelay<Void>()
+    let showCompletionFloatingView = PublishRelay<Void>()
     
     // MARK: - Initialization
     
@@ -111,6 +112,10 @@ final class DashboardViewModel {
         self.updateDashboardMessage()
         self.updateCanTakePill()
         self.autoMarkPastScheduledAsMissed()
+
+        if let cycle = data.cycle {
+            self.checkCompletionFloating(cycle)
+        }
     }
     
     private func handleError(_ error: Error) {
@@ -148,11 +153,6 @@ final class DashboardViewModel {
             let isToday = calendar.isDateInToday(record.scheduledDateTime)
 
             if isToday {
-                print("🔍 [DashboardViewModel.updateItems] 오늘 레코드 발견")
-                print("   DB상태: \(record.status.rawValue)")
-                print("   예정시각: \(record.scheduledDateTime)")
-                print("   현재시각: \(now)")
-
                 let todayScheduledDateTime = calculateTodayScheduledTime(
                     from: currentScheduledTime,
                     calendar: calendar
@@ -166,14 +166,12 @@ final class DashboardViewModel {
                         // 오늘 날짜는 늦었어도 notTaken(회색)으로 표시
                         // recentlyMissed는 과거 날짜에만 사용
                         displayStatus = .notTaken
-                        print("   → 오늘은 미복용: notTaken")
                     }
                     else if let takenAt = record.takenAt {
                         displayStatus = calculateTakenStatus(
                             takenAt: takenAt,
                             scheduledDateTime: todayScheduledDateTime
                         )
-                        print("   → 복용시각 기반: \(displayStatus.rawValue)")
                     }
                 }
             }
@@ -227,14 +225,7 @@ final class DashboardViewModel {
     
     private func updateDashboardMessage() {
         guard let cycle = currentCycle.value else {
-            print("❌ [updateDashboardMessage] cycle이 nil")
             return
-        }
-
-        let now = Date()
-        if let todayRecord = cycle.records.first(where: { calendar.isDate($0.scheduledDateTime, inSameDayAs: now) }) {
-            print("📬 [updateDashboardMessage] 메시지 계산 시작")
-            print("   오늘 레코드 상태: \(todayRecord.status.rawValue)")
         }
 
         let message = calculateDashboardMessageUseCase.execute(cycle: cycle)
@@ -278,14 +269,14 @@ final class DashboardViewModel {
             updateCanTakePill()
             return
         }
-        
+
         let now = Date()
         let startOfToday = calendar.startOfDay(for: now)
-        
+
         let hasPastScheduled = cycle.records.contains { record in
             record.scheduledDateTime < startOfToday && record.status == .scheduled
         }
-        
+
         if hasPastScheduled {
             autoMarkPastScheduledAsMissed()
         } else {
@@ -293,6 +284,8 @@ final class DashboardViewModel {
             updateDashboardMessage()
             updateCanTakePill()
         }
+
+        checkCompletionFloating(cycle)
     }
     
     func reloadData() {
@@ -320,6 +313,9 @@ final class DashboardViewModel {
 
                 // 사이클 완료 확인
                 self.checkCycleCompletion(updatedCycle)
+
+                // 복용일 마지막 날 확인
+                self.checkCompletionFloating(updatedCycle)
             })
             .disposed(by: disposeBag)
     }
@@ -349,11 +345,6 @@ final class DashboardViewModel {
             return
         }
 
-        print("🔄 [DashboardViewModel.updateState] 상태 변경 요청")
-        print("   인덱스: \(index)")
-        print("   변경 전: \(index < cycle.records.count ? cycle.records[index].status.rawValue : "범위초과")")
-        print("   변경 후: \(newStatus.rawValue)")
-
         updatePillStatusUseCase.execute(
             cycle: cycle,
             recordIndex: index,
@@ -364,11 +355,6 @@ final class DashboardViewModel {
         .subscribe(
             onNext: { [weak self] updatedCycle in
                 guard let self = self else { return }
-
-                if index < updatedCycle.records.count {
-                    print("✅ [DashboardViewModel.updateState] DB 업데이트 완료")
-                    print("   업데이트된 상태: \(updatedCycle.records[index].status.rawValue)")
-                }
 
                 self.currentCycle.accept(updatedCycle)
 
@@ -383,6 +369,9 @@ final class DashboardViewModel {
 
                 // 사이클 완료 확인
                 self.checkCycleCompletion(updatedCycle)
+
+                // 복용일 마지막 날 확인
+                self.checkCompletionFloating(updatedCycle)
             },
             onError: { error in
                 print("❌ UseCase 에러: \(error)")
@@ -408,6 +397,18 @@ final class DashboardViewModel {
     private func checkCycleCompletion(_ cycle: Cycle) {
         if cycle.isCycleCompleted() {
             showNewCycleAlert.accept(())
+        }
+    }
+
+    private func checkCompletionFloating(_ cycle: Cycle) {
+        let now = Date()
+        let totalDays = cycle.activeDays + cycle.breakDays
+
+        let daysSinceStart = calendar.dateComponents([.day], from: cycle.startDate, to: now).day ?? 0
+        let currentCycleDay = daysSinceStart + 1
+
+        if currentCycleDay >= totalDays {
+            showCompletionFloatingView.accept(())
         }
     }
 }

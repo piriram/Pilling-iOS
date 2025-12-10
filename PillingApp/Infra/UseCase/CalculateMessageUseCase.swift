@@ -41,13 +41,6 @@ final class CalculateMessageUseCase {
         let todayRecord = findTodayRecord(in: cycle, from: date)
         let yesterdayRecord = findYesterdayRecord(in: cycle, from: date)
 
-        if let today = todayRecord {
-            print("🔍 [CalculateMessageUseCase.buildContext] 오늘 레코드")
-            print("   DB 상태: \(today.status.rawValue)")
-            print("   복용시각: \(today.takenAt?.description ?? "nil")")
-            print("   예정시각: \(today.scheduledDateTime)")
-        }
-
         let todayStatus = todayRecord.map { record in
             var status = statusFactory.createStatus(
                 scheduledDate: record.scheduledDateTime,
@@ -68,7 +61,6 @@ final class CalculateMessageUseCase {
                     scheduledDate: status.scheduledDate,
                     actionDate: status.actionDate
                 )
-                print("   🔧 DB 상태 우선 적용: \(status.baseStatus.rawValue) → \(record.status.rawValue)")
             }
 
             return status
@@ -128,7 +120,6 @@ final class CalculateMessageUseCase {
 
             // 오늘 레코드는 건너뛰기
             if skipToday && isToday {
-                print("연속미복용 계산: 오늘 건너뜀 (status=\(record.status.rawValue))")
                 continue
             }
             skipToday = false
@@ -137,14 +128,11 @@ final class CalculateMessageUseCase {
 
             if timeElapsed >= TimeThreshold.fullyMissed && !record.status.isTaken {
                 count += 1
-                print("연속미복용 계산: +1 (total=\(count), status=\(record.status.rawValue))")
             } else if record.status.isTaken {
-                print("연속미복용 계산: 복용 발견, 중단 (status=\(record.status.rawValue))")
                 break
             }
         }
 
-        print("연속미복용 계산 최종: \(count)일")
         return count
     }
 

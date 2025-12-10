@@ -47,9 +47,6 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
             self.userDefaultsManager.saveCurrentCycleID(cycle.id)
             
             return self.cycleRepository.saveCycle(cycle)
-                .do(onNext: { _ in
-                    print("✅ 새 사이클 저장 완료")
-                })
                 .map { cycle }
         }
     }
@@ -146,4 +143,3 @@ final class CreateCycleUseCase: CreateCycleUseCaseProtocol {
         return calendar.date(from: combined) ?? date
     }
 }
-
