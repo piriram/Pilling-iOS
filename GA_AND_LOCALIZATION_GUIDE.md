@@ -107,11 +107,12 @@ Xcode 콘솔에 다음과 같이 출력됩니다:
 ### 1. 기본 사용
 
 ```swift
-// 간단한 번역
-let title = "dashboard.title".localized  // "대시보드" 또는 "Dashboard"
+// AppStrings를 통한 사용 (권장)
+label.text = AppStrings.Dashboard.guideTitle  // 자동으로 현재 언어에 맞게 번역됨
+button.setTitle(AppStrings.Common.confirmTitle, for: .normal)
 
-// 버튼 텍스트
-button.setTitle("common.confirm".localized, for: .normal)
+// 직접 키를 사용하는 방법 (권장하지 않음)
+let title = "dashboard.guide_title".localized  // "필링 가이드" 또는 "Pilling Guide"
 ```
 
 ### 2. 새로운 번역 추가하기
@@ -135,21 +136,21 @@ label.text = "feature.new_button".localized
 
 ### 3. 파라미터가 있는 번역
 
-#### Step 1: Localizable.strings에 포맷 추가
-
-**한국어**
-```
-"pill.count" = "%d개의 약";
-"pill.taken_at" = "%@에 복용 완료";
-```
-
-**영어**
-```
-"pill.count" = "%d pills";
-"pill.taken_at" = "Taken at %@";
+#### 단일 파라미터
+```swift
+// AppStrings를 통한 사용 (권장)
+let days = 5
+let message = AppStrings.Message.daysUntilStart(days)  // "복용 시작까지 5일 남았어요" 또는 "5 days until start"
 ```
 
-#### Step 2: 코드에서 사용
+#### 복수 파라미터
+```swift
+// AppStrings를 통한 사용 (권장)
+let metaText = AppStrings.History.cellMetaFormat(activeDays: 24, breakDays: 4, time: "09:00")
+// "복용 24일 · 휴약 4일 · 예정시각 09:00" 또는 "24 days active · 4 days break · Scheduled 09:00"
+```
+
+#### 직접 키를 사용하는 방법 (권장하지 않음)
 ```swift
 let count = 5
 let message = "pill.count".localized(with: count)  // "5개의 약"
@@ -174,16 +175,33 @@ Xcode가 자동으로 `ja.lproj/Localizable.strings` 생성
 "dashboard.title" = "ダッシュボード";
 ```
 
-### 5. 유지보수 팁
+### 5. 복수형 처리
+
+복수형은 `.stringsdict` 파일에서 자동 처리됩니다:
+
+```swift
+// 영어: "1 day until start" vs "5 days until start"
+// 한국어: "복용 시작까지 1일 남았어요" vs "복용 시작까지 5일 남았어요"
+let message1 = AppStrings.Message.daysUntilStart(1)
+let message5 = AppStrings.Message.daysUntilStart(5)
+```
+
+### 6. 유지보수 팁
 
 #### 번역 키 네이밍 규칙
 ```
 [화면명].[요소명]
 예:
-- dashboard.title
-- settings.notification
-- pill.status.taken
+- dashboard.guide_title
+- setting.navigation_title
+- message.plant_today_grass
 ```
+
+#### 새로운 문자열 추가하기
+1. `AppStrings.swift`에 새로운 프로퍼티 추가
+2. `ko.lproj/Localizable.strings`에 한국어 번역 추가
+3. `en.lproj/Localizable.strings`에 영어 번역 추가
+4. 복수형이 필요하면 `.stringsdict` 파일에도 추가
 
 #### 번역 누락 확인
 Xcode에서 빌드 시 자동으로 경고가 표시됩니다.
@@ -207,14 +225,50 @@ PillingApp/
 │   └── FirebaseAnalyticsService.swift         # 프로덕션 구현체
 ├── Resources/
 │   ├── ko.lproj/
-│   │   └── Localizable.strings                # 한국어 번역
+│   │   ├── Localizable.strings                # 한국어 번역
+│   │   └── Localizable.stringsdict            # 한국어 복수형 처리
 │   └── en.lproj/
-│       └── Localizable.strings                # 영어 번역
+│       ├── Localizable.strings                # 영어 번역
+│       └── Localizable.stringsdict            # 영어 복수형 처리
 └── Common/
+    ├── Constants/
+    │   └── AppStrings.swift                   # 중앙 집중식 문자열 관리 (자동 번역)
     └── Extension/
         └── String+Localized.swift             # 번역 헬퍼
 
 ```
+
+---
+
+## 구현 완료 사항
+
+### GA (Google Analytics)
+- ✅ Protocol 기반 아키텍처 (`AnalyticsServiceProtocol`)
+- ✅ Enum 기반 이벤트 관리 (`AnalyticsEvent`)
+- ✅ 개발/프로덕션 환경 자동 분리 (`ConsoleAnalyticsService`, `FirebaseAnalyticsService`)
+- ✅ DI Container 통합
+- ✅ UseCase에 Analytics 주입 (예: `TakePillUseCase`)
+
+### 로컬라이제이션
+- ✅ 한국어/영어 번역 파일 (`Localizable.strings`)
+- ✅ 복수형 처리 (`Localizable.stringsdict`)
+- ✅ AppStrings 중앙 집중화 (모든 하드코딩된 문자열 수집)
+- ✅ AppStrings의 자동 번역 적용 (`.localized` 사용)
+- ✅ String Extension 헬퍼 (`String+Localized.swift`)
+- ✅ 파라미터가 있는 번역 지원
+
+### 사용 가능한 문자열 카테고리
+- Common (공통: 확인, 취소, 완료 등)
+- PillSetting (약 설정)
+- SettingFloating (설정 완료 플로팅)
+- Setting (설정 화면)
+- Dashboard (대시보드)
+- Widget (위젯)
+- History (히스토리)
+- Statistics (통계)
+- Message (앱 메시지 - 20+ 가지)
+- Error (에러 메시지)
+- TimeSetting (시간 설정)
 
 ---
 
