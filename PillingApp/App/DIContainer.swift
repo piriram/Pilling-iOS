@@ -32,7 +32,17 @@ final class DIContainer {
     private lazy var notificationManager: NotificationManagerProtocol = {
         return LocalNotificationManager()
     }()
-    
+
+    // MARK: - Analytics
+
+    private lazy var analyticsService: AnalyticsServiceProtocol = {
+        #if DEBUG
+        return ConsoleAnalyticsService()  // 개발 환경: 콘솔 출력
+        #else
+        return FirebaseAnalyticsService()  // 프로덕션: Firebase (설치 후 활성화)
+        #endif
+    }()
+
     // MARK: - Repositories (싱글톤)
     
     private lazy var cycleRepository: CycleRepositoryProtocol = {
@@ -60,7 +70,8 @@ final class DIContainer {
     func makeTakePillUseCase() -> TakePillUseCaseProtocol {
         return TakePillUseCase(
             cycleRepository: cycleRepository,
-            timeProvider: timeProvider
+            timeProvider: timeProvider,
+            analytics: analyticsService
         )
     }
     
@@ -157,5 +168,9 @@ final class DIContainer {
     
     func getUserDefaultsManager() -> UserDefaultsManagerProtocol {
         return userDefaultsManager
+    }
+
+    func getAnalyticsService() -> AnalyticsServiceProtocol {
+        return analyticsService
     }
 }
