@@ -111,8 +111,8 @@ final class PillStatusFactoryTests: XCTestCase {
         let calendar = Calendar.current
         let scheduledDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 10, hour: 9))!
 
-        // When: 12:00에 복용 (3시간 늦음, 2시간 임계값 초과)
-        let actionDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 10, hour: 12))!
+        // When: 10:00에 복용 (1시간 늦음)
+        let actionDate = calendar.date(from: DateComponents(year: 2024, month: 1, day: 10, hour: 10))!
         let status = sut.createStatus(
             scheduledDate: scheduledDate,
             actionDate: actionDate,
