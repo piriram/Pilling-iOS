@@ -1,36 +1,143 @@
 /*
   Localizable.strings (English)
-  Add new translations here
+  PillingApp
 */
 
 // MARK: - Common
-"common.confirm" = "Confirm";
-"common.cancel" = "Cancel";
-"common.delete" = "Delete";
-"common.save" = "Save";
-"common.edit" = "Edit";
-"common.done" = "Done";
+"common.alert_title" = "Alert";
+"common.ok_button" = "OK";
+"common.error_title" = "Error";
+"common.cancel_title" = "Cancel";
+"common.confirm_title" = "Done";
 
-// MARK: - Pill Status
-"pill.status.taken" = "Taken";
-"pill.status.missed" = "Missed";
-"pill.status.scheduled" = "Scheduled";
-"pill.status.delayed" = "Delayed";
+// MARK: - Pill Setting
+"pill_setting.main_title" = "Tell us about your pill!";
+"pill_setting.subtitle" = "Settings can be changed later.";
+"pill_setting.button_title" = "Pill Type";
+"pill_setting.start_date_button" = "Start Date";
+"pill_setting.next_button" = "Next";
+"pill_setting.nav_title" = "Pill Settings";
+"pill_setting.name_title" = "Pill Name (Optional)";
+"pill_setting.taking_days" = "Active Days";
+"pill_setting.taking_button" = "24 days";
+"pill_setting.break_label" = "Break Days";
+"pill_setting.break_day" = "4 days";
+"pill_setting.warning_label" = "The sum of active and break days must be 28 or less.";
+"pill_setting.setting_complete" = "Setup Complete";
+"pill_setting.title_label" = "Enter Pill Information";
+
+// MARK: - Setting Floating
+"setting_floating.title" = "Setup Complete!";
+"setting_floating.subtitle" = "We'll send you daily reminders";
+
+// MARK: - Setting
+"setting.section_label" = "Pill Settings";
+"setting.new_pill_button" = "Start New Pill Cycle";
+"setting.navigation_title" = "Settings";
+"setting.alarm_section_title" = "Notification Settings";
+"setting.time_setting_title" = "Pill Time";
+"setting.time_setting_default" = "9:00 AM";
+"setting.message_setting_title" = "Notification Message";
+"setting.message_setting_default" = "For a healthy day...";
+"setting.message_editor_title" = "Edit Notification Message";
+"setting.message_editor_description" = "Enter your preferred notification message";
+"setting.message_editor_placeholder" = "Enter notification message";
+"setting.new_pill_cycle_title" = "Start New Pill Cycle";
+"setting.new_pill_cycle_message" = "All current pill records will be deleted.\nAre you sure you want to start a new pill cycle?";
+"setting.new_pill_cycle_confirm" = "Start";
+"setting.success_time_updated" = "Pill time has been updated";
+"setting.success_message_updated" = "Notification message has been updated";
+"setting.error_time_update_failed" = "Failed to update time";
+"setting.error_message_update_failed" = "Failed to update message";
+"setting.error_reset_failed" = "Failed to reset";
+"setting.permission_error_go_to_settings" = "Go to Settings";
 
 // MARK: - Dashboard
-"dashboard.title" = "Dashboard";
-"dashboard.today" = "Today";
-"dashboard.take_pill" = "Take Pill";
+"dashboard.guide_title" = "Pilling Guide";
+"dashboard.guide_subtitle" = "Track your pill status with grass!";
+"dashboard.guide_confirm_button" = "OK";
+"dashboard.guide_taken" = "Pill Taken";
+"dashboard.guide_taken_double" = "2 Pills Taken";
+"dashboard.guide_missed" = "Missed";
+"dashboard.taken" = "Taken";
+"dashboard.taken_double" = "2 Pills Taken";
+"dashboard.guide_today" = "Today";
+"dashboard.take_pill_button" = "Plant Grass";
+"dashboard.take_pill_completed" = "Planted!";
+"dashboard.rest_period" = "Break Period";
+"dashboard.weekday_mon" = "Mon";
+"dashboard.weekday_tue" = "Tue";
+"dashboard.weekday_wed" = "Wed";
+"dashboard.weekday_thu" = "Thu";
+"dashboard.weekday_fri" = "Fri";
+"dashboard.weekday_sat" = "Sat";
+"dashboard.weekday_sun" = "Sun";
 
-// MARK: - Settings
-"settings.title" = "Settings";
-"settings.language" = "Language";
-"settings.notification" = "Notification";
+// MARK: - Widget
+"widget.configuration_display_name" = "Pill Reminder";
+"widget.configuration_description" = "Check today's pill status";
+"widget.message_plant_grass" = "Plant your grass!";
+"widget.message_setup_pill" = "Please set up your pill";
+"widget.message_grass_waiting" = "Grass is waiting";
+"widget.message_one_pill_complete" = "One planted";
+"widget.message_rest_time" = "Rest time";
+"widget.message_two_today" = "Two pills today";
+"widget.message_today_complete" = "Today's pill taken.";
+
+// MARK: - History
+"history.navigation_title" = "History";
+"history.detail_title" = "Cycle Details";
+"history.empty_message" = "No records yet";
+"history.start_label" = "Start:";
+"history.created_label" = "Created:";
+"history.scheduled_time_label" = "Scheduled Time";
+// Plural handled in stringsdict
+"history.active_days_format" = "%d active day(s)";
+"history.break_days_format" = "%d break day(s)";
+"history.cell_meta_format" = "%d active · %d break · Scheduled %@";
 
 // MARK: - Statistics
-"statistics.title" = "Statistics";
-"statistics.adherence_rate" = "Adherence Rate";
+"statistics.my_record_title" = "My Records";
+"statistics.taking_pill_label" = "Pills";
+"statistics.chart_title" = "Pilling Time";
+"statistics.period_selection_title" = "Select Period";
+
+// MARK: - Message
+"message.setup_required" = "Please set up your pill";
+"message.rest_period" = "Grass is resting today";
+"message.forgot_me" = "Did you forget me...?";
+"message.plant_today_grass" = "Plant today's grass";
+"message.plant_steadily" = "Keep planting grass steadily.";
+"message.pilling_searching" = "Pilling is looking for you...";
+"message.pilling_angry" = "Pilling is upset";
+"message.take_two_pills" = "Take two pills today.";
+"message.grass_growing_well" = "Grass is growing well";
+"message.missed_yesterday_take_two" = "Missed yesterday? Take 2 today!!";
+"message.take_within_two_hours" = "Take at the same time within 2 hours daily.";
+"message.need_one_pill_more" = "Need one more pill!";
+"message.took_too_early" = "Taken 2+ hours earlier than scheduled";
+"message.see_tomorrow" = "See you tomorrow!";
+"message.start_taking_today" = "Start taking today";
+"message.start_taking_tomorrow" = "Start taking tomorrow";
+// Plural handled in stringsdict
+"message.days_until_start" = "%d day(s) until start";
+"message.one_pill_more" = "One more!";
+"message.widget_plant_grass" = "Plant your grass!";
+"message.widget_planting_complete" = "Planting complete!";
+"message.widget_grass_waiting" = "Grass is waiting";
+"message.widget_rest_time" = "Rest time";
 
 // MARK: - Error
-"error.unknown" = "An unknown error occurred";
-"error.network" = "Please check your network connection";
+"error.invalid_time_format" = "Invalid time format";
+"error.invalid_date_range" = "Invalid date range";
+"error.unknown_error" = "Error";
+"error.permission_error" = "Permission";
+"error.notification_permission_title" = "Notification Permission Error";
+
+// MARK: - Time Setting
+"time_setting.main_title" = "Set your pill reminder time!";
+"time_setting.subtitle" = "Settings can be changed later.";
+"time_setting.time_button_title" = "Pill Time";
+"time_setting.confirm_button" = "Setup Complete!";
+"time_setting.picker_confirm_button" = "Confirm";
+"time_setting.navigation_title" = "Time Settings";
