@@ -19,6 +19,7 @@
 		218AFB3E2E996D86008A77DB /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 218AFB3D2E996D86008A77DB /* RxCocoa */; };
 		218AFB402E996D86008A77DB /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 218AFB3F2E996D86008A77DB /* RxSwift */; };
 		21F0812C2E9CDAE10045BC93 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 21F0812B2E9CDAE10045BC93 /* IQKeyboardManagerSwift */; };
+		21F19BE52EE6E10E007F57A8 /* RxBlocking in Frameworks */ = {isa = PBXBuildFile; productRef = 21F19BE42EE6E10E007F57A8 /* RxBlocking */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +29,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 2124F75F2EA23E3A001578C9;
 			remoteInfo = DaillyWidgetExtension;
+		};
+		21F19BD02EE6DFF0007F57A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 218AFB122E996BF7008A77DB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 218AFB192E996BF7008A77DB;
+			remoteInfo = PillingApp;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -52,6 +60,7 @@
 		2124F79E2EA25B84001578C9 /* DaillyWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DaillyWidgetExtension.entitlements; sourceTree = "<group>"; };
 		2124FC3A2EA77F14001578C9 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		218AFB1A2E996BF7008A77DB /* PillingApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PillingApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21F19BCC2EE6DFF0007F57A8 /* PillingAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PillingAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -144,6 +153,11 @@
 			path = PillingApp;
 			sourceTree = "<group>";
 		};
+		21F19BCD2EE6DFF0007F57A8 /* PillingAppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = PillingAppTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +184,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		21F19BC92EE6DFF0007F57A8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21F19BE52EE6E10E007F57A8 /* RxBlocking in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -189,6 +211,7 @@
 				2124F79E2EA25B84001578C9 /* DaillyWidgetExtension.entitlements */,
 				218AFB1C2E996BF7008A77DB /* PillingApp */,
 				2124F7662EA23E3A001578C9 /* DaillyWidget */,
+				21F19BCD2EE6DFF0007F57A8 /* PillingAppTests */,
 				2124F7612EA23E3A001578C9 /* Frameworks */,
 				218AFB1B2E996BF7008A77DB /* Products */,
 			);
@@ -199,6 +222,7 @@
 			children = (
 				218AFB1A2E996BF7008A77DB /* PillingApp.app */,
 				2124F7602EA23E3A001578C9 /* DaillyWidgetExtension.appex */,
+				21F19BCC2EE6DFF0007F57A8 /* PillingAppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -259,6 +283,30 @@
 			productReference = 218AFB1A2E996BF7008A77DB /* PillingApp.app */;
 			productType = "com.apple.product-type.application";
 		};
+		21F19BCB2EE6DFF0007F57A8 /* PillingAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21F19BD42EE6DFF0007F57A8 /* Build configuration list for PBXNativeTarget "PillingAppTests" */;
+			buildPhases = (
+				21F19BC82EE6DFF0007F57A8 /* Sources */,
+				21F19BC92EE6DFF0007F57A8 /* Frameworks */,
+				21F19BCA2EE6DFF0007F57A8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				21F19BD12EE6DFF0007F57A8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				21F19BCD2EE6DFF0007F57A8 /* PillingAppTests */,
+			);
+			name = PillingAppTests;
+			packageProductDependencies = (
+				21F19BE42EE6E10E007F57A8 /* RxBlocking */,
+			);
+			productName = PillingAppTests;
+			productReference = 21F19BCC2EE6DFF0007F57A8 /* PillingAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -274,6 +322,10 @@
 					};
 					218AFB192E996BF7008A77DB = {
 						CreatedOnToolsVersion = 26.0;
+					};
+					21F19BCB2EE6DFF0007F57A8 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 218AFB192E996BF7008A77DB;
 					};
 				};
 			};
@@ -300,6 +352,7 @@
 			targets = (
 				218AFB192E996BF7008A77DB /* PillingApp */,
 				2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */,
+				21F19BCB2EE6DFF0007F57A8 /* PillingAppTests */,
 			);
 		};
 /* End PBXProject section */
@@ -321,6 +374,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		21F19BCA2EE6DFF0007F57A8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -338,6 +398,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		21F19BC82EE6DFF0007F57A8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -345,6 +412,11 @@
 			isa = PBXTargetDependency;
 			target = 2124F75F2EA23E3A001578C9 /* DaillyWidgetExtension */;
 			targetProxy = 2124F7722EA23E3C001578C9 /* PBXContainerItemProxy */;
+		};
+		21F19BD12EE6DFF0007F57A8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 218AFB192E996BF7008A77DB /* PillingApp */;
+			targetProxy = 21F19BD02EE6DFF0007F57A8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -640,6 +712,58 @@
 			};
 			name = Release;
 		};
+		21F19BD22EE6DFF0007F57A8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 557346W8SC;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Pilltastic.Pilling.PillingAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PillingApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PillingApp";
+			};
+			name = Debug;
+		};
+		21F19BD32EE6DFF0007F57A8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 557346W8SC;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Pilltastic.Pilling.PillingAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PillingApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PillingApp";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -666,6 +790,15 @@
 			buildConfigurations = (
 				218AFB2E2E996BF9008A77DB /* Debug */,
 				218AFB2F2E996BF9008A77DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21F19BD42EE6DFF0007F57A8 /* Build configuration list for PBXNativeTarget "PillingAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21F19BD22EE6DFF0007F57A8 /* Debug */,
+				21F19BD32EE6DFF0007F57A8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -750,6 +883,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 21F0812A2E9CDAE10045BC93 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */;
 			productName = IQKeyboardManagerSwift;
+		};
+		21F19BE42EE6E10E007F57A8 /* RxBlocking */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 218AFB3C2E996D86008A77DB /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxBlocking;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

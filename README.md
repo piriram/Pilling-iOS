@@ -36,119 +36,26 @@
 
 ---
 
-## 기술 스택 및 선택 이유
+## 기술 스택
 
-### 아키텍처
+**UI / Presentation**
+- UIKit
+- SnapKit
+- WidgetKit
+- Diffable Data Source
 
-**MVVM + Clean Architecture**
-- **선택 이유:** MVP 개발 일정 내에서 빠른 기능 추가와 유지보수를 동시에 확보하기 위해 계층을 Domain/Data/Presentation으로 분리
-- **효과:** 비즈니스 로직(UseCase)을 독립적으로 테스트 가능하게 만들어 CoreData 마이그레이션 시에도 Domain 레이어는 변경 없이 유지
+**Architecture**
+- MVVM
+- Clean Architecture
+- Repository Pattern
 
-```
-Presentation Layer (MVVM)
-├── Views: UIKit + SnapKit
-└── ViewModels: RxSwift 기반 바인딩
+**Reactive & State Handling**
+- RxSwift
+- NotificationCenter
 
-Domain Layer
-├── Entities: PillCycle, PillRecord, DayItem
-├── UseCases: 비즈니스 로직 캡슐화
-└── Repository Protocols: DIP 적용
-
-Data Layer
-├── CoreData: 영구 저장소
-├── Repositories: Protocol 구현체
-└── DataSources: CoreData 접근 계층
-
-Infrastructure Layer
-├── AnalyticsService: GA4 추적
-└── TimeProvider: 타임존 처리
-```
-
-**Repository Pattern + DI**
-- **선택 이유:** CoreData 구현체를 Protocol로 추상화하여 위젯 Extension과 메인 앱이 동일한 인터페이스로 데이터 접근
-- **효과:** 위젯 개발 시 메인 앱의 CoreData 로직을 그대로 재사용하여 개발 시간 단축
-
-```swift
-protocol PillCycleRepositoryProtocol {
-    func fetchCurrentCycle() -> Observable<PillCycle?>
-    func updateRecord(_ record: PillRecord) -> Observable<Void>
-}
-```
-
-### UI
-
-**UIKit + SnapKit**
-- **SwiftUI 대신 선택한 이유:**
-  - iOS 16 최소 타겟에서 일부 SwiftUI API 제약 회피 (ScrollView의 scrollPosition, scrollTargetBehavior 등)
-  - 사용자별 다른 사이클 길이에 따른 동적 그리드 CollectionView의 세밀한 레이아웃 제어 필요
-  - 5년간 축적된 UIKit 경험을 활용한 빠른 개발
-- **SnapKit 도입 이유:** AutoLayout 코드의 가독성 향상 및 constraint 업데이트 로직 간소화
-
-**구체적 사례:**
-```swift
-// CollectionView 동적 높이 계산
-func collectionView(_ collectionView: UICollectionView, 
-                    layout: UICollectionViewLayout, 
-                    sizeForItemAt indexPath: IndexPath) -> CGSize {
-    let width = (collectionView.bounds.width - spacing * 6) / 7
-    return CGSize(width: width, height: width)
-}
-
-// 계산된 높이를 즉시 다른 뷰에 적용
-let totalHeight = calculateCollectionViewHeight()
-collectionViewHeightConstraint.update(offset: totalHeight)
-```
-
-### 반응형 프로그래밍
-
-**RxSwift + RxCocoa**
-- **선택 이유:** CoreData 변경 → ViewModel 상태 업데이트 → UI 반영의 데이터 흐름을 선언적으로 표현
-- **효과:** 복용 기록 시 달력, 메시지, 위젯 등 여러 UI 컴포넌트가 자동으로 동기화
-
-```swift
-// 단일 데이터 소스에서 여러 UI 자동 업데이트
-dashboardStateRelay
-    .observe(on: MainScheduler.instance)
-    .bind(to: calendarView.rx.items)
-    .disposed(by: disposeBag)
-```
-
-### 데이터베이스
-
-**CoreData**
-- **선택 이유:**
-  - 로컬 전용 앱으로 서버 통신 불필요
-  - App Groups를 통한 앱-위젯 간 데이터 공유 구현 용이
-  - NSPersistentContainer의 백그라운드 컨텍스트로 메인 스레드 블로킹 방지
-- **구현 전략:** Shared Container를 사용해 메인 앱과 위젯이 동일한 SQLite 파일 접근
-
-```swift
-// App Groups로 컨테이너 공유
-let storeURL = FileManager.default
-    .containerURL(forSecurityApplicationGroupIdentifier: "group.app.Pilltastic.Pilling")?
-    .appendingPathComponent("PillingApp.sqlite")
-```
-
-### Extensions
-
-**WidgetKit**
-- **선택 이유:** 사용자가 앱을 열지 않고도 홈 화면에서 오늘의 복용 상태를 즉시 확인 가능
-- **구현 특징:** Timeline Provider에서 CoreData를 직접 읽어 1시간마다 업데이트, 복용 상태 변경 시 `WidgetCenter.shared.reloadAllTimelines()` 호출
-
-### 분석
-
-**Google Analytics (Firebase)**
-- **선택 이유:** 사용자 행동 패턴 분석을 위한 무료 분석 도구
-- **구현 특징:**
-  - ATT(App Tracking Transparency) 프레임워크 통합으로 GDPR/CCPA 규제 준수
-  - Protocol 기반 AnalyticsService로 추후 다른 분석 도구로 교체 가능하도록 설계
-  - 민감한 복용 데이터는 수집하지 않고 사용 패턴만 익명 수집
-
-### 테스트
-
-**XCTest**
-- **선택 이유:** UseCase와 ViewModel의 비즈니스 로직 검증
-- **테스트 전략:** TimeProvider Protocol을 Mock으로 교체하여 타임존 변경 시나리오 테스트
+**Data Layer**
+- CoreData
+- App Groups
 
 ---
 
