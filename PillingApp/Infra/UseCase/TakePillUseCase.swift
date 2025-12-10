@@ -12,13 +12,16 @@ protocol TakePillUseCaseProtocol {
 final class TakePillUseCase: TakePillUseCaseProtocol {
     private let cycleRepository: CycleRepositoryProtocol
     private let timeProvider: TimeProvider
-    
+    private let analytics: AnalyticsServiceProtocol?
+
     init(
         cycleRepository: CycleRepositoryProtocol,
-        timeProvider: TimeProvider
+        timeProvider: TimeProvider,
+        analytics: AnalyticsServiceProtocol? = nil
     ) {
         self.cycleRepository = cycleRepository
         self.timeProvider = timeProvider
+        self.analytics = analytics
     }
     
     func execute(cycle: Cycle, settings: UserSettings, takenAt: Date) -> Observable<Cycle> {
@@ -65,8 +68,12 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
         )
         
         updatedCycle.records[todayIndex] = updatedRecord
-        
+
         return cycleRepository.updateRecord(updatedRecord, in: cycle.id)
+            .do(onNext: { [weak self] _ in
+                // 성공 시에만 Analytics 이벤트 전송
+                self?.analytics?.logEvent(.pillTaken(date: takenAt, status: newStatus))
+            })
             .map { updatedCycle }
     }
 }
