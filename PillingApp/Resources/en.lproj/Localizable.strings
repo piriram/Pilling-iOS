@@ -1,0 +1,36 @@
+/*
+  Localizable.strings (English)
+  Add new translations here
+*/
+
+// MARK: - Common
+"common.confirm" = "Confirm";
+"common.cancel" = "Cancel";
+"common.delete" = "Delete";
+"common.save" = "Save";
+"common.edit" = "Edit";
+"common.done" = "Done";
+
+// MARK: - Pill Status
+"pill.status.taken" = "Taken";
+"pill.status.missed" = "Missed";
+"pill.status.scheduled" = "Scheduled";
+"pill.status.delayed" = "Delayed";
+
+// MARK: - Dashboard
+"dashboard.title" = "Dashboard";
+"dashboard.today" = "Today";
+"dashboard.take_pill" = "Take Pill";
+
+// MARK: - Settings
+"settings.title" = "Settings";
+"settings.language" = "Language";
+"settings.notification" = "Notification";
+
+// MARK: - Statistics
+"statistics.title" = "Statistics";
+"statistics.adherence_rate" = "Adherence Rate";
+
+// MARK: - Error
+"error.unknown" = "An unknown error occurred";
+"error.network" = "Please check your network connection";
