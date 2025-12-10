@@ -3,6 +3,7 @@ import Foundation
 /// 메시지 타입 enum
 enum MessageType {
     case empty
+    case cycleComplete
     case resting
     case waiting
     case plantingSeed
@@ -26,6 +27,8 @@ enum MessageType {
         switch self {
         case .empty:
             return "약을 설정해주세요"
+        case .cycleComplete:
+            return "새 약을 설정해주세요."
         case .resting:
             return "오늘은 잔디도 휴식중"
         case .waiting:
@@ -94,6 +97,8 @@ enum MessageType {
         switch self {
         case .empty:
             return "icon_plant"
+        case .cycleComplete:
+            return "icon_rest"
         case .resting:
             return "icon_rest"
         case .waiting:
@@ -135,7 +140,7 @@ enum MessageType {
     
     var iconImageName: String {
         switch self {
-        case .empty, .resting:
+        case .empty, .cycleComplete, .resting:
             return "rest"
         case .waiting,.fire,.groomy:
             return "missed"
@@ -154,6 +159,8 @@ enum MessageType {
             return "background_rest"
         case .resting, .empty, .beforeStart:
             return "background_rest"
+        case .cycleComplete:
+            return "background_taken"
         default:
             return "background_taken"
         }

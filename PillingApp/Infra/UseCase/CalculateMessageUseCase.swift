@@ -31,6 +31,14 @@ final class CalculateMessageUseCase {
             return makeBeforeStartMessage(startDate: cycle.startDate, currentDate: date)
         }
 
+        let totalDays = cycle.activeDays + cycle.breakDays
+        let daysSinceStart = timeProvider.calendar.dateComponents([.day], from: cycle.startDate, to: date).day ?? 0
+        let currentCycleDay = daysSinceStart + 1
+
+        if currentCycleDay >= totalDays {
+            return MessageType.cycleComplete.toResult()
+        }
+
         let context = buildContext(cycle: cycle, date: date)
         let messageType = ruleEngine.evaluate(context: context)
 

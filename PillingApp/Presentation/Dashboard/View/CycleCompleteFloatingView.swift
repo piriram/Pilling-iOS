@@ -13,14 +13,14 @@ final class CycleCompleteFloatingView: UIView {
 
     private let dimmedBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.2)
         return view
     }()
 
     private let floatingCardView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemBackground
-        view.layer.cornerRadius = 20
+        view.layer.cornerRadius = 30
         view.layer.masksToBounds = true
         return view
     }()
@@ -35,15 +35,15 @@ final class CycleCompleteFloatingView: UIView {
     private let congratulationLabel: UILabel = {
         let label = UILabel()
         label.text = "잔디를 꽉 채워주셨군요!"
-        label.font = Typography.body2()
-        label.textColor = AppColor.secondary
+        label.font = Typography.body1(.medium)
+        label.textColor = AppColor.gray600
         label.textAlignment = .center
         return label
     }()
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = Typography.headline1(.bold)
+        label.font = Typography.headline3(.bold)
         label.textColor = AppColor.textBlack
         label.textAlignment = .center
         return label
@@ -53,9 +53,9 @@ final class CycleCompleteFloatingView: UIView {
         let button = UIButton(type: .system)
         button.setTitle("새 약 복용 시작하기", for: .normal)
         button.setTitleColor(.label, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        button.backgroundColor = AppColor.pillGreen200
-        button.layer.cornerRadius = 12
+        button.titleLabel?.font = Typography.body2(.semibold)
+        button.backgroundColor = AppColor.pillGreen300
+        button.layer.cornerRadius = 8
         return button
     }()
 
@@ -78,7 +78,7 @@ final class CycleCompleteFloatingView: UIView {
     private func setupViews() {
         backgroundColor = .clear
 
-        titleLabel.text = "\(pillName) 복용 완료"
+        titleLabel.text = pillName.isEmpty ? "[\(pillName)] 복용 완료" : "복용 완료"
 
         addSubview(dimmedBackgroundView)
         addSubview(floatingCardView)
@@ -100,10 +100,9 @@ final class CycleCompleteFloatingView: UIView {
         }
 
         illustrationImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(48)
+            $0.top.equalToSuperview().offset(45)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(160)
-            $0.height.equalTo(140)
+            $0.size.equalTo(140)
         }
 
         congratulationLabel.snp.makeConstraints {
