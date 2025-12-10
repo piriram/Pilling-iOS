@@ -269,6 +269,7 @@ final class MockUserDefaultsManager: UserDefaultsManagerProtocol {
     var sideEffectTags: [SideEffectTag] = []
     var pillStartDate: Date?
     var currentCycleID: UUID?
+    var completedOnboarding = false
 
     func savePillInfo(_ pillInfo: PillInfo) {
         self.pillInfo = pillInfo
@@ -297,6 +298,14 @@ final class MockUserDefaultsManager: UserDefaultsManagerProtocol {
 
     func loadCurrentCycleID() -> UUID? {
         return currentCycleID
+    }
+
+    func hasCompletedOnboarding() -> Bool {
+        return completedOnboarding
+    }
+
+    func setHasCompletedOnboarding(_ completed: Bool) {
+        completedOnboarding = completed
     }
 
     func saveSideEffectTags(_ tags: [SideEffectTag]) {

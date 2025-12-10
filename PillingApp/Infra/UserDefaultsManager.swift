@@ -8,6 +8,8 @@ protocol UserDefaultsManagerProtocol {
     func clearPillSettings()
     func saveCurrentCycleID(_ id: UUID)
     func loadCurrentCycleID() -> UUID?
+    func hasCompletedOnboarding() -> Bool
+    func setHasCompletedOnboarding(_ completed: Bool)
     
     func saveSideEffectTags(_ tags: [SideEffectTag])
     func loadSideEffectTags() -> [SideEffectTag]
@@ -113,6 +115,14 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
         }
         return UUID(uuidString: uuidString)
     }
+
+    func hasCompletedOnboarding() -> Bool {
+        return userDefaults.bool(forKey: UserDefaultsKey.hasCompletedOnboarding.rawValue)
+    }
+
+    func setHasCompletedOnboarding(_ completed: Bool) {
+        userDefaults.set(completed, forKey: UserDefaultsKey.hasCompletedOnboarding.rawValue)
+    }
     
     // MARK: - Clear Methods
     
@@ -142,14 +152,16 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
             return tags
         }
 
+        print("⚠️ 저장된 태그 없음 - 기본 태그 생성 및 저장")
         let defaultTags = createDefaultSideEffectTags()
+        saveSideEffectTags(defaultTags)  // 최초 생성 시 저장하여 UUID 고정
         return defaultTags
     }
     
     /// 기본 부작용 태그 생성
     private func createDefaultSideEffectTags() -> [SideEffectTag] {
         let defaultNames = [
-           "부정출혈","메스꺼움","식욕 증가","우울","가슴 통증","피부 건조함","두통","여드름"
+           "기분저하","부정출혈","입마름"
         ]
         
         return defaultNames.enumerated().map { index, name in

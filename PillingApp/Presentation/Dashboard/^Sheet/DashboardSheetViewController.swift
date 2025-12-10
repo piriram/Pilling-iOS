@@ -280,12 +280,14 @@ final class DashboardSheetViewController: UIViewController {
                 
                 // 선택된 부작용 태그 ID 수집
                 let selectedTagIds = self.sideEffectTagsView.getSelectedTagIds()
-                
+
                 // 선택된 태그의 이름을 함께 저장 (삭제된 태그 대비)
                 let allTags = self.userDefaultsManager.loadSideEffectTags()
+
                 let selectedTags = allTags.filter { selectedTagIds.contains($0.id) }
+
                 let sideEffectNames = Dictionary(uniqueKeysWithValues: selectedTags.map { ($0.id, $0.name) })
-                
+
                 // PillRecordMemo로 결합하여 JSON 저장
                 let pillMemo = PillRecordMemo(
                     text: memoText,

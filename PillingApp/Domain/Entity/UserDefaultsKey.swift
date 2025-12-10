@@ -8,4 +8,5 @@ enum UserDefaultsKey: String {
     case pillInfo = "pillInfo"
     case currentCycleID = "current_cycle_id"
     case sideEffectTags = "side_effect_tags"
+    case hasCompletedOnboarding = "has_completed_onboarding"
 }

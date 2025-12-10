@@ -6,6 +6,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     private let disposeBag = DisposeBag()
+    private let userDefaultsManager = DIContainer.shared.getUserDefaultsManager()
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
@@ -15,11 +16,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
+        if !userDefaultsManager.hasCompletedOnboarding() {
+            showOnboarding()
+            window.makeKeyAndVisible()
+            return
+        }
+
+        startMainFlow()
+    }
+    
+    private func configureIQKeyboardManager() {
+        IQKeyboardManager.shared.isEnabled = true
+        IQKeyboardManager.shared.resignOnTouchOutside = true
+    }
+
+    private func startMainFlow() {
         let wasReset = VersionManager.shared.checkAndResetIfNeeded()
 
         if wasReset {
             showPillSetting()
-            window.makeKeyAndVisible()
+            window?.makeKeyAndVisible()
             return
         }
 
@@ -31,14 +47,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     self.showPillSetting()
                 }
 
-                window.makeKeyAndVisible()
+                self.window?.makeKeyAndVisible()
             }
         }
-    }
-    
-    private func configureIQKeyboardManager() {
-        IQKeyboardManager.shared.isEnabled = true
-        IQKeyboardManager.shared.resignOnTouchOutside = true
     }
     
     private func checkExistingCycle(completion: @escaping (Bool) -> Void) {
@@ -74,6 +85,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let navigationController = UINavigationController(rootViewController: pillSettingVC)
         navigationController.navigationBar.isHidden = false
         window?.rootViewController = navigationController
+    }
+
+    private func showOnboarding() {
+        let onboardingVC = OnboardingViewController(
+            userDefaultsManager: userDefaultsManager,
+            onCompletion: { [weak self] in
+                self?.startMainFlow()
+            }
+        )
+        window?.rootViewController = onboardingVC
     }
     private func showTest() {
         let viewModel = DIContainer.shared.makeStasticsViewModel()
