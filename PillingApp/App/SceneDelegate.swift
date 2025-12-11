@@ -13,6 +13,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         configureIQKeyboardManager()
 
+        DIContainer.shared.getAnalyticsService().logEvent(.appLaunched)
+
         let window = UIWindow(windowScene: windowScene)
         self.window = window
 
@@ -118,9 +120,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
+        DIContainer.shared.getAnalyticsService().logEvent(.appForegrounded)
     }
     
     func sceneDidEnterBackground(_ scene: UIScene) {
         // Called as the scene transitions from the foreground to the background.
+        DIContainer.shared.getAnalyticsService().logEvent(.appBackgrounded)
     }
 }

@@ -91,6 +91,11 @@ final class DashboardViewController: UIViewController {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated: false)
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        DIContainer.shared.getAnalyticsService().logEvent(.screenViewed(screenName: "Dashboard"))
+    }
     
     // MARK: - Setup
     
@@ -209,6 +214,7 @@ final class DashboardViewController: UIViewController {
         )
 
         let retryAction = UIAlertAction(title: "재시도", style: .default) { _ in
+            DIContainer.shared.getAnalyticsService().logEvent(.retryButtonTapped)
             retryHandler()
         }
 

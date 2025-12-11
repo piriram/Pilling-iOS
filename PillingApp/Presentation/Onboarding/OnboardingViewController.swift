@@ -129,6 +129,7 @@ final class OnboardingViewController: UIViewController {
     private let contents: [OnboardingPageContent]
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let onCompletion: () -> Void
+    private let analytics: AnalyticsServiceProtocol
 
     private lazy var pages: [OnboardingPageViewController] = {
         contents.map { OnboardingPageViewController(content: $0) }
@@ -166,15 +167,17 @@ final class OnboardingViewController: UIViewController {
                                   description: "하루 한 번, 정해둔 시간에 나만 알 수 있는\n알림이 오면 복용하고 기록하면 돼요"),
             OnboardingPageContent(imageName: "onboarding_2", title: "복용률을 한눈에, 차트로\n확인할 수 있어요", 
                                   description: "주기별 복용과 휴약 기간도\n한 곳에서 간편하게 관리해요"),
-            OnboardingPageContent(imageName: "onboarding_3", title: "위젯으로 내 복용 상태를\n바로 확인할 수 있어요",
-                                  description: "터치 한 번으로 기록하고,\n언제든 상태를 볼 수 있어요")
-        ],
-        userDefaultsManager: UserDefaultsManagerProtocol,
-        onCompletion: @escaping () -> Void
+        OnboardingPageContent(imageName: "onboarding_3", title: "위젯으로 내 복용 상태를\n바로 확인할 수 있어요",
+                              description: "터치 한 번으로 기록하고,\n언제든 상태를 볼 수 있어요")
+    ],
+    userDefaultsManager: UserDefaultsManagerProtocol,
+    onCompletion: @escaping () -> Void,
+    analytics: AnalyticsServiceProtocol = DIContainer.shared.getAnalyticsService()
     ) {
         self.contents = contents
         self.userDefaultsManager = userDefaultsManager
         self.onCompletion = onCompletion
+        self.analytics = analytics
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -190,6 +193,7 @@ final class OnboardingViewController: UIViewController {
         pageControl.numberOfPages = contents.count
         updatePageControl()
         nextButton.addTarget(self, action: #selector(didTapNext), for: .touchUpInside)
+        analytics.logEvent(.onboardingStarted)
     }
 
     private func configurePageViewController() {
@@ -247,6 +251,7 @@ final class OnboardingViewController: UIViewController {
     }
 
     private func completeOnboarding() {
+        analytics.logEvent(.onboardingCompleted)
         userDefaultsManager.setHasCompletedOnboarding(true)
         onCompletion()
     }
@@ -273,5 +278,6 @@ extension OnboardingViewController: UIPageViewControllerDataSource, UIPageViewCo
               let index = pages.firstIndex(where: { $0 === visible }) else { return }
         currentIndex = index
         updatePageControl()
+        analytics.logEvent(.onboardingStepCompleted(step: currentIndex))
     }
 }

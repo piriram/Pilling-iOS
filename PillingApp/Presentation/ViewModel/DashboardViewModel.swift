@@ -123,6 +123,7 @@ final class DashboardViewModel {
     
     private func handleError(_ error: Error) {
         print("❌ 데이터 로드 실패: \(error)")
+        analytics.logEvent(.dataLoadFailed(errorType: "\(error)"))
         self.showRetryAlert.accept(())
     }
     

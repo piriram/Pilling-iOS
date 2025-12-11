@@ -300,6 +300,7 @@ extension DashboardCalendarView: UICollectionViewDelegate {
         let isToday = calendar.isDate(item.date, inSameDayAs: Date())
         
         if !isToday || item.status.isTaken {
+            DIContainer.shared.getAnalyticsService().logEvent(.calendarCellTapped(cycleDay: item.cycleDay))
             onCellSelected?(indexPath.item, item)
         }
     }

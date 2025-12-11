@@ -15,6 +15,7 @@ final class SideEffectManagementViewController: UIViewController {
     // MARK: - Properties
     
     private let userDefaultsManager: UserDefaultsManagerProtocol
+    private let analytics: AnalyticsServiceProtocol
     
     private var tags: [SideEffectTag] = []
     private var isEditingOrder: Bool = false
@@ -43,8 +44,12 @@ final class SideEffectManagementViewController: UIViewController {
     
     // MARK: - Init
     
-    init(userDefaultsManager: UserDefaultsManagerProtocol) {
+    init(
+        userDefaultsManager: UserDefaultsManagerProtocol,
+        analytics: AnalyticsServiceProtocol = DIContainer.shared.getAnalyticsService()
+    ) {
         self.userDefaultsManager = userDefaultsManager
+        self.analytics = analytics
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -179,6 +184,7 @@ final class SideEffectManagementViewController: UIViewController {
         print("   변경: \(tags[index].isVisible) → \(sender.isOn)")
 
         tags[index].isVisible = sender.isOn
+        analytics.logEvent(.sideEffectVisibilityToggled(tagName: tags[index].name, isVisible: sender.isOn))
         sortTagsByVisibility()
         persistTags()
 
@@ -207,6 +213,7 @@ final class SideEffectManagementViewController: UIViewController {
             return tag
         }
         print("   최종 tags: \(tags.map { "\($0.name)[\($0.order)]" })")
+        analytics.logEvent(.sideEffectReordered)
     }
     
     private func sortTagsByVisibility() {
@@ -279,6 +286,7 @@ final class SideEffectManagementViewController: UIViewController {
                 isDefault: false
             )
             self.tags.append(newTag)
+            self.analytics.logEvent(.sideEffectTagCreated(tagName: name))
             self.sortTagsByVisibility()
             self.persistTags()
             self.applySnapshot(animating: true)

@@ -8,6 +8,7 @@ final class SettingViewController: UIViewController {
     // MARK: - Properties
     private typealias str = AppStrings.Setting
     private let viewModel: SettingViewModel
+    private let analytics: AnalyticsServiceProtocol
     private let disposeBag = DisposeBag()
     private let contentInset: CGFloat = 16
     private var currentScheduledTime: Date = Date()
@@ -158,8 +159,9 @@ final class SettingViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(viewModel: SettingViewModel) {
+    init(viewModel: SettingViewModel, analytics: AnalyticsServiceProtocol = DIContainer.shared.getAnalyticsService()) {
         self.viewModel = viewModel
+        self.analytics = analytics
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -191,6 +193,11 @@ final class SettingViewController: UIViewController {
         navigationController?.navigationBar.compactAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
         navigationController?.navigationBar.tintColor = .black
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        analytics.logEvent(.screenViewed(screenName: "Settings"))
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -393,6 +400,8 @@ final class SettingViewController: UIViewController {
                   !newMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 return
             }
+
+            self.analytics.logEvent(.notificationMessageChanged)
             
             self.viewModel.updateMessage(newMessage)
                 .observe(on: MainScheduler.instance)
@@ -425,6 +434,7 @@ final class SettingViewController: UIViewController {
         let cancelAction = UIAlertAction(title: AppStrings.Common.cancelTitle, style: .cancel)
         
         let confirmAction = UIAlertAction(title: str.newPillCycleConfirm, style: .destructive) { [weak self] _ in
+            self?.analytics.logEvent(.pillInfoEditStarted)
             self?.viewModel.startNewPillCycle()
                 .observe(on: MainScheduler.instance)
                 .subscribe(
