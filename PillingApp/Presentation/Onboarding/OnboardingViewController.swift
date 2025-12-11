@@ -57,25 +57,37 @@ final class OnboardingPageViewController: UIViewController {
         applyContent()
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if previousTraitCollection?.horizontalSizeClass != traitCollection.horizontalSizeClass ||
+            previousTraitCollection?.verticalSizeClass != traitCollection.verticalSizeClass {
+        }
+    }
+
     private func setupLayout() {
+        view.addSubview(imageContainer)
         imageContainer.addSubview(imageView)
         imageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
 
-        let stackView = UIStackView(arrangedSubviews: [imageContainer, titleLabel, descriptionLabel])
-        stackView.axis = .vertical
-        stackView.spacing = 16
-        stackView.alignment = .fill
+        view.addSubview(titleLabel)
+        view.addSubview(descriptionLabel)
 
         imageContainer.snp.makeConstraints { make in
             make.top.horizontalEdges.equalToSuperview()
             make.height.equalTo(426)
         }
 
-        view.addSubview(stackView)
-        stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalTo(imageContainer.snp.bottom).offset(44)
+            make.leading.trailing.equalToSuperview().inset(24)
+        }
+
+        descriptionLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.leading.trailing.equalToSuperview().inset(24)
+            make.bottom.lessThanOrEqualToSuperview().inset(12)
         }
     }
 
@@ -88,6 +100,28 @@ final class OnboardingPageViewController: UIViewController {
 
         titleLabel.text = content.title.isEmpty ? " " : content.title
         descriptionLabel.text = content.description.isEmpty ? " " : content.description
+
+        let deviceType = traitCollection.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
+        print("[Onboarding] device:\(deviceType) viewSize:\(view.bounds.size)")
+        updateImageLayoutForAspect()
+    }
+
+    private func updateImageLayoutForAspect() {
+        let size = view.bounds.size
+        guard size.width > 0, size.height > 0 else { return }
+        let aspect = size.width / size.height
+        // iPhone SE 세로 비율(16:9≈0.56)보다 가로가 큰 경우: scaleFit + 낮은 높이
+        if aspect > (375.0 / 700.0) {
+            imageView.contentMode = .scaleAspectFit
+            imageContainer.snp.updateConstraints { make in
+                make.height.equalTo(300)
+            }
+        } else {
+            imageView.contentMode = .scaleAspectFill
+            imageContainer.snp.updateConstraints { make in
+                make.height.equalTo(426)
+            }
+        }
     }
 }
 
@@ -112,8 +146,8 @@ final class OnboardingViewController: UIViewController {
 
     private let pageControl: UIPageControl = {
         let control = UIPageControl()
-        control.currentPageIndicatorTintColor = AppColor.pillGreen800
-        control.pageIndicatorTintColor = AppColor.gray300
+        control.currentPageIndicatorTintColor = AppColor.pillGreen700
+        control.pageIndicatorTintColor = AppColor.pillGreen100
         control.isUserInteractionEnabled = false
         return control
     }()
@@ -171,8 +205,8 @@ final class OnboardingViewController: UIViewController {
         view.addSubview(nextButton)
 
         pageContainer.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
-            make.leading.trailing.equalToSuperview().inset(24)
+            make.top.equalToSuperview()
+            make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(pageControl.snp.top).offset(-24)
         }
 
@@ -197,12 +231,7 @@ final class OnboardingViewController: UIViewController {
 
     @objc
     private func didTapNext() {
-        let nextIndex = currentIndex + 1
-        if nextIndex < pages.count {
-            moveToPage(nextIndex)
-        } else {
-            completeOnboarding()
-        }
+        completeOnboarding()
     }
 
     private func moveToPage(_ index: Int) {

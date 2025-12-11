@@ -13,6 +13,7 @@ final class DashboardViewModel {
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let settingsRepository: UserDefaultsProtocol
     private let notificationManager: NotificationManagerProtocol
+    private let analytics: AnalyticsServiceProtocol
 
     private let disposeBag = DisposeBag()
     private let calendar = Calendar.current
@@ -38,7 +39,8 @@ final class DashboardViewModel {
         calculateDashboardMessageUseCase: CalculateDashboardMessageUseCaseProtocol,
         userDefaultsManager: UserDefaultsManagerProtocol,
         settingsRepository: UserDefaultsProtocol,
-        notificationManager: NotificationManagerProtocol
+        notificationManager: NotificationManagerProtocol,
+        analytics: AnalyticsServiceProtocol
     ) {
         self.fetchDashboardDataUseCase = fetchDashboardDataUseCase
         self.takePillUseCase = takePillUseCase
@@ -47,6 +49,7 @@ final class DashboardViewModel {
         self.userDefaultsManager = userDefaultsManager
         self.settingsRepository = settingsRepository
         self.notificationManager = notificationManager
+        self.analytics = analytics
 
 
         loadDashboardData()
@@ -300,6 +303,9 @@ final class DashboardViewModel {
         guard let cycle = currentCycle.value else { return }
         let takenAt = Date()
 
+        // Analytics: 복용하기 버튼 탭
+        analytics.logEvent(.pillButtonTapped)
+
         takePillUseCase.execute(cycle: cycle, settings: settings.value, takenAt: takenAt)
             .subscribe(onNext: { [weak self] updatedCycle in
                 guard let self = self else { return }
@@ -408,6 +414,8 @@ final class DashboardViewModel {
         let currentCycleDay = daysSinceStart + 1
 
         if currentCycleDay >= totalDays {
+            // Analytics: 사이클 완료 플로팅뷰 표시
+            analytics.logEvent(.cycleCompletionFloatingShown)
             showCompletionFloatingView.accept(())
         }
     }

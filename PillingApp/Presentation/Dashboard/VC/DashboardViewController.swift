@@ -193,6 +193,8 @@ final class DashboardViewController: UIViewController {
         let floatingView = CycleCompleteFloatingView(pillName: pillName)
 
         floatingView.onStartNewCycle = { [weak self] in
+            // Analytics: 새 약 시작하기 버튼 탭
+            DIContainer.shared.getAnalyticsService().logEvent(.newCycleStarted)
             self?.coordinator.navigateToPillSetting()
         }
 

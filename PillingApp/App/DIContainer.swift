@@ -114,7 +114,8 @@ final class DIContainer {
             calculateDashboardMessageUseCase: makeCalculateDashboardMessageUseCase(),
             userDefaultsManager: userDefaultsManager,
             settingsRepository: settingsRepository,
-            notificationManager: notificationManager
+            notificationManager: notificationManager,
+            analytics: analyticsService
         )
     }
     
