@@ -73,6 +73,15 @@ final class TakePillUseCase: TakePillUseCaseProtocol {
             .do(onNext: { [weak self] _ in
                 // 성공 시에만 Analytics 이벤트 전송
                 self?.analytics?.logEvent(.pillTaken(date: takenAt, status: newStatus))
+            }, onError: { error in
+                DIContainer.shared.getCrashlyticsService().logError(
+                    error,
+                    userInfo: [
+                        "context": "takePill",
+                        "cycleDay": record.cycleDay,
+                        "takenAt": takenAt.ISO8601Format()
+                    ]
+                )
             })
             .map { updatedCycle }
     }

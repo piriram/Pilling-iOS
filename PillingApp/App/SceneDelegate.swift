@@ -17,6 +17,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let window = UIWindow(windowScene: windowScene)
         self.window = window
+        let crashlytics = DIContainer.shared.getCrashlyticsService()
+        if let installID = UserDefaults.standard.string(forKey: "app_install_id") {
+            crashlytics.setUserID(installID)
+        } else {
+            let newID = UUID().uuidString
+            UserDefaults.standard.set(newID, forKey: "app_install_id")
+            crashlytics.setUserID(newID)
+        }
+        crashlytics.setCustomValue(UIDevice.current.systemVersion, forKey: "ios_version")
+        crashlytics.setCustomValue(UIDevice.current.model, forKey: "device_model")
+
+        DIContainer.shared.getPillCycleRepository()
+            .fetchCurrentCycle()
+            .subscribe(onNext: { cycle in
+                if let cycle = cycle {
+                    crashlytics.setCustomValue(cycle.startDate.ISO8601Format(), forKey: "cycle_start_date")
+                    crashlytics.setCustomValue(cycle.activeDays, forKey: "cycle_active_days")
+                    crashlytics.setCustomValue(cycle.breakDays, forKey: "cycle_break_days")
+                }
+            })
+            .disposed(by: disposeBag)
 
         if !userDefaultsManager.hasCompletedOnboarding() {
             showOnboarding()

@@ -51,6 +51,13 @@ final class CycleRepository: CycleRepositoryProtocol {
                 // 없으면 최신 사이클
                 return cycles.first
             }
+            .catch { error in
+                DIContainer.shared.getCrashlyticsService().logError(
+                    error,
+                    userInfo: ["context": "fetchCurrentCycle", "repository": "CycleRepository"]
+                )
+                return .error(error)
+            }
     }
     
     func saveCycle(_ cycle: Cycle) -> Observable<Void> {
@@ -195,5 +202,4 @@ final class CycleRepository: CycleRepositoryProtocol {
         }
     }
 }
-
 

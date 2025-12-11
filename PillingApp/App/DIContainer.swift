@@ -43,6 +43,14 @@ final class DIContainer {
         #endif
     }()
 
+    private lazy var crashlyticsService: CrashlyticsServiceProtocol = {
+        #if DEBUG
+        return ConsoleCrashlyticsService()
+        #else
+        return FirebaseCrashlyticsService()
+        #endif
+    }()
+
     // MARK: - Repositories (싱글톤)
     
     private lazy var cycleRepository: CycleRepositoryProtocol = {
@@ -173,5 +181,9 @@ final class DIContainer {
 
     func getAnalyticsService() -> AnalyticsServiceProtocol {
         return analyticsService
+    }
+
+    func getCrashlyticsService() -> CrashlyticsServiceProtocol {
+        return crashlyticsService
     }
 }

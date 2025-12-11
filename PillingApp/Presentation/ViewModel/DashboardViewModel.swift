@@ -102,6 +102,9 @@ final class DashboardViewModel {
                     self?.handleSuccess(data)
                 },
                 onError: { [weak self] error in
+                    let crashlytics = DIContainer.shared.getCrashlyticsService()
+                    crashlytics.log("DashboardViewModel: loadDashboardData failed")
+                    crashlytics.logError(error, userInfo: ["screen": "Dashboard"])
                     self?.handleError(error)
                 }
             )
@@ -124,6 +127,12 @@ final class DashboardViewModel {
     private func handleError(_ error: Error) {
         print("❌ 데이터 로드 실패: \(error)")
         analytics.logEvent(.dataLoadFailed(errorType: "\(error)"))
+        let crashlytics = DIContainer.shared.getCrashlyticsService()
+        crashlytics.log("DashboardViewModel: loadDashboardData failed")
+        crashlytics.logError(error, userInfo: [
+            "context": "loadDashboardData",
+            "timestamp": Date().ISO8601Format()
+        ])
         self.showRetryAlert.accept(())
     }
     
