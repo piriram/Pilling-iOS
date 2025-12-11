@@ -26,68 +26,68 @@ enum MessageType {
     var text: String {
         switch self {
         case .empty:
-            return "약을 설정해주세요"
+            return AppStrings.Message.empty
         case .cycleComplete:
-            return "새 약을 설정해주세요."
+            return AppStrings.Message.cycleComplete
         case .resting:
-            return "오늘은 잔디도 휴식중"
+            return AppStrings.Message.restPeriod
         case .waiting:
-            return "저를 잊었나요...?"
+            return AppStrings.Message.forgotMe
         case .plantingSeed:
-            return "오늘의 잔디를 심어주세요"
+            return AppStrings.Message.plantTodayGrass
         case .success:
-            return "꾸준히 잔디를 심어주세요."
+            return AppStrings.Message.plantSteadily
         case .groomy:
-            return "필링이가 찾아요..."
+            return AppStrings.Message.pillingSearching
         case .fire:
-            return "필링이 화남"
+            return AppStrings.Message.pillingAngry
         case .pilledTwo:
-            return "오늘은 두알을 복용하세요."
+            return AppStrings.Message.takeTwoPills
         case .todayAfter:
-            return "잔디가 잘 자라고 있어요"
+            return AppStrings.Message.grassGrowingWell
         case .takingBeforeTwo:
-            return "어제 미복용했다면 오늘은 2알!!"
+            return AppStrings.Message.missedYesterdayTakeTwo
         case .takingBefore:
-            return "매일 2시간 이내의 같은 시간에 복용해주세요."
+            return AppStrings.Message.takeWithinTwoHours
         case .warning:
-            return "한알 더 먹어야해요!"
+            return AppStrings.Message.needOnePillMore
         case .takenDelayedOk:
-            return "2시간 지났지만 괜찮아요!"
+            return AppStrings.Message.takenDelayedOk
         case .takenTooEarly:
-            return "예정보다 2시간 이상 일찍 복용했어요"
+            return AppStrings.Message.tookTooEarly
         case .takenDoubleComplete:
-            return "내일도 만나요!"
+            return AppStrings.Message.seeTomorrow
         case .beforeStart(let daysUntilStart):
             if daysUntilStart == 0 {
-                return "오늘부터 복용을 시작해요"
+                return AppStrings.Message.startTakingToday
             } else if daysUntilStart == 1 {
-                return "내일부터 복용을 시작해요"
+                return AppStrings.Message.startTakingTomorrow
             } else {
-                return "복용 시작까지 \(daysUntilStart)일 남았어요"
+                return AppStrings.Message.daysUntilStart(daysUntilStart)
             }
         case .overTwoHours:
-            return "2시간 지났어요"
+            return AppStrings.Message.overTwoHours
         case .overFourHours:
-            return "4시간 지났어요"
+            return AppStrings.Message.overFourHours
         case .morePill:
-            return "한알 더!"
+            return AppStrings.Message.onePillMore
         }
     }
     
     var widgetText: String? {
         switch self {
         case .plantingSeed:
-            return "잔디를 심어보세요!"
+            return AppStrings.Message.widgetPlantGrass
         case .todayAfter:
-            return "잔디 심기 완료!"
+            return AppStrings.Message.widgetPlantingComplete
         case .waiting:
-            return "잔디가 기다려요"
+            return AppStrings.Message.widgetGrassWaiting
         case .groomy:
-            return "2시간 지났어요!"
+            return AppStrings.Message.widgetOverTwoHours
         case .fire:
-            return "4시간 지났어요!"
+            return AppStrings.Message.widgetOverFourHours
         case .resting:
-            return "지금은 쉬는 시간"
+            return AppStrings.Message.widgetRestTime
         default:
             return nil
         }

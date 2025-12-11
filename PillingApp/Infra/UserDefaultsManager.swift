@@ -161,7 +161,9 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
     /// 기본 부작용 태그 생성
     private func createDefaultSideEffectTags() -> [SideEffectTag] {
         let defaultNames = [
-           "기분저하","부정출혈","입마름"
+            AppStrings.SideEffectTag.moodDown,
+            AppStrings.SideEffectTag.spotting,
+            AppStrings.SideEffectTag.dryMouth
         ]
         
         return defaultNames.enumerated().map { index, name in

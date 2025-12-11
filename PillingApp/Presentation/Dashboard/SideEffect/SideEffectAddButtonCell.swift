@@ -20,7 +20,7 @@ final class SideEffectAddButtonCell: UICollectionViewCell {
         let label = UILabel()
         label.font = Typography.caption(.semibold)
         label.textColor = AppColor.green800
-        label.text = "추가"
+        label.text = AppStrings.SideEffectTag.addButton
         return label
     }()
 

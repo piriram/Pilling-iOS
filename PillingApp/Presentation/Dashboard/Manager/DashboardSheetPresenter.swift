@@ -34,7 +34,7 @@ final class DashboardSheetPresenter {
         let calendar = Calendar.current
         let daysSinceStart = max(0, calendar.dateComponents([.day], from: cycle.startDate, to: item.date).day ?? 0)
         let currentDay = min(daysSinceStart + 1, cycle.totalDays)
-        let dayText = "\(currentDay)일차/\(cycle.totalDays)"
+        let dayText = AppStrings.Dashboard.dayProgressFormat(current: currentDay, total: cycle.totalDays)
         
         // Safely access existing memo/taken time
         let existingMemo: String = {
@@ -110,7 +110,7 @@ final class DashboardSheetPresenter {
     ) {
         guard let viewController = viewController else { return }
         
-        let alert = UIAlertController(title: "기간 선택", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: AppStrings.Statistics.periodSelectionTitle, message: nil, preferredStyle: .actionSheet)
         
         for (index, data) in periodList.enumerated() {
             let action = UIAlertAction(title: "\(data.startDate) - \(data.endDate)", style: .default) { _ in

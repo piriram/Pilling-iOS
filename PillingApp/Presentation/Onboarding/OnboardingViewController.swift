@@ -103,29 +103,11 @@ final class OnboardingPageViewController: UIViewController {
 
         let deviceType = traitCollection.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
         print("[Onboarding] device:\(deviceType) viewSize:\(view.bounds.size)")
-        updateImageLayoutForAspect()
-    }
-
-    private func updateImageLayoutForAspect() {
-        let size = view.bounds.size
-        guard size.width > 0, size.height > 0 else { return }
-        let aspect = size.width / size.height
-        // iPhone SE 세로 비율(16:9≈0.56)보다 가로가 큰 경우: scaleFit + 낮은 높이
-        if aspect > (375.0 / 700.0) {
-            imageView.contentMode = .scaleAspectFit
-            imageContainer.snp.updateConstraints { make in
-                make.height.equalTo(300)
-            }
-        } else {
-            imageView.contentMode = .scaleAspectFill
-            imageContainer.snp.updateConstraints { make in
-                make.height.equalTo(426)
-            }
-        }
     }
 }
 
 final class OnboardingViewController: UIViewController {
+    private typealias Str = AppStrings.Onboarding
     private let contents: [OnboardingPageContent]
     private let userDefaultsManager: UserDefaultsManagerProtocol
     private let onCompletion: () -> Void
@@ -155,24 +137,17 @@ final class OnboardingViewController: UIViewController {
 
     private let nextButton: PrimaryActionButton = {
         let button = PrimaryActionButton()
-        button.setTitle("다음으로", for: .normal)
+        button.setTitle(Str.nextButton, for: .normal)
         return button
     }()
 
     private var currentIndex: Int = 0
 
     init(
-        contents: [OnboardingPageContent] = [
-            OnboardingPageContent(imageName: "onboarding_1", title: "필링이 한 달 동안 꾸준한\n복용 습관을 도와드릴게요",
-                                  description: "하루 한 번, 정해둔 시간에 나만 알 수 있는\n알림이 오면 복용하고 기록하면 돼요"),
-            OnboardingPageContent(imageName: "onboarding_2", title: "복용률을 한눈에, 차트로\n확인할 수 있어요", 
-                                  description: "주기별 복용과 휴약 기간도\n한 곳에서 간편하게 관리해요"),
-        OnboardingPageContent(imageName: "onboarding_3", title: "위젯으로 내 복용 상태를\n바로 확인할 수 있어요",
-                              description: "터치 한 번으로 기록하고,\n언제든 상태를 볼 수 있어요")
-    ],
-    userDefaultsManager: UserDefaultsManagerProtocol,
-    onCompletion: @escaping () -> Void,
-    analytics: AnalyticsServiceProtocol = DIContainer.shared.getAnalyticsService()
+        contents: [OnboardingPageContent] = OnboardingViewController.defaultContents(),
+        userDefaultsManager: UserDefaultsManagerProtocol,
+        onCompletion: @escaping () -> Void,
+        analytics: AnalyticsServiceProtocol = DIContainer.shared.getAnalyticsService()
     ) {
         self.contents = contents
         self.userDefaultsManager = userDefaultsManager
@@ -254,6 +229,26 @@ final class OnboardingViewController: UIViewController {
         analytics.logEvent(.onboardingCompleted)
         userDefaultsManager.setHasCompletedOnboarding(true)
         onCompletion()
+    }
+
+    static func defaultContents() -> [OnboardingPageContent] {
+        [
+            OnboardingPageContent(
+                imageName: "onboarding_1",
+                title: Str.page1Title,
+                description: Str.page1Description
+            ),
+            OnboardingPageContent(
+                imageName: "onboarding_2",
+                title: Str.page2Title,
+                description: Str.page2Description
+            ),
+            OnboardingPageContent(
+                imageName: "onboarding_3",
+                title: Str.page3Title,
+                description: Str.page3Description
+            )
+        ]
     }
 }
 

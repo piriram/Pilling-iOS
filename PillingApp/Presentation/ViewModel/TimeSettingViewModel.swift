@@ -68,7 +68,7 @@ final class TimeSettingViewModel {
             .asDriver(onErrorJustReturn: ())
         
         let showError = errorTracker
-            .asDriver(onErrorJustReturn: "알 수 없는 오류가 발생했습니다.")
+            .asDriver(onErrorJustReturn: AppStrings.Error.retryLater)
         
         return Output(
             showTimePicker: showTimePicker,
@@ -152,22 +152,21 @@ final class TimeSettingViewModel {
         if let notificationError = error as? NotificationError {
             switch notificationError {
             case .permissionDenied:
-                return "알림 권한이 필요합니다.\n설정에서 알림을 허용해주세요."
+                return AppStrings.Error.notificationPermissionRequired
             case .schedulingFailed:
-                return "알림 설정에 실패했습니다.\n다시 시도해주세요."
+                return AppStrings.Error.notificationSettingFailed
             case .invalidTime:
-                return "유효하지 않은 시간입니다."
+                return AppStrings.Error.invalidTime
             }
         }
         
         if let setupError = error as? SetupError {
             switch setupError {
             case .missingPillInfo:
-                return "약 정보를 찾을 수 없습니다.\n처음부터 다시 설정해주세요."
+                return AppStrings.Error.pillInfoNotFound
             }
         }
         
-        return "오류가 발생했습니다.\n다시 시도해주세요."
+        return AppStrings.Error.retryLater
     }
 }
-

@@ -19,7 +19,7 @@ final class SideEffectTagsView: UIView {
     
     private let sectionLabel: UILabel = {
         let label = UILabel()
-        label.text = "부작용"
+        label.text = AppStrings.SideEffectTag.sectionTitle
         label.font = Typography.body1(.semibold)
         label.textColor = AppColor.textBlack
         return label

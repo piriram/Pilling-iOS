@@ -9,6 +9,7 @@
 "common.error_title" = "Error";
 "common.cancel_title" = "Cancel";
 "common.confirm_title" = "Done";
+"common.retry_title" = "Retry";
 
 // MARK: - Pill Setting
 "pill_setting.main_title" = "Tell us about your pill!";
@@ -65,6 +66,9 @@
 "dashboard.take_pill_button" = "Plant Grass";
 "dashboard.take_pill_completed" = "Planted!";
 "dashboard.rest_period" = "Break Period";
+"dashboard.progress_before_start" = "Before start";
+"dashboard.progress_day" = "Day %d";
+"dashboard.day_progress_format" = "Day %d/%d";
 "dashboard.weekday_mon" = "Mon";
 "dashboard.weekday_tue" = "Tue";
 "dashboard.weekday_wed" = "Wed";
@@ -81,6 +85,8 @@
 "widget.message_grass_waiting" = "Grass is waiting";
 "widget.message_one_pill_complete" = "One planted";
 "widget.message_rest_time" = "Rest time";
+"widget.message_over_two_hours" = "Over 2 hours!";
+"widget.message_over_four_hours" = "Over 4 hours!";
 "widget.message_two_today" = "Two pills today";
 "widget.message_today_complete" = "Today's pill taken.";
 
@@ -101,9 +107,15 @@
 "statistics.taking_pill_label" = "Pills";
 "statistics.chart_title" = "Pilling Time";
 "statistics.period_selection_title" = "Select Period";
+"statistics.category_on_time" = "Taken on time";
+"statistics.category_delayed" = "Taken a bit late";
+"statistics.category_missed_or_double" = "Missed or double dose";
+"statistics.deleted_side_effect" = "Deleted side effect";
 
 // MARK: - Message
 "message.setup_required" = "Please set up your pill";
+"message.empty" = "Please set up your pill";
+"message.cycle_complete" = "Please set up a new pill.";
 "message.rest_period" = "Grass is resting today";
 "message.forgot_me" = "Did you forget me...?";
 "message.plant_today_grass" = "Plant today's grass";
@@ -115,6 +127,7 @@
 "message.missed_yesterday_take_two" = "Missed yesterday? Take 2 today!!";
 "message.take_within_two_hours" = "Take at the same time within 2 hours daily.";
 "message.need_one_pill_more" = "Need one more pill!";
+"message.taken_delayed_ok" = "Over 2 hours but it's okay!";
 "message.took_too_early" = "Taken 2+ hours earlier than scheduled";
 "message.see_tomorrow" = "See you tomorrow!";
 "message.start_taking_today" = "Start taking today";
@@ -122,10 +135,26 @@
 // Plural handled in stringsdict
 "message.days_until_start" = "%d day(s) until start";
 "message.one_pill_more" = "One more!";
+"message.over_two_hours" = "Over 2 hours";
+"message.over_four_hours" = "Over 4 hours";
 "message.widget_plant_grass" = "Plant your grass!";
 "message.widget_planting_complete" = "Planting complete!";
 "message.widget_grass_waiting" = "Grass is waiting";
 "message.widget_rest_time" = "Rest time";
+"message.widget_over_two_hours" = "Over 2 hours!";
+"message.widget_over_four_hours" = "Over 4 hours!";
+
+// MARK: - Notification
+"notification.title" = "Pilling Time";
+"notification.break_period" = "It's your break period";
+"notification.default_message" = "Time to plant your grass🌱";
+
+// MARK: - Side Effect Tag
+"side_effect.mood_down" = "Low mood";
+"side_effect.spotting" = "Spotting";
+"side_effect.dry_mouth" = "Dry mouth";
+"side_effect.section_title" = "Side effects";
+"side_effect.add_button" = "Add";
 
 // MARK: - Error
 "error.invalid_time_format" = "Invalid time format";
@@ -133,6 +162,12 @@
 "error.unknown_error" = "Error";
 "error.permission_error" = "Permission";
 "error.notification_permission_title" = "Notification Permission Error";
+"error.notification_permission_required" = "Notification permission is required.\nPlease allow notifications in Settings.";
+"error.notification_setting_failed" = "Failed to set notifications.\nPlease try again.";
+"error.invalid_time" = "Invalid time.";
+"error.pill_info_not_found" = "Pill info not found.\nPlease set it up again from the start.";
+"error.retry_later" = "An error occurred.\nPlease try again.";
+"error.data_load_failed" = "Failed to load data";
 
 // MARK: - Time Setting
 "time_setting.main_title" = "Set your pill reminder time!";

@@ -88,7 +88,7 @@ final class SettingViewModel {
                     guard let self = self else { return .empty() }
                     return self.updateAlarmSetting(isEnabled: isEnabled)
                         .do(onNext: {
-                            successTracker.onNext("알림 설정이 변경되었습니다")
+                            successTracker.onNext(AppStrings.Setting.successMessageUpdated)
                         })
                         .catch { error in
                             errorTracker.onNext(self.handleError(error))
@@ -106,7 +106,7 @@ final class SettingViewModel {
                     guard let self = self else { return .empty() }
                     return self.updateHealthSetting(isEnabled: isEnabled)
                         .do(onNext: {
-                            successTracker.onNext("Health 연동 설정이 변경되었습니다")
+                            successTracker.onNext(AppStrings.Setting.successMessageUpdated)
                         })
                         .catch { error in
                             errorTracker.onNext(self.handleError(error))
@@ -295,13 +295,13 @@ final class SettingViewModel {
         if let notificationError = error as? NotificationError {
             switch notificationError {
             case .permissionDenied:
-                return "알림 권한이 필요합니다.\n설정에서 알림을 허용해주세요."
+                return AppStrings.Error.notificationPermissionRequired
             case .schedulingFailed:
-                return "알림 설정에 실패했습니다.\n다시 시도해주세요."
+                return AppStrings.Error.notificationSettingFailed
             case .invalidTime:
-                return "유효하지 않은 시간입니다."
+                return AppStrings.Error.invalidTime
             }
         }
-        return "오류가 발생했습니다.\n다시 시도해주세요."
+        return AppStrings.Error.retryLater
     }
 }

@@ -114,7 +114,7 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
 
         if onTimeCount > 0 {
             recordItems.append(RecordItemDTO(
-                category: "정시에 복용했어요",
+                category: AppStrings.Statistics.categoryOnTime,
                 percentage: onTimePercentage,
                 days: onTimeCount,
                 colorHex: "#99D94C"
@@ -123,7 +123,7 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
 
         if lateCount > 0 {
             recordItems.append(RecordItemDTO(
-                category: "조금 늦었어요",
+                category: AppStrings.Statistics.categoryDelayed,
                 percentage: latePercentage,
                 days: lateCount,
                 colorHex: "#4C8033"
@@ -132,7 +132,7 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
 
         if missedOrDoubleCount > 0 {
             recordItems.append(RecordItemDTO(
-                category: "미복용 및 2알 복용",
+                category: AppStrings.Statistics.categoryMissedOrDouble,
                 percentage: missedPercentage,
                 days: missedOrDoubleCount,
                 colorHex: "#B3B3B3"
@@ -189,7 +189,7 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
                     tagName = savedName
                 } else {
                     // 저장된 이름도 없으면 fallback
-                    tagName = "삭제된 부작용"
+                    tagName = AppStrings.Statistics.deletedSideEffect
                 }
                 return SideEffectStatDTO(tagId: tagId, tagName: tagName, count: count)
             }

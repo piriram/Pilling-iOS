@@ -9,6 +9,7 @@
 "common.error_title" = "오류";
 "common.cancel_title" = "취소";
 "common.confirm_title" = "완료";
+"common.retry_title" = "재시도";
 
 // MARK: - Pill Setting
 "pill_setting.main_title" = "복용하고 계신 약을 알려주세요!";
@@ -65,6 +66,9 @@
 "dashboard.take_pill_button" = "잔디 심기";
 "dashboard.take_pill_completed" = "심기 완료!";
 "dashboard.rest_period" = "휴약 기간";
+"dashboard.progress_before_start" = "시작전";
+"dashboard.progress_day" = "%d일차";
+"dashboard.day_progress_format" = "%d일차/%d";
 "dashboard.weekday_mon" = "월";
 "dashboard.weekday_tue" = "화";
 "dashboard.weekday_wed" = "수";
@@ -81,6 +85,8 @@
 "widget.message_grass_waiting" = "잔디가 기다려요";
 "widget.message_one_pill_complete" = "한알 심기 완료";
 "widget.message_rest_time" = "지금은 쉬는 시간";
+"widget.message_over_two_hours" = "2시간 지났어요!";
+"widget.message_over_four_hours" = "4시간 지났어요!";
 "widget.message_two_today" = "오늘은 두알";
 "widget.message_today_complete" = "오늘 복용 완료.";
 
@@ -101,8 +107,14 @@
 "statistics.taking_pill_label" = "복용약";
 "statistics.chart_title" = "필링타임";
 "statistics.period_selection_title" = "기간 선택";
+"statistics.category_on_time" = "정시에 복용했어요";
+"statistics.category_delayed" = "조금 늦었어요";
+"statistics.category_missed_or_double" = "미복용 및 2알 복용";
+"statistics.deleted_side_effect" = "삭제된 부작용";
 
 // MARK: - Message
+"message.empty" = "약을 설정해주세요";
+"message.cycle_complete" = "새 약을 설정해주세요.";
 "message.setup_required" = "약을 설정해주세요";
 "message.rest_period" = "오늘은 잔디도 휴식중";
 "message.forgot_me" = "저를 잊었나요...?";
@@ -115,6 +127,7 @@
 "message.missed_yesterday_take_two" = "어제 미복용했다면 오늘은 2알!!";
 "message.take_within_two_hours" = "매일 2시간 이내의 같은 시간에 복용해주세요.";
 "message.need_one_pill_more" = "한알 더 먹어야해요!";
+"message.taken_delayed_ok" = "2시간 지났지만 괜찮아요!";
 "message.took_too_early" = "예정보다 2시간 이상 일찍 복용했어요";
 "message.see_tomorrow" = "내일도 만나요!";
 "message.start_taking_today" = "오늘부터 복용을 시작해요";
@@ -122,10 +135,26 @@
 // 복수형은 stringsdict에서 처리
 "message.days_until_start" = "복용 시작까지 %d일 남았어요";
 "message.one_pill_more" = "한알 더!";
+"message.over_two_hours" = "2시간 지났어요";
+"message.over_four_hours" = "4시간 지났어요";
 "message.widget_plant_grass" = "잔디를 심어보세요!";
 "message.widget_planting_complete" = "잔디 심기 완료!";
 "message.widget_grass_waiting" = "잔디가 기다려요";
 "message.widget_rest_time" = "지금은 쉬는 시간";
+"message.widget_over_two_hours" = "2시간 지났어요!";
+"message.widget_over_four_hours" = "4시간 지났어요!";
+
+// MARK: - Notification
+"notification.title" = "잔디 타임";
+"notification.break_period" = "지금은 휴식 기간이에요";
+"notification.default_message" = "잔디를 심을 시간이에요🌱";
+
+// MARK: - Side Effect Tag
+"side_effect.mood_down" = "기분저하";
+"side_effect.spotting" = "부정출혈";
+"side_effect.dry_mouth" = "입마름";
+"side_effect.section_title" = "부작용";
+"side_effect.add_button" = "추가";
 
 // MARK: - Error
 "error.invalid_time_format" = "시간 형식이 올바르지 않습니다";
@@ -133,6 +162,12 @@
 "error.unknown_error" = "오류";
 "error.permission_error" = "권한";
 "error.notification_permission_title" = "알림 설정 오류";
+"error.notification_permission_required" = "알림 권한이 필요합니다.\n설정에서 알림을 허용해주세요.";
+"error.notification_setting_failed" = "알림 설정에 실패했습니다.\n다시 시도해주세요.";
+"error.invalid_time" = "유효하지 않은 시간입니다.";
+"error.pill_info_not_found" = "약 정보를 찾을 수 없습니다.\n처음부터 다시 설정해주세요.";
+"error.retry_later" = "오류가 발생했습니다.\n다시 시도해주세요.";
+"error.data_load_failed" = "데이터를 불러올 수 없습니다";
 
 // MARK: - Time Setting
 "time_setting.main_title" = "알람 받을 시간을 설정해주세요!";

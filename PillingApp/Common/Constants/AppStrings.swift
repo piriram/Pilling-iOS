@@ -8,6 +8,7 @@ enum AppStrings{
         static let errorTitle = "common.error_title".localized
         static let cancelTitle = "common.cancel_title".localized
         static let confirmTitle = "common.confirm_title".localized
+        static let retryTitle = "common.retry_title".localized
     }
     
     enum PillSetting{
@@ -75,6 +76,13 @@ enum AppStrings{
         static let takePillButton = "dashboard.take_pill_button".localized
         static let takePillCompleted = "dashboard.take_pill_completed".localized
         static let restPeriod = "dashboard.rest_period".localized
+        static let progressBeforeStart = "dashboard.progress_before_start".localized
+        static func progressDay(_ day: Int) -> String {
+            "dashboard.progress_day".localized(with: day)
+        }
+        static func dayProgressFormat(current: Int, total: Int) -> String {
+            "dashboard.day_progress_format".localized(with: current, total)
+        }
 
         static let weekdays = [
             "dashboard.weekday_mon".localized,
@@ -97,6 +105,8 @@ enum AppStrings{
         static let messageRestTime = "widget.message_rest_time".localized
         static let messageTwoToday = "widget.message_two_today".localized
         static let messageTodayComplete = "widget.message_today_complete".localized
+        static let messageOverTwoHours = "widget.message_over_two_hours".localized
+        static let messageOverFourHours = "widget.message_over_four_hours".localized
     }
 
     enum History {
@@ -122,10 +132,16 @@ enum AppStrings{
         static let takingPillLabel = "statistics.taking_pill_label".localized
         static let chartTitle = "statistics.chart_title".localized
         static let periodSelectionTitle = "statistics.period_selection_title".localized
+        static let categoryOnTime = "statistics.category_on_time".localized
+        static let categoryDelayed = "statistics.category_delayed".localized
+        static let categoryMissedOrDouble = "statistics.category_missed_or_double".localized
+        static let deletedSideEffect = "statistics.deleted_side_effect".localized
     }
 
     enum Message {
         // 기본 메시지
+        static let empty = "message.empty".localized
+        static let cycleComplete = "message.cycle_complete".localized
         static let setupRequired = "message.setup_required".localized
         static let restPeriod = "message.rest_period".localized
         static let forgotMe = "message.forgot_me".localized
@@ -138,6 +154,7 @@ enum AppStrings{
         static let missedYesterdayTakeTwo = "message.missed_yesterday_take_two".localized
         static let takeWithinTwoHours = "message.take_within_two_hours".localized
         static let needOnePillMore = "message.need_one_pill_more".localized
+        static let takenDelayedOk = "message.taken_delayed_ok".localized
         static let tookTooEarly = "message.took_too_early".localized
         static let seeTomorrow = "message.see_tomorrow".localized
         static let startTakingToday = "message.start_taking_today".localized
@@ -146,12 +163,40 @@ enum AppStrings{
             return "message.days_until_start".localized(with: days)
         }
         static let onePillMore = "message.one_pill_more".localized
+        static let overTwoHours = "message.over_two_hours".localized
+        static let overFourHours = "message.over_four_hours".localized
 
         // 위젯용 메시지
         static let widgetPlantGrass = "message.widget_plant_grass".localized
         static let widgetPlantingComplete = "message.widget_planting_complete".localized
         static let widgetGrassWaiting = "message.widget_grass_waiting".localized
         static let widgetRestTime = "message.widget_rest_time".localized
+        static let widgetOverTwoHours = "message.widget_over_two_hours".localized
+        static let widgetOverFourHours = "message.widget_over_four_hours".localized
+    }
+
+    enum Onboarding {
+        static let nextButton = "onboarding.next_button".localized
+        static let page1Title = "onboarding.page1_title".localized
+        static let page1Description = "onboarding.page1_description".localized
+        static let page2Title = "onboarding.page2_title".localized
+        static let page2Description = "onboarding.page2_description".localized
+        static let page3Title = "onboarding.page3_title".localized
+        static let page3Description = "onboarding.page3_description".localized
+    }
+
+    enum Notification {
+        static let title = "notification.title".localized
+        static let breakPeriodMessage = "notification.break_period".localized
+        static let defaultMessage = "notification.default_message".localized
+    }
+
+    enum SideEffectTag {
+        static let moodDown = "side_effect.mood_down".localized
+        static let spotting = "side_effect.spotting".localized
+        static let dryMouth = "side_effect.dry_mouth".localized
+        static let sectionTitle = "side_effect.section_title".localized
+        static let addButton = "side_effect.add_button".localized
     }
 
     enum Error {
@@ -160,6 +205,12 @@ enum AppStrings{
         static let unknownError = "error.unknown_error".localized
         static let permissionError = "error.permission_error".localized
         static let notificationPermissionTitle = "error.notification_permission_title".localized
+        static let notificationPermissionRequired = "error.notification_permission_required".localized
+        static let notificationSettingFailed = "error.notification_setting_failed".localized
+        static let invalidTime = "error.invalid_time".localized
+        static let pillInfoNotFound = "error.pill_info_not_found".localized
+        static let retryLater = "error.retry_later".localized
+        static let dataLoadFailed = "error.data_load_failed".localized
     }
 
     enum TimeSetting {

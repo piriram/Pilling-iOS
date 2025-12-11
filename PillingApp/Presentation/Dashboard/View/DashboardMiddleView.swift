@@ -170,7 +170,7 @@ final class DashboardMiddleView: UIView {
         let daysSinceStart = calendar.dateComponents([.day], from: cycle.startDate, to: now).day ?? 0
         let currentDay = daysSinceStart + 1
 
-        progressLabel.text = daysSinceStart < 0 ? "시작전": "\(currentDay)일차"
+        progressLabel.text = daysSinceStart < 0 ? AppStrings.Dashboard.progressBeforeStart : AppStrings.Dashboard.progressDay(currentDay)
         progressLabel.textColor = AppColor.textBlack
         totalLabel.text = "/\(cycle.totalDays)"
     }

@@ -9,7 +9,7 @@ protocol UserDefaultsProtocol {
 // MARK: - Domain/Entities/UserSettings.swift
 
 struct UserSettings {
-    static let defaultNotificationMessage: String = "잔디를 심을 시간이에요🌱"
+    static let defaultNotificationMessage: String = AppStrings.Notification.defaultMessage
     
     let scheduledTime: Date
     let notificationEnabled: Bool
@@ -42,5 +42,4 @@ struct UserSettings {
         )
     }
 }
-
 
