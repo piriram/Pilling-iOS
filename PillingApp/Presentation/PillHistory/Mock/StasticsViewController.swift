@@ -21,7 +21,7 @@ final class StasticsViewController: UIViewController {
     
     private let headerLabel: UILabel = {
         let label = UILabel()
-        label.text = "나의 기록"
+        label.text = AppStrings.Statistics.myRecordTitle
         label.font = .systemFont(ofSize: 28, weight: .bold)
         return label
     }()
@@ -186,7 +186,7 @@ final class StasticsViewController: UIViewController {
 
             let attributedString = NSMutableAttributedString()
             attributedString.append(NSAttributedString(
-                string: "복용약 ",
+                string: "\(AppStrings.Statistics.takingPillLabel) ",
                 attributes: [.font: UIFont.systemFont(ofSize: 18, weight: .bold)]
             ))
             attributedString.append(NSAttributedString(
@@ -233,7 +233,7 @@ final class StasticsViewController: UIViewController {
         categoryLabel.textColor = .black
         
         let daysLabel = UILabel()
-        daysLabel.text = "\(item.days)일"
+        daysLabel.text = AppStrings.Statistics.dayCount(item.days)
         daysLabel.font = .systemFont(ofSize: 16)
         daysLabel.textColor = .gray
         
@@ -279,7 +279,7 @@ final class StasticsViewController: UIViewController {
         categoryLabel.textColor = .black
 
         let countLabel = UILabel()
-        countLabel.text = "\(stat.count)회"
+        countLabel.text = AppStrings.Statistics.sideEffectCount(stat.count)
         countLabel.font = .systemFont(ofSize: 16)
         countLabel.textColor = .gray
 
@@ -312,7 +312,7 @@ final class StasticsViewController: UIViewController {
     }
     
     private func showPeriodSelectionAlert(periodList: [PeriodRecordDTO]) {
-        let alert = UIAlertController(title: "기간 선택", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: AppStrings.Statistics.periodSelectionTitle, message: nil, preferredStyle: .actionSheet)
         
         for (index, data) in periodList.enumerated() {
             let action = UIAlertAction(title: "\(data.startDate) - \(data.endDate)", style: .default) { [weak self] _ in
@@ -324,7 +324,7 @@ final class StasticsViewController: UIViewController {
             alert.addAction(action)
         }
         
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: AppStrings.Common.cancelTitle, style: .cancel))
         
         present(alert, animated: true)
     }

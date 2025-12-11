@@ -35,7 +35,7 @@ final class SideEffectManagementViewController: UIViewController {
     private var dataSource: DataSource!
     
     private lazy var editButton: UIBarButtonItem = {
-        UIBarButtonItem(title: "편집", style: .plain, target: self, action: #selector(didTapEditButton))
+        UIBarButtonItem(title: AppStrings.SideEffectTag.editTitle, style: .plain, target: self, action: #selector(didTapEditButton))
     }()
     
     private lazy var addButton: UIBarButtonItem = {
@@ -86,7 +86,7 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        title = "부작용 관리"
+        title = AppStrings.SideEffectTag.manageTitle
         navigationController?.navigationBar.prefersLargeTitles = false
         
         navigationItem.rightBarButtonItems = [addButton, editButton]
@@ -94,11 +94,11 @@ final class SideEffectManagementViewController: UIViewController {
     
     private func updateNavigationBar() {
         if isEditingOrder {
-            editButton.title = "완료"
+            editButton.title = AppStrings.SideEffectTag.doneTitle
             editButton.style = .done
             addButton.isEnabled = false
         } else {
-            editButton.title = "편집"
+            editButton.title = AppStrings.SideEffectTag.editTitle
             editButton.style = .plain
             addButton.isEnabled = true
         }
@@ -266,14 +266,18 @@ final class SideEffectManagementViewController: UIViewController {
     }
     
     private func showAddTagAlert() {
-        let alert = UIAlertController(title: "새 태그 추가", message: "태그 이름을 입력하세요", preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: AppStrings.SideEffectTag.newTagTitle,
+            message: AppStrings.SideEffectTag.newTagMessage,
+            preferredStyle: .alert
+        )
         
         alert.addTextField { textField in
-            textField.placeholder = "태그 이름"
+            textField.placeholder = AppStrings.SideEffectTag.newTagPlaceholder
             textField.autocapitalizationType = .none
         }
         
-        let addAction = UIAlertAction(title: "추가", style: .default) { [weak self, weak alert] _ in
+        let addAction = UIAlertAction(title: AppStrings.SideEffectTag.addButton, style: .default) { [weak self, weak alert] _ in
             guard let self,
                   let textField = alert?.textFields?.first,
                   let name = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -292,7 +296,7 @@ final class SideEffectManagementViewController: UIViewController {
             self.applySnapshot(animating: true)
         }
         
-        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        let cancelAction = UIAlertAction(title: AppStrings.Common.cancelTitle, style: .cancel)
         
         alert.addAction(addAction)
         alert.addAction(cancelAction)

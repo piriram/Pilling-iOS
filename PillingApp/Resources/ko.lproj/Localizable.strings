@@ -26,6 +26,11 @@
 "pill_setting.warning_label" = "복용일과 휴약일의 합은 28일 이하여야 해요.";
 "pill_setting.setting_complete" = "설정 완료";
 "pill_setting.title_label" = "복용 정보 입력";
+"pill_setting.days_format" = "%d일";
+"pill_setting.taking_break_format" = "복용 %d일 / 휴약 %d일";
+"pill_setting.day_ordinal" = "%d일째";
+"pill_setting.today" = "오늘";
+"pill_setting.days_remaining" = "%d일 남음";
 
 // MARK: - Setting Floating
 "setting_floating.title" = "설정 완료!";
@@ -96,6 +101,7 @@
 "history.empty_message" = "기록이 없어요";
 "history.start_label" = "시작:";
 "history.created_label" = "생성:";
+"history.cycle_title_format" = "사이클 #%d · 총 %d일";
 "history.scheduled_time_label" = "예정시각";
 // 복수형은 stringsdict에서 처리
 "history.active_days_format" = "복용 %d일";
@@ -111,6 +117,8 @@
 "statistics.category_delayed" = "조금 늦었어요";
 "statistics.category_missed_or_double" = "미복용 및 2알 복용";
 "statistics.deleted_side_effect" = "삭제된 부작용";
+"statistics.day_count_format" = "%d일";
+"statistics.side_effect_count_format" = "%d회";
 
 // MARK: - Message
 "message.empty" = "약을 설정해주세요";
@@ -155,6 +163,12 @@
 "side_effect.dry_mouth" = "입마름";
 "side_effect.section_title" = "부작용";
 "side_effect.add_button" = "추가";
+"side_effect.manage_title" = "부작용 관리";
+"side_effect.edit_title" = "편집";
+"side_effect.done_title" = "완료";
+"side_effect.new_tag_title" = "새 태그 추가";
+"side_effect.new_tag_message" = "태그 이름을 입력하세요";
+"side_effect.new_tag_placeholder" = "태그 이름";
 
 // MARK: - Error
 "error.invalid_time_format" = "시간 형식이 올바르지 않습니다";
@@ -176,3 +190,12 @@
 "time_setting.confirm_button" = "설정 완료!";
 "time_setting.picker_confirm_button" = "확인";
 "time_setting.navigation_title" = "시간 설정";
+
+// MARK: - Onboarding
+"onboarding.next_button" = "다음으로";
+"onboarding.page1_title" = "필링이 한 달 동안 꾸준한\n복용 습관을 도와드릴게요";
+"onboarding.page1_description" = "하루 한 번, 정해둔 시간에 나만 알 수 있는\n알림이 오면 복용하고 기록하면 돼요";
+"onboarding.page2_title" = "복용률을 한눈에, 차트로\n확인할 수 있어요";
+"onboarding.page2_description" = "주기별 복용과 휴약 기간도\n한 곳에서 간편하게 관리해요";
+"onboarding.page3_title" = "위젯으로 내 복용 상태를\n바로 확인할 수 있어요";
+"onboarding.page3_description" = "터치 한 번으로 기록하고,\n언제든 상태를 볼 수 있어요";

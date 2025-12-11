@@ -16,7 +16,7 @@ final class StatisticsContentView: UIView {
     
     private let headerLabel: UILabel = {
         let label = UILabel()
-        label.text = "나의 기록"
+        label.text = AppStrings.Statistics.myRecordTitle
         label.font = .systemFont(ofSize: 28, weight: .bold)
         return label
     }()
@@ -149,7 +149,7 @@ final class StatisticsContentView: UIView {
 
             let attributedString = NSMutableAttributedString()
             attributedString.append(NSAttributedString(
-                string: "복용약 ",
+                string: "\(AppStrings.Statistics.takingPillLabel) ",
                 attributes: [.font: UIFont.systemFont(ofSize: 18, weight: .bold)]
             ))
             attributedString.append(NSAttributedString(
@@ -202,7 +202,7 @@ final class StatisticsContentView: UIView {
         categoryLabel.textColor = .black
         
         let daysLabel = UILabel()
-        daysLabel.text = "\(item.days)일"
+        daysLabel.text = AppStrings.Statistics.dayCount(item.days)
         daysLabel.font = .systemFont(ofSize: 16)
         daysLabel.textColor = .gray
         
@@ -248,7 +248,7 @@ final class StatisticsContentView: UIView {
         categoryLabel.textColor = .black
 
         let countLabel = UILabel()
-        countLabel.text = "\(stat.count)회"
+        countLabel.text = AppStrings.Statistics.sideEffectCount(stat.count)
         countLabel.font = .systemFont(ofSize: 16)
         countLabel.textColor = .gray
 

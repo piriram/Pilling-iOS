@@ -26,6 +26,19 @@ enum AppStrings{
         static let warningLabel = "pill_setting.warning_label".localized
         static let settingComplete = "pill_setting.setting_complete".localized
         static let titleLabel = "pill_setting.title_label".localized
+        static func daysFormat(_ days: Int) -> String {
+            "pill_setting.days_format".localized(with: days)
+        }
+        static func takingBreakFormat(taking: Int, breaking: Int) -> String {
+            "pill_setting.taking_break_format".localized(with: taking, breaking)
+        }
+        static func dayOrdinal(_ day: Int) -> String {
+            "pill_setting.day_ordinal".localized(with: day)
+        }
+        static let today = "pill_setting.today".localized
+        static func daysRemaining(_ days: Int) -> String {
+            "pill_setting.days_remaining".localized(with: days)
+        }
     }
     enum SettingFloating{
         static let titleLabel = "setting_floating.title".localized
@@ -115,6 +128,9 @@ enum AppStrings{
         static let emptyMessage = "history.empty_message".localized
         static let startLabel = "history.start_label".localized
         static let createdLabel = "history.created_label".localized
+        static func cycleTitle(_ number: Int, totalDays: Int) -> String {
+            "history.cycle_title_format".localized(with: number, totalDays)
+        }
         static func activeDaysFormat(_ days: Int) -> String {
             return "history.active_days_format".localized(with: days)
         }
@@ -136,6 +152,12 @@ enum AppStrings{
         static let categoryDelayed = "statistics.category_delayed".localized
         static let categoryMissedOrDouble = "statistics.category_missed_or_double".localized
         static let deletedSideEffect = "statistics.deleted_side_effect".localized
+        static func dayCount(_ days: Int) -> String {
+            "statistics.day_count_format".localized(with: days)
+        }
+        static func sideEffectCount(_ count: Int) -> String {
+            "statistics.side_effect_count_format".localized(with: count)
+        }
     }
 
     enum Message {
@@ -197,6 +219,12 @@ enum AppStrings{
         static let dryMouth = "side_effect.dry_mouth".localized
         static let sectionTitle = "side_effect.section_title".localized
         static let addButton = "side_effect.add_button".localized
+        static let manageTitle = "side_effect.manage_title".localized
+        static let editTitle = "side_effect.edit_title".localized
+        static let doneTitle = "side_effect.done_title".localized
+        static let newTagTitle = "side_effect.new_tag_title".localized
+        static let newTagMessage = "side_effect.new_tag_message".localized
+        static let newTagPlaceholder = "side_effect.new_tag_placeholder".localized
     }
 
     enum Error {

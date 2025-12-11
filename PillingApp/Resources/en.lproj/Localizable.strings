@@ -26,6 +26,11 @@
 "pill_setting.warning_label" = "The sum of active and break days must be 28 or less.";
 "pill_setting.setting_complete" = "Setup Complete";
 "pill_setting.title_label" = "Enter Pill Information";
+"pill_setting.days_format" = "%d days";
+"pill_setting.taking_break_format" = "Active %d days / Break %d days";
+"pill_setting.day_ordinal" = "Day %d";
+"pill_setting.today" = "Today";
+"pill_setting.days_remaining" = "%d days left";
 
 // MARK: - Setting Floating
 "setting_floating.title" = "Setup Complete!";
@@ -96,6 +101,7 @@
 "history.empty_message" = "No records yet";
 "history.start_label" = "Start:";
 "history.created_label" = "Created:";
+"history.cycle_title_format" = "Cycle #%d · %d days";
 "history.scheduled_time_label" = "Scheduled Time";
 // Plural handled in stringsdict
 "history.active_days_format" = "%d active day(s)";
@@ -111,6 +117,8 @@
 "statistics.category_delayed" = "Taken a bit late";
 "statistics.category_missed_or_double" = "Missed or double dose";
 "statistics.deleted_side_effect" = "Deleted side effect";
+"statistics.day_count_format" = "%d days";
+"statistics.side_effect_count_format" = "%d times";
 
 // MARK: - Message
 "message.setup_required" = "Please set up your pill";
@@ -155,6 +163,12 @@
 "side_effect.dry_mouth" = "Dry mouth";
 "side_effect.section_title" = "Side effects";
 "side_effect.add_button" = "Add";
+"side_effect.manage_title" = "Side Effect Management";
+"side_effect.edit_title" = "Edit";
+"side_effect.done_title" = "Done";
+"side_effect.new_tag_title" = "Add New Tag";
+"side_effect.new_tag_message" = "Enter a tag name";
+"side_effect.new_tag_placeholder" = "Tag name";
 
 // MARK: - Error
 "error.invalid_time_format" = "Invalid time format";
@@ -176,3 +190,12 @@
 "time_setting.confirm_button" = "Setup Complete!";
 "time_setting.picker_confirm_button" = "Confirm";
 "time_setting.navigation_title" = "Time Settings";
+
+// MARK: - Onboarding
+"onboarding.next_button" = "Next";
+"onboarding.page1_title" = "Pilling helps you build\na consistent pill-taking habit";
+"onboarding.page1_description" = "Get personalized reminders once a day\nand easily track your progress";
+"onboarding.page2_title" = "Track your adherence rate\nat a glance with charts";
+"onboarding.page2_description" = "Manage your active and break periods\nall in one place";
+"onboarding.page3_title" = "Check your status instantly\nwith the widget";
+"onboarding.page3_description" = "Record with a single tap\nand check your status anytime";

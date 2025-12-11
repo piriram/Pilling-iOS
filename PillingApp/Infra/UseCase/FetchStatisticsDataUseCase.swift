@@ -51,8 +51,8 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
         let endDate = calendar.date(byAdding: .day, value: cycle.totalDays - 1, to: startDate) ?? startDate
 
         let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "ko_KR")
-        dateFormatter.dateFormat = "M월 d일"
+        dateFormatter.locale = Locale.current
+        dateFormatter.setLocalizedDateFormatFromTemplate("MMMMd")
 
         let startDateString = dateFormatter.string(from: startDate)
         let endDateString = dateFormatter.string(from: endDate)

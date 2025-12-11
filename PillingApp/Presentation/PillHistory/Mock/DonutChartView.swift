@@ -35,7 +35,7 @@ final class DonutChartView: UIView {
     
     private let centerTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "필링타임"
+        label.text = AppStrings.Statistics.chartTitle
         label.font = .systemFont(
             ofSize: ChartLayoutConstants.Data.centerTitleFontSize,
             weight: .semibold

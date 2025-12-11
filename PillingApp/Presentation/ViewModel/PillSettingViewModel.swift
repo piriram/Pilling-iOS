@@ -71,7 +71,8 @@ final class PillSettingViewModel {
         let selectedPillTypeText = selectedPillInfoRelay
             .map { pillInfo -> String? in
                 guard let info = pillInfo else { return nil }
-                return "\(info.name) (복용 \(info.takingDays)일 / 휴약 \(info.breakDays)일)"
+                let infoText = AppStrings.PillSetting.takingBreakFormat(taking: info.takingDays, breaking: info.breakDays)
+                return "\(info.name) (\(infoText))"
             }
         
         let selectedStartDateText = selectedStartDateRelay
@@ -126,7 +127,7 @@ final class PillSettingViewModel {
                 if total <= 28 {
                     self?.selectedPillInfoRelay.accept(pillInfo)
                 } else {
-                    self?.alertMessageSubject.onNext("복용일과 휴약일의 합은 28일 이하여야 해요.")
+                    self?.alertMessageSubject.onNext(AppStrings.PillSetting.warningLabel)
                 }
             })
             .disposed(by: disposeBag)
@@ -153,14 +154,13 @@ final class PillSettingViewModel {
         let selectedDay = calendar.startOfDay(for: date)
         if selectedDay < today {
             let days = calculateDaysSinceStart(from: date)
-            return "\(dateText) (\(days)일째)"
+            return "\(dateText) (\(AppStrings.PillSetting.dayOrdinal(days)))"
         } else if selectedDay == today {
-            return "\(dateText) (오늘)"
+            return "\(dateText) (\(AppStrings.PillSetting.today))"
         } else {
             let components = calendar.dateComponents([.day], from: today, to: selectedDay)
             let daysRemaining = components.day ?? 0
-            return "\(dateText) (\(daysRemaining)일 남음)"
+            return "\(dateText) (\(AppStrings.PillSetting.daysRemaining(daysRemaining)))"
         }
     }
 }
-

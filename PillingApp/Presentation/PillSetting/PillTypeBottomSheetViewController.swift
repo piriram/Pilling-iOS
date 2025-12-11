@@ -299,6 +299,9 @@ final class PillTypeBottomSheetViewController: UIViewController {
             pickerView.selectRow(breakIndex, inComponent: 0, animated: false)
         }
         
+        takingDaysButton.setTitle(AppStrings.PillSetting.daysFormat(selectedTakingDays), for: .normal)
+        breakDaysButton.setTitle(AppStrings.PillSetting.daysFormat(selectedBreakDays), for: .normal)
+        
         let doneButton = UIBarButtonItem(
             title: AppStrings.Common.confirmTitle,
             style: .done,
@@ -498,9 +501,9 @@ extension PillTypeBottomSheetViewController: UIPickerViewDelegate, UIPickerViewD
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         switch currentPickerType {
         case .takingDays:
-            return "\(takingDaysOptions[row])일"
+            return AppStrings.PillSetting.daysFormat(takingDaysOptions[row])
         case .breakDays:
-            return "\(breakDaysOptions[row])일"
+            return AppStrings.PillSetting.daysFormat(breakDaysOptions[row])
         }
     }
     
@@ -508,11 +511,11 @@ extension PillTypeBottomSheetViewController: UIPickerViewDelegate, UIPickerViewD
         switch currentPickerType {
         case .takingDays:
             selectedTakingDays = takingDaysOptions[row]
-            takingDaysButton.setTitle("\(selectedTakingDays)일", for: .normal)
+            takingDaysButton.setTitle(AppStrings.PillSetting.daysFormat(selectedTakingDays), for: .normal)
             selectedTakingDaysRelay.accept(selectedTakingDays)
         case .breakDays:
             selectedBreakDays = breakDaysOptions[row]
-            breakDaysButton.setTitle("\(selectedBreakDays)일", for: .normal)
+            breakDaysButton.setTitle(AppStrings.PillSetting.daysFormat(selectedBreakDays), for: .normal)
             selectedBreakDaysRelay.accept(selectedBreakDays)
         }
     }
