@@ -74,13 +74,6 @@
 "dashboard.progress_before_start" = "시작전";
 "dashboard.progress_day" = "%d일차";
 "dashboard.day_progress_format" = "%d일차/%d";
-"dashboard.weekday_mon" = "월";
-"dashboard.weekday_tue" = "화";
-"dashboard.weekday_wed" = "수";
-"dashboard.weekday_thu" = "목";
-"dashboard.weekday_fri" = "금";
-"dashboard.weekday_sat" = "토";
-"dashboard.weekday_sun" = "일";
 
 // MARK: - Widget
 "widget.configuration_display_name" = "약 복용 위젯";

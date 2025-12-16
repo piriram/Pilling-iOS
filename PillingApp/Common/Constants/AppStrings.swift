@@ -97,15 +97,11 @@ enum AppStrings{
             "dashboard.day_progress_format".localized(with: current, total)
         }
 
-        static let weekdays = [
-            "dashboard.weekday_mon".localized,
-            "dashboard.weekday_tue".localized,
-            "dashboard.weekday_wed".localized,
-            "dashboard.weekday_thu".localized,
-            "dashboard.weekday_fri".localized,
-            "dashboard.weekday_sat".localized,
-            "dashboard.weekday_sun".localized
-        ]
+        static var weekdays: [String] {
+            let calendar = Calendar.current
+            let symbols = calendar.shortWeekdaySymbols
+            return Array(symbols.dropFirst()) + [symbols.first!]
+        }
     }
 
     enum Widget {
