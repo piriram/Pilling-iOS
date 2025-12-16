@@ -40,40 +40,42 @@ final class DashboardCalendarCell: UICollectionViewCell {
         backgroundShapeView.addSubview(capsuleContainer)
         capsuleContainer.addSubview(capsule1)
         capsuleContainer.addSubview(capsule2)
-        
+
         backgroundShapeView.layer.masksToBounds = true
-        backgroundShapeView.snp.makeConstraints { $0.edges.equalToSuperview() }
-        
+        backgroundShapeView.snp.makeConstraints {
+            $0.edges.equalToSuperview().priority(.high)
+        }
+
         // inner shadow 효과를 내는 border view
         innerBorderView.isUserInteractionEnabled = false
         innerBorderView.backgroundColor = .clear
         innerBorderView.layer.borderWidth = 3
         innerBorderView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(3)
+            make.edges.equalToSuperview().inset(3).priority(.high)
         }
-        
+
         capsuleContainer.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.height.equalToSuperview()
             make.width.equalTo(backgroundShapeView.snp.width)
         }
-        
+
         capsule1.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(0.5)
             make.top.bottom.equalToSuperview()
-            make.width.equalTo(capsuleContainer.snp.width).multipliedBy(0.5).offset(-1.5)
+            make.width.equalTo(capsuleContainer.snp.width).multipliedBy(0.5).offset(-1.5).priority(.high)
         }
-        
+
         capsule2.snp.makeConstraints { make in
-            make.leading.equalTo(capsule1.snp.trailing).offset(2)
+            make.leading.equalTo(capsule1.snp.trailing).offset(2).priority(.high)
             make.trailing.equalToSuperview().inset(0.5)
             make.top.bottom.equalToSuperview()
             make.width.equalTo(capsule1)
         }
-        
+
         capsule1.backgroundColor = AppColor.pillGreen800
         capsule2.backgroundColor = AppColor.pillGreen800
-        
+
         capsuleContainer.isHidden = true
         innerBorderView.isHidden = true
         contentView.backgroundColor = .clear
