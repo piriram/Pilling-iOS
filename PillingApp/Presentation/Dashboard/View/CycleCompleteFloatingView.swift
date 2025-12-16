@@ -78,7 +78,7 @@ final class CycleCompleteFloatingView: UIView {
     private func setupViews() {
         backgroundColor = .clear
 
-        titleLabel.text = pillName.isEmpty ? "[\(pillName)] 복용 완료" : "복용 완료"
+        titleLabel.text = (pillName.isEmpty || pillName == "") ?  "복용 완료" : "[\(pillName)] 복용 완료"
 
         addSubview(dimmedBackgroundView)
         addSubview(floatingCardView)

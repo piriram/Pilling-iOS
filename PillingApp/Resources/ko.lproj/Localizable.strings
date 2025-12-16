@@ -70,7 +70,7 @@
 "dashboard.guide_today" = "현재";
 "dashboard.take_pill_button" = "잔디 심기";
 "dashboard.take_pill_completed" = "심기 완료!";
-"dashboard.rest_period" = "휴약 기간";
+"dashboard.rest_period" = "지금은 휴약기";
 "dashboard.progress_before_start" = "시작전";
 "dashboard.progress_day" = "%d일차";
 "dashboard.day_progress_format" = "%d일차/%d";
@@ -158,7 +158,7 @@
 "notification.default_message" = "잔디를 심을 시간이에요🌱";
 
 // MARK: - Side Effect Tag
-"side_effect.mood_down" = "기분저하";
+"side_effect.mood_down" = "우울감";
 "side_effect.spotting" = "부정출혈";
 "side_effect.dry_mouth" = "입마름";
 "side_effect.section_title" = "부작용";

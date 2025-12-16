@@ -163,7 +163,6 @@ final class UserDefaultsManager: UserDefaultsManagerProtocol {
         let defaultNames = [
             AppStrings.SideEffectTag.moodDown,
             AppStrings.SideEffectTag.spotting,
-            AppStrings.SideEffectTag.dryMouth
         ]
         
         return defaultNames.enumerated().map { index, name in

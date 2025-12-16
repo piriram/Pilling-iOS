@@ -268,7 +268,6 @@
 			buildPhases = (
 				218AFB162E996BF7008A77DB /* Sources */,
 				218AFB172E996BF7008A77DB /* Frameworks */,
-				211FF6C02EEADE9300C51E33 /* Firebase Crashlytics(Custom) */,
 				218AFB182E996BF7008A77DB /* Resources */,
 				2124F7792EA23E3C001578C9 /* Embed Foundation Extensions */,
 			);
@@ -398,28 +397,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		211FF6C02EEADE9300C51E33 /* Firebase Crashlytics(Custom) */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"  ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}\n  ${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}",
-			);
-			name = "Firebase Crashlytics(Custom)";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = " # Firebase Crashlytics Run Script\n  if [ \"${CONFIGURATION}\" == \"Release\" ]; then\n      \"${BUILD_DIR%Build/*}SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n  fi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2124F75C2EA23E3A001578C9 /* Sources */ = {
