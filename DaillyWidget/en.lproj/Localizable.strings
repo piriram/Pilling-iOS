@@ -1,0 +1,18 @@
+/*
+  Localizable.strings (English)
+  DaillyWidget
+*/
+
+// MARK: - Widget
+"widget.configuration_display_name" = "Pill Widget";
+"widget.configuration_description" = "Today's status";
+"widget.day_label" = "Day %d";
+"widget.message_plant_grass" = "Plant your grass!";
+"widget.message_setup_pill" = "Set up pill";
+"widget.message_grass_waiting" = "Grass is waiting";
+"widget.message_one_pill_complete" = "One planted!";
+"widget.message_rest_time" = "Rest time";
+"widget.message_over_two_hours" = "2 hours late!";
+"widget.message_over_four_hours" = "4 hours late!";
+"widget.message_two_today" = "Two pills today";
+"widget.message_today_complete" = "Today done";

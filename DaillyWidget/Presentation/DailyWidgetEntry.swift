@@ -14,19 +14,19 @@ struct DailyWidgetEntry: TimelineEntry {
             date: Date(),
             displayData: WidgetDisplayData(
                 cycleDay: 1,
-                message: "잔디를 심어보세요!",
+                message: NSLocalizedString("widget.message_plant_grass", bundle: .main, comment: ""),
                 iconImageName: "widget_icon_plant",
                 backgroundImageName: "widget_background_normal"
             )
         )
     }
-    
+
     static var empty: DailyWidgetEntry {
         DailyWidgetEntry(
             date: Date(),
             displayData: WidgetDisplayData(
                 cycleDay: 0,
-                message: "약을 설정해주세요",
+                message: NSLocalizedString("widget.message_setup_pill", bundle: .main, comment: ""),
                 iconImageName: "widget_icon_rest",
                 backgroundImageName: "widget_background_normal"
             )

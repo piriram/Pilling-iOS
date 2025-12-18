@@ -25,23 +25,23 @@ enum WidgetMessageType {
     var message: String {
         switch self {
         case .waiting:
-            return "잔디가 기다려요"
+            return NSLocalizedString("widget.message_grass_waiting", bundle: .main, comment: "")
         case .plantingSeed:
-            return "잔디를 심어보세요!"
+            return NSLocalizedString("widget.message_plant_grass", bundle: .main, comment: "")
         case .completed:
-            return "한알 심기 완료"
+            return NSLocalizedString("widget.message_one_pill_complete", bundle: .main, comment: "")
         case .resting:
-            return "지금은 쉬는 시간"
+            return NSLocalizedString("widget.message_rest_time", bundle: .main, comment: "")
         case .empty:
-            return "약을 설정해주세요"
+            return NSLocalizedString("widget.message_setup_pill", bundle: .main, comment: "")
         case .groomy:
-            return "2시간 지났어요"
+            return NSLocalizedString("widget.message_over_two_hours", bundle: .main, comment: "")
         case .fire:
-            return "4시간 지났어요!"
+            return NSLocalizedString("widget.message_over_four_hours", bundle: .main, comment: "")
         case .pilledTwo:
-            return "오늘은 두알"
+            return NSLocalizedString("widget.message_two_today", bundle: .main, comment: "")
         case .success:
-            return "오늘 복용 완료."
+            return NSLocalizedString("widget.message_today_complete", bundle: .main, comment: "")
         }
     }
     

@@ -11,8 +11,8 @@ struct DaillyWidget: Widget {
             DailyWidgetView(entry: entry)
                 .environment(\.colorScheme, .light)
         }
-        .configurationDisplayName("약 복용 위젯")
-        .description("오늘의 복용 상태를 확인하세요")
+        .configurationDisplayName(NSLocalizedString("widget.configuration_display_name", bundle: .main, comment: ""))
+        .description(NSLocalizedString("widget.configuration_description", bundle: .main, comment: ""))
         .supportedFamilies([.systemSmall])
     }
 }

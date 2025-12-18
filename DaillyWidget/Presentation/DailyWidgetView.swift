@@ -17,7 +17,7 @@ struct DailyWidgetView: View {
             
             // N일차
             if entry.displayData.cycleDay > 0 {
-                Text("\(entry.displayData.cycleDay)일차")
+                Text(String(format: NSLocalizedString("widget.day_label", bundle: .main, comment: ""), entry.displayData.cycleDay))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.gray)
             }
