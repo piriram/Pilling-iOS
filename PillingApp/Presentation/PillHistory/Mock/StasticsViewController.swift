@@ -99,7 +99,7 @@ final class StasticsViewController: UIViewController {
             make.top.equalToSuperview().offset(20)
             make.leading.equalToSuperview().offset(20)
         }
-        
+
         periodButton.snp.makeConstraints { make in
             make.centerY.equalTo(headerLabel)
             make.trailing.equalToSuperview().offset(-20)
@@ -173,7 +173,7 @@ final class StasticsViewController: UIViewController {
     }
     
     private func updateUI(with data: PeriodRecordDTO) {
-        periodButton.setTitle("\(data.startDate) - \(data.endDate)", for: .normal)
+        periodButton.setTitle("\(data.startDateShort) - \(data.endDateShort)", for: .normal)
 
         chartContainerView.configure(with: data)
 

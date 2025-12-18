@@ -17,6 +17,8 @@ struct SideEffectStatDTO {
 struct PeriodRecordDTO {
     let startDate: String
     let endDate: String
+    let startDateShort: String
+    let endDateShort: String
     let completionRate: Int
     let medicineName: String
     let records: [RecordItemDTO]

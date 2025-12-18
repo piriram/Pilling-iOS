@@ -78,6 +78,7 @@
 // MARK: - Widget
 "widget.configuration_display_name" = "약 복용 위젯";
 "widget.configuration_description" = "오늘의 복용 상태를 확인하세요";
+"widget.day_label" = "%d일차";
 "widget.message_plant_grass" = "잔디를 심어보세요!";
 "widget.message_setup_pill" = "약을 설정해주세요";
 "widget.message_grass_waiting" = "잔디가 기다려요";

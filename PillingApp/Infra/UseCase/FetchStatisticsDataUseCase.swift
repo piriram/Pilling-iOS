@@ -52,10 +52,31 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
 
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale.current
-        dateFormatter.setLocalizedDateFormatFromTemplate("MMMMd")
 
-        let startDateString = dateFormatter.string(from: startDate)
-        let endDateString = dateFormatter.string(from: endDate)
+        // Full date format (for sheet)
+        let startDateString: String
+        let endDateString: String
+        let startDateShortString: String
+        let endDateShortString: String
+
+        if Locale.current.language.languageCode?.identifier == "en" {
+            // 영어: 년/월/일 (시트용)
+            dateFormatter.dateFormat = "yyyy/MM/dd"
+            startDateString = dateFormatter.string(from: startDate)
+            endDateString = dateFormatter.string(from: endDate)
+
+            // 영어: 월/일 (버튼용)
+            dateFormatter.dateFormat = "MM/dd"
+            startDateShortString = dateFormatter.string(from: startDate)
+            endDateShortString = dateFormatter.string(from: endDate)
+        } else {
+            // 한글: 월/일 (공통)
+            dateFormatter.setLocalizedDateFormatFromTemplate("MMMMd")
+            startDateString = dateFormatter.string(from: startDate)
+            endDateString = dateFormatter.string(from: endDate)
+            startDateShortString = startDateString
+            endDateShortString = endDateString
+        }
 
         // Filter only active days (exclude rest days)
         let activeDayRecords = cycle.records.filter { record in
@@ -69,6 +90,8 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
             return PeriodRecordDTO(
                 startDate: startDateString,
                 endDate: endDateString,
+                startDateShort: startDateShortString,
+                endDateShort: endDateShortString,
                 completionRate: 0,
                 medicineName: pillInfo?.name ?? "",
                 records: [],
@@ -145,6 +168,8 @@ final class FetchStatisticsDataUseCase: FetchStatisticsDataUseCaseProtocol {
         return PeriodRecordDTO(
             startDate: startDateString,
             endDate: endDateString,
+            startDateShort: startDateShortString,
+            endDateShort: endDateShortString,
             completionRate: completionRate,
             medicineName: pillInfo?.name ?? "",
             records: recordItems,

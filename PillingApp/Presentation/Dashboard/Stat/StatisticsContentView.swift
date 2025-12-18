@@ -89,7 +89,7 @@ final class StatisticsContentView: UIView {
             make.top.equalToSuperview().offset(60)
             make.leading.equalToSuperview().offset(20)
         }
-        
+
         periodButton.snp.makeConstraints { make in
             make.centerY.equalTo(headerLabel)
             make.trailing.equalToSuperview().offset(-20)
@@ -136,7 +136,7 @@ final class StatisticsContentView: UIView {
     // MARK: - Public Methods
     
     func configure(with data: PeriodRecordDTO) {
-        periodButton.setTitle("\(data.startDate) - \(data.endDate)", for: .normal)
+        periodButton.setTitle("\(data.startDateShort) - \(data.endDateShort)", for: .normal)
 
         chartContainerView.configure(with: data)
 

@@ -79,6 +79,8 @@ final class StatisticsViewModel {
                     return PeriodRecordDTO(
                         startDate: "",
                         endDate: "",
+                        startDateShort: "",
+                        endDateShort: "",
                         completionRate: 0,
                         medicineName: "",
                         records: [],

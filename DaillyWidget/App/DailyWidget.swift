@@ -11,8 +11,8 @@ struct DaillyWidget: Widget {
             DailyWidgetView(entry: entry)
                 .environment(\.colorScheme, .light)
         }
-        .configurationDisplayName(NSLocalizedString("widget.configuration_display_name", bundle: .main, comment: ""))
-        .description(NSLocalizedString("widget.configuration_description", bundle: .main, comment: ""))
+        .configurationDisplayName("widget.configuration_display_name")
+        .description("widget.configuration_description")
         .supportedFamilies([.systemSmall])
     }
 }

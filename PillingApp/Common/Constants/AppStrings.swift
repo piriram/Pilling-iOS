@@ -107,6 +107,9 @@ enum AppStrings{
     enum Widget {
         static let configurationDisplayName = "widget.configuration_display_name".localized
         static let configurationDescription = "widget.configuration_description".localized
+        static func dayLabel(_ day: Int) -> String {
+            "widget.day_label".localized(with: day)
+        }
         static let messagePlantGrass = "widget.message_plant_grass".localized
         static let messageSetupPill = "widget.message_setup_pill".localized
         static let messageGrassWaiting = "widget.message_grass_waiting".localized
@@ -185,12 +188,12 @@ enum AppStrings{
         static let overFourHours = "message.over_four_hours".localized
 
         // 위젯용 메시지
-        static let widgetPlantGrass = "message.widget_plant_grass".localized
-        static let widgetPlantingComplete = "message.widget_planting_complete".localized
-        static let widgetGrassWaiting = "message.widget_grass_waiting".localized
-        static let widgetRestTime = "message.widget_rest_time".localized
-        static let widgetOverTwoHours = "message.widget_over_two_hours".localized
-        static let widgetOverFourHours = "message.widget_over_four_hours".localized
+        static let widgetPlantGrass = "widget.message_plant_grass".localized
+        static let widgetPlantingComplete = "widget.message_one_pill_complete".localized
+        static let widgetGrassWaiting = "widget.message_grass_waiting".localized
+        static let widgetRestTime = "widget.message_rest_time".localized
+        static let widgetOverTwoHours = "widget.message_over_two_hours".localized
+        static let widgetOverFourHours = "widget.message_over_four_hours".localized
     }
 
     enum Onboarding {
