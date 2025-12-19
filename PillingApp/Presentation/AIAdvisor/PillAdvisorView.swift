@@ -268,48 +268,31 @@ struct StreamingAdviceView: View {
                     .foregroundColor(.secondary)
             }
 
-            if let situation = advice.situation {
-                adviceRow(icon: "📋", title: "상황", content: situation)
+            if let answer = advice.answer {
+                Text(answer)
+                    .font(.body)
+                    .foregroundColor(.primary)
             }
 
-            if let action = advice.immediateAction {
-                adviceRow(icon: "💊", title: "조치", content: action)
-            }
-
-            if let effectiveness = advice.contraceptiveEffectiveness {
-                adviceRow(
-                    icon: effectivenessIcon(effectiveness),
-                    title: "피임 효과",
-                    content: effectiveness.description
-                )
+            if let warning = advice.warning {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("[주의]")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.orange)
+                    Text(warning)
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
+                }
+                .padding(12)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(8)
             }
         }
         .padding()
         .background(Color(.tertiarySystemGroupedBackground))
         .cornerRadius(12)
         .transition(.opacity.combined(with: .scale))
-    }
-
-    private func adviceRow(icon: String, title: String, content: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text(icon)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                Text(content)
-                    .font(.subheadline)
-            }
-        }
-    }
-
-    private func effectivenessIcon(_ effectiveness: ContraceptiveEffectiveness) -> String {
-        switch effectiveness {
-        case .maintained: return "✅"
-        case .reduced: return "⚠️"
-        case .uncertain: return "❓"
-        }
     }
 }
 
@@ -321,67 +304,24 @@ struct AdviceCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let riskLevel = advice.riskLevel {
-                RiskLevelBadge(level: riskLevel)
-            }
-
-            if let needsExtra = advice.needsExtraContraception, needsExtra {
-                if let days = advice.extraContraceptionDays {
-                    WarningBanner(message: "\(days)일간 추가 피임 필요", icon: "🛡️")
+            if let warning = advice.warning {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("[주의]")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.orange)
+                    Text(warning)
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
                 }
-            }
-
-            if let needsEC = advice.needsEmergencyContraception, needsEC {
-                WarningBanner(message: "응급 피임 고려 필요", icon: "🚨", color: .red)
-            }
-
-            if let consultDoctor = advice.consultDoctor, consultDoctor {
-                WarningBanner(message: "의사 상담 권장", icon: "👨‍⚕️", color: .orange)
+                .padding(12)
+                .background(Color.orange.opacity(0.1))
+                .cornerRadius(8)
             }
         }
         .padding()
         .background(Color(.tertiarySystemGroupedBackground))
         .cornerRadius(12)
-    }
-}
-
-// MARK: - Risk Level Badge
-
-@available(iOS 26.0, *)
-struct RiskLevelBadge: View {
-    let level: RiskLevel
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(color)
-                .frame(width: 8, height: 8)
-            Text(text)
-                .font(.caption)
-                .fontWeight(.semibold)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(color.opacity(0.2))
-        .cornerRadius(12)
-    }
-
-    private var color: Color {
-        switch level {
-        case .low: return .green
-        case .medium: return .orange
-        case .high: return .red
-        case .emergency: return .purple
-        }
-    }
-
-    private var text: String {
-        switch level {
-        case .low: return "낮은 위험"
-        case .medium: return "중간 위험"
-        case .high: return "높은 위험"
-        case .emergency: return "응급"
-        }
     }
 }
 
@@ -399,26 +339,6 @@ struct DisclaimerBanner: View {
         .padding(.horizontal)
         .padding(.vertical, 8)
         .background(Color.blue.opacity(0.1))
-    }
-}
-
-struct WarningBanner: View {
-    let message: String
-    let icon: String
-    var color: Color = .orange
-
-    var body: some View {
-        HStack {
-            Text(icon)
-            Text(message)
-                .font(.subheadline)
-                .fontWeight(.medium)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(color.opacity(0.1))
-        .foregroundColor(color)
-        .cornerRadius(8)
     }
 }
 

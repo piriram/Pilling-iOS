@@ -57,33 +57,39 @@ final class PillAdvisorViewModel {
         let instructions = """
             당신은 피임약 복용자를 위한 supportive health assistant입니다.
 
-            ## 역할
+            역할:
             - 공감적이고 안심시키는 태도 유지
             - 간단하고 명확한 언어 사용 (전문 용어 최소화)
             - 교육 중심, 공포 조성 금지
             - 한국어로 응답
 
-            ## 행동 규칙
-            - **첫 대화 시 복용 중인 피임약 이름을 물어보세요** (예: 머시론, 야즈, 센스리베 등)
-            - **약물 정보 조회 시 pillInfo guidance type 사용**
-            - **의학적 조언은 반드시 pill guideline tool 사용**
+            행동 규칙:
+            - 첫 대화 시 복용 중인 피임약 이름을 물어보세요 (예: 머시론, 야즈, 센스리베 등)
+            - 약물 정보 조회 시 pillInfo guidance type 사용
+            - 의학적 조언은 반드시 pill guideline tool 사용
             - 약물명을 알면 pillName 파라미터에 포함
             - 가이드라인 인용 시 출처 명시
             - 복잡한 상황은 의료 전문가 상담 권장
             - 2-4 문장으로 간결하게 응답
 
-            ## 약물 구분 중요
-            - **미니필(세라젯 등 POP)**: 3시간 기준
-            - **복합피임약(머시론, 야즈 등 COC)**: 12시간 기준
+            약물 구분 중요:
+            - 미니필(세라젯 등 POP): 3시간 기준
+            - 복합피임약(머시론, 야즈 등 COC): 12시간 기준
             - Tool에서 약물 타입을 확인 후 조언
 
-            ## 안전 규칙 (CRITICAL)
-            DO NOT 가이드라인 tool 없이 의학 조언 제공
-            DO NOT 개인 건강 상태에 대한 가정
-            DO NOT tool 확인 없이 응급 피임 권장
-            DO NOT 진단이나 치료 처방
+            안전 규칙 (CRITICAL):
+            - DO NOT 가이드라인 tool 없이 의학 조언 제공
+            - DO NOT 개인 건강 상태에 대한 가정
+            - DO NOT tool 확인 없이 응급 피임 권장
+            - DO NOT 진단이나 치료 처방
 
-            ## 면책 조항
+            포맷 규칙 (CRITICAL):
+            - DO NOT use markdown formatting (**, ##, -, etc.)
+            - DO NOT use emojis (💊, ⚠️, 📋, etc.)
+            - Use plain text only
+            - Use line breaks for structure
+
+            면책 조항:
             모든 응답 끝에 다음 문구 포함:
             "본 정보는 교육 목적이며, 개인 맞춤 조언은 의료 전문가와 상담하세요."
             """
@@ -177,42 +183,12 @@ final class PillAdvisorViewModel {
     private func formatAdvice(_ advice: PillAdvice.PartiallyGenerated) -> String {
         var text = ""
 
-        if let situation = advice.situation {
-            text += "📋 **상황**: \(situation)\n\n"
+        if let answer = advice.answer {
+            text = answer
         }
 
-        if let action = advice.immediateAction {
-            text += "💊 **조치**: \(action)\n\n"
-        }
-
-        if let effectiveness = advice.contraceptiveEffectiveness {
-            let icon: String
-            switch effectiveness {
-            case .maintained: icon = "✅"
-            case .reduced: icon = "⚠️"
-            case .uncertain: icon = "❓"
-            }
-            text += "\(icon) **피임 효과**: \(effectiveness.description)\n\n"
-        }
-
-        if let needsExtra = advice.needsExtraContraception, needsExtra {
-            if let days = advice.extraContraceptionDays {
-                text += "🛡️ **추가 피임**: \(days)일간 필요\n\n"
-            } else {
-                text += "🛡️ **추가 피임**: 필요\n\n"
-            }
-        }
-
-        if let needsEC = advice.needsEmergencyContraception, needsEC {
-            text += "🚨 **응급 피임**: 고려 필요\n\n"
-        }
-
-        if let consultDoctor = advice.consultDoctor, consultDoctor {
-            text += "👨‍⚕️ **의사 상담**: 권장\n\n"
-        }
-
-        if let notes = advice.additionalNotes {
-            text += "📝 **추가 안내**: \(notes)\n\n"
+        if let warning = advice.warning {
+            text += "\n\n[주의] " + warning
         }
 
         return text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -251,19 +227,6 @@ extension PillAdvisorViewModel {
 
         var displayText: String {
             rawValue
-        }
-    }
-}
-
-// MARK: - ContraceptiveEffectiveness Extension
-
-@available(iOS 26.0, *)
-extension ContraceptiveEffectiveness {
-    var description: String {
-        switch self {
-        case .maintained: return "유지됨"
-        case .reduced: return "저하됨"
-        case .uncertain: return "불확실"
         }
     }
 }
