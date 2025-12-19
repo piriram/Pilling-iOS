@@ -51,6 +51,9 @@ enum AnalyticsEvent {
     case infoButtonTapped
     case guideViewShown
 
+    // AI 어드바이저
+    case aiAdvisorOpened
+
     // 앱 라이프사이클
     case appLaunched
     case appForegrounded
@@ -113,6 +116,9 @@ enum AnalyticsEvent {
         // 가이드
         case .infoButtonTapped: return "info_button_tapped"
         case .guideViewShown: return "guide_view_shown"
+
+        // AI 어드바이저
+        case .aiAdvisorOpened: return "ai_advisor_opened"
 
         // 앱 라이프사이클
         case .appLaunched: return "app_launched"
@@ -265,6 +271,10 @@ enum AnalyticsEvent {
             return [:]
 
         case .guideViewShown:
+            return [:]
+
+        // AI 어드바이저
+        case .aiAdvisorOpened:
             return [:]
 
         // 앱 라이프사이클

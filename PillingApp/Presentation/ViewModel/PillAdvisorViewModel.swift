@@ -135,16 +135,17 @@ final class PillAdvisorViewModel {
                 messages.append(aiMessage)
             }
 
-        } catch FoundationModelsError.guardrailViolation {
-            errorMessage = "부적절한 내용이 감지되었습니다. 다른 질문을 시도해주세요."
-
-        } catch FoundationModelsError.contextWindowExceeded {
-            errorMessage = "대화가 너무 길어졌습니다. 새로운 대화를 시작해주세요."
-            // 세션 재시작 제안
-
-        } catch FoundationModelsError.unsupportedLanguage {
-            errorMessage = "지원되지 않는 언어입니다."
-
+        } catch let genError as LanguageModelSession.GenerationError {
+            switch genError {
+            case .guardrailViolation:
+                errorMessage = "부적절한 내용이 감지되었습니다. 다른 질문을 시도해주세요."
+            case .exceededContextWindowSize:
+                errorMessage = "대화가 너무 길어졌습니다. 새로운 대화를 시작해주세요."
+            case .unsupportedLanguageOrLocale:
+                errorMessage = "지원되지 않는 언어입니다."
+            default:
+                errorMessage = "오류가 발생했습니다: \(genError.localizedDescription)"
+            }
         } catch {
             errorMessage = "오류가 발생했습니다: \(error.localizedDescription)"
         }

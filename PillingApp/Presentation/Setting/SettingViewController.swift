@@ -217,7 +217,9 @@ final class SettingViewController: UIViewController {
             $0.size.equalTo(20)
         }
 
-        button.addTarget(self, action: #selector(aiAdvisorButtonTapped), for: .touchUpInside)
+        if #available(iOS 26.0, *) {
+            button.addTarget(self, action: #selector(aiAdvisorButtonTapped), for: .touchUpInside)
+        }
 
         return button
     }()
@@ -554,7 +556,7 @@ final class SettingViewController: UIViewController {
     @available(iOS 26.0, *)
     @objc private func aiAdvisorButtonTapped() {
         #if canImport(FoundationModels)
-        analytics.logEvent(.custom(name: "ai_advisor_opened", parameters: [:]))
+        analytics.logEvent(.aiAdvisorOpened)
 
         let advisorView = PillAdvisorView()
         let hostingController = UIHostingController(rootView: advisorView)
