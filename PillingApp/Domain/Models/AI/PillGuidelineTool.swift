@@ -21,6 +21,9 @@ struct PillGuidelineTool: Tool {
         - Drug interactions
         - Emergency symptoms
         - Contraindications
+        - When to start pills (timing)
+        - Depression and mood changes
+        - When to consider switching pills
         """
 
     // MARK: - Arguments
@@ -55,6 +58,9 @@ struct PillGuidelineTool: Tool {
         case emergencySymptoms
         case drugInteractions
         case basicUsage
+        case startTiming
+        case depression
+        case switching
     }
 
     // MARK: - Tool Implementation
@@ -87,6 +93,15 @@ struct PillGuidelineTool: Tool {
 
         case .basicUsage:
             guideline = PillKnowledgeBase.basicUsageGuidelines
+
+        case .startTiming:
+            guideline = PillKnowledgeBase.startTimingGuidelines
+
+        case .depression:
+            guideline = PillKnowledgeBase.depressionGuidelines
+
+        case .switching:
+            guideline = PillKnowledgeBase.switchingGuidelines
         }
 
         // 출처 명시
