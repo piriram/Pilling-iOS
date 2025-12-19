@@ -64,10 +64,18 @@ final class PillAdvisorViewModel {
             - 한국어로 응답
 
             ## 행동 규칙
+            - **첫 대화 시 복용 중인 피임약 이름을 물어보세요** (예: 머시론, 야즈, 센스리베 등)
+            - **약물 정보 조회 시 pillInfo guidance type 사용**
             - **의학적 조언은 반드시 pill guideline tool 사용**
+            - 약물명을 알면 pillName 파라미터에 포함
             - 가이드라인 인용 시 출처 명시
             - 복잡한 상황은 의료 전문가 상담 권장
             - 2-4 문장으로 간결하게 응답
+
+            ## 약물 구분 중요
+            - **미니필(세라젯 등 POP)**: 3시간 기준
+            - **복합피임약(머시론, 야즈 등 COC)**: 12시간 기준
+            - Tool에서 약물 타입을 확인 후 조언
 
             ## 안전 규칙 (CRITICAL)
             DO NOT 가이드라인 tool 없이 의학 조언 제공
@@ -231,6 +239,7 @@ extension PillAdvisorViewModel {
     }
 
     enum PredefinedQuestion: String, CaseIterable {
+        case pillInfo = "복용 중인 피임약 정보가 궁금해요"
         case missedPill = "실수로 약을 안 먹었어요"
         case lateByHours = "약을 몇 시간 늦게 먹었어요"
         case vomiting = "약 먹고 구토했어요"
