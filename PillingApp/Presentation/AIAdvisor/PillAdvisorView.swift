@@ -71,8 +71,10 @@ struct PillAdvisorView: View {
                         }
 
                         // 현재 생성 중인 조언 (Streaming)
-                        if let currentAdvice = viewModel.currentAdvice {
+                        if viewModel.isResponding, let currentAdvice = viewModel.currentAdvice {
                             StreamingAdviceView(advice: currentAdvice)
+                        } else if viewModel.isResponding {
+                            LoadingIndicatorView()
                         }
                     }
                     .padding()
@@ -293,6 +295,24 @@ struct StreamingAdviceView: View {
         .background(Color(.tertiarySystemGroupedBackground))
         .cornerRadius(12)
         .transition(.opacity.combined(with: .scale))
+    }
+}
+
+// MARK: - Loading Indicator View
+
+struct LoadingIndicatorView: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            ProgressView()
+                .scaleEffect(0.9)
+            Text("생성 중...")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color(.tertiarySystemGroupedBackground))
+        .cornerRadius(12)
     }
 }
 

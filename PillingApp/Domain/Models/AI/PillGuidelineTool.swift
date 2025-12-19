@@ -15,6 +15,8 @@ struct PillGuidelineTool: Tool {
     let description = """
         Get WHO and MFDS-verified contraceptive pill guidelines and information.
         Use this tool to provide accurate medical advice for:
+        - General education about contraceptive pills
+        - Common myths and misconceptions about pills
         - Specific pill information (brand name, ingredients, characteristics)
         - Missed pill situations
         - Vomiting/diarrhea after taking pill
@@ -51,6 +53,8 @@ struct PillGuidelineTool: Tool {
 
     @Generable
     enum GuidanceType {
+        case generalEducation
+        case myths
         case pillInfo
         case missedPill
         case vomitingDiarrhea
@@ -69,6 +73,11 @@ struct PillGuidelineTool: Tool {
         var guideline: String
 
         switch arguments.guidanceType {
+        case .generalEducation:
+            guideline = PillKnowledgeBase.generalEducationGuidelines
+        case .myths:
+            guideline = PillKnowledgeBase.mythsGuidelines
+
         case .pillInfo:
             guard let pillName = arguments.pillName else {
                 guideline = "약물명을 제공해주세요."
