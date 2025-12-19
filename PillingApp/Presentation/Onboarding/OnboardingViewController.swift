@@ -167,6 +167,7 @@ final class OnboardingViewController: UIViewController {
         configureLayout()
         pageControl.numberOfPages = contents.count
         updatePageControl()
+        updateButtonText()
         nextButton.addTarget(self, action: #selector(didTapNext), for: .touchUpInside)
         analytics.logEvent(.onboardingStarted)
     }
@@ -210,7 +211,11 @@ final class OnboardingViewController: UIViewController {
 
     @objc
     private func didTapNext() {
-        completeOnboarding()
+        if currentIndex < pages.count - 1 {
+            moveToPage(currentIndex + 1)
+        } else {
+            completeOnboarding()
+        }
     }
 
     private func moveToPage(_ index: Int) {
@@ -223,6 +228,13 @@ final class OnboardingViewController: UIViewController {
 
     private func updatePageControl() {
         pageControl.currentPage = currentIndex
+        updateButtonText()
+    }
+
+    private func updateButtonText() {
+        let isLastPage = currentIndex == pages.count - 1
+        let buttonTitle = isLastPage ? Str.startButton : Str.nextButton
+        nextButton.setTitle(buttonTitle, for: .normal)
     }
 
     private func completeOnboarding() {

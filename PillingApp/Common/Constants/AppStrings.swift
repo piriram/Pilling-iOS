@@ -9,6 +9,7 @@ enum AppStrings{
         static let cancelTitle = "common.cancel_title".localized
         static let confirmTitle = "common.confirm_title".localized
         static let retryTitle = "common.retry_title".localized
+        static let goToSettings = "common.go_to_settings".localized
     }
     
     enum PillSetting{
@@ -198,6 +199,7 @@ enum AppStrings{
 
     enum Onboarding {
         static let nextButton = "onboarding.next_button".localized
+        static let startButton = "onboarding.start_button".localized
         static let page1Title = "onboarding.page1_title".localized
         static let page1Description = "onboarding.page1_description".localized
         static let page2Title = "onboarding.page2_title".localized

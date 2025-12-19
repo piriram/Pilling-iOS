@@ -10,6 +10,7 @@
 "common.cancel_title" = "Cancel";
 "common.confirm_title" = "Done";
 "common.retry_title" = "Retry";
+"common.go_to_settings" = "Go to Settings";
 
 // MARK: - Pill Setting
 "pill_setting.main_title" = "Tell us about your pill";
@@ -187,6 +188,7 @@
 
 // MARK: - Onboarding
 "onboarding.next_button" = "Next";
+"onboarding.start_button" = "Start Taking";
 "onboarding.page1_title" = "Build a steady routine\nfor a month with Pilling";
 "onboarding.page1_description" = "Get a daily reminder at your set time.\nTake your pill and record it.";
 "onboarding.page2_title" = "Track your adherence\nwith simple charts";

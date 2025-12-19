@@ -237,7 +237,7 @@ final class SettingViewModel {
     
     private func updateAlarmSetting(isEnabled: Bool) -> Observable<Void> {
         let currentSettings = currentSettingsRelay.value
-        
+
         // NOTE: assuming UserSettings has a fifth field for HealthKit/other state
         let updatedSettings = UserSettings(
             scheduledTime: currentSettings.scheduledTime,
@@ -245,21 +245,38 @@ final class SettingViewModel {
             delayThresholdMinutes: currentSettings.delayThresholdMinutes,
             notificationMessage: currentSettings.notificationMessage
         )
-        
+
         return notificationManager.requestAuthorization()
             .flatMap { [weak self] granted -> Observable<Void> in
                 guard let self = self else { return .empty() }
-                
+
+                // 권한이 거부되면 에러 발생 (사용자가 설정에서 권한 허용 필요)
                 guard granted else {
                     return .error(NotificationError.permissionDenied)
                 }
-                
+
                 return self.notificationManager.scheduleDailyNotification(
                     at: currentSettings.scheduledTime,
                     isEnabled: isEnabled,
                     message: currentSettings.notificationMessage,
                     cycle: nil
                 )
+            }
+            .catch { error -> Observable<Void> in
+                // 알림 권한 거부 시에도 설정은 저장 (토글은 꺼진 상태로)
+                let fallbackSettings = UserSettings(
+                    scheduledTime: currentSettings.scheduledTime,
+                    notificationEnabled: false,
+                    delayThresholdMinutes: currentSettings.delayThresholdMinutes,
+                    notificationMessage: currentSettings.notificationMessage
+                )
+                return self.settingsRepository.saveSettings(fallbackSettings)
+                    .do(onNext: { [weak self] in
+                        self?.currentSettingsRelay.accept(fallbackSettings)
+                    })
+                    .flatMap { _ -> Observable<Void> in
+                        return .error(error)
+                    }
             }
             .flatMap { [weak self] _ -> Observable<Void> in
                 guard let self = self else { return .empty() }

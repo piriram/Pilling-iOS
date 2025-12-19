@@ -25,7 +25,7 @@ extension UIViewController {
         
         if includeSettingsOption, let handler = settingsHandler {
             let settingsAction = UIAlertAction(
-                title: "설정으로 이동",
+                title: AppStrings.Common.goToSettings,
                 style: .default
             ) { _ in
                 handler()

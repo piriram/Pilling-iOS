@@ -110,23 +110,28 @@ final class TimeSettingViewModel {
         return notificationManager.requestAuthorization()
             .flatMap { [weak self] granted -> Observable<Void> in
                 guard let self = self else { return .empty() }
-                
-                // 권한이 거부되면 에러 발생
-                guard granted else {
-                    return .error(NotificationError.permissionDenied)
+
+                // 권한이 거부되어도 계속 진행 (알림은 선택사항)
+                if granted {
+                    // 2. 알림 스케줄링 (기본 메시지 사용)
+                    return self.notificationManager.scheduleDailyNotification(
+                        at: self.selectedTime.value,
+                        isEnabled: self.isAlarmEnabled.value,
+                        message: UserSettings.default.notificationMessage,
+                        cycle: nil
+                    )
+                    .catch { _ in
+                        // 알림 스케줄링 실패해도 계속 진행
+                        return .just(())
+                    }
+                } else {
+                    // 권한이 거부되면 알림 없이 계속 진행
+                    return .just(())
                 }
-                
-                // 2. 알림 스케줄링 (기본 메시지 사용)
-                return self.notificationManager.scheduleDailyNotification(
-                    at: self.selectedTime.value,
-                    isEnabled: self.isAlarmEnabled.value,
-                    message: UserSettings.default.notificationMessage,
-                    cycle: nil
-                )
             }
             .flatMap { [weak self] _ -> Observable<Void> in
                 guard let self = self else { return .empty() }
-                
+
                 // 3. 설정 저장
                 return self.saveSettings()
             }

@@ -10,6 +10,7 @@
 "common.cancel_title" = "취소";
 "common.confirm_title" = "완료";
 "common.retry_title" = "재시도";
+"common.go_to_settings" = "설정으로 이동";
 
 // MARK: - Pill Setting
 "pill_setting.main_title" = "복용하고 계신 약을 알려주세요!";
@@ -187,6 +188,7 @@
 
 // MARK: - Onboarding
 "onboarding.next_button" = "다음으로";
+"onboarding.start_button" = "복용 시작";
 "onboarding.page1_title" = "필링이 한 달 동안 꾸준한\n복용 습관을 도와드릴게요";
 "onboarding.page1_description" = "하루 한 번, 정해둔 시간에 나만 알 수 있는\n알림이 오면 복용하고 기록하면 돼요";
 "onboarding.page2_title" = "복용률을 한눈에, 차트로\n확인할 수 있어요";
