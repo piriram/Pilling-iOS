@@ -277,13 +277,11 @@ struct StreamingAdviceView: View {
             }
 
             if let effectiveness = advice.contraceptiveEffectiveness {
-                let icon: String
-                switch effectiveness {
-                case .maintained: icon = "✅"
-                case .reduced: icon = "⚠️"
-                case .uncertain: icon = "❓"
-                }
-                adviceRow(icon: icon, title: "피임 효과", content: effectiveness.description)
+                adviceRow(
+                    icon: effectivenessIcon(effectiveness),
+                    title: "피임 효과",
+                    content: effectiveness.description
+                )
             }
         }
         .padding()
@@ -303,6 +301,14 @@ struct StreamingAdviceView: View {
                 Text(content)
                     .font(.subheadline)
             }
+        }
+    }
+
+    private func effectivenessIcon(_ effectiveness: ContraceptiveEffectiveness) -> String {
+        switch effectiveness {
+        case .maintained: return "✅"
+        case .reduced: return "⚠️"
+        case .uncertain: return "❓"
         }
     }
 }
