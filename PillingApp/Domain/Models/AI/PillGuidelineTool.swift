@@ -54,7 +54,7 @@ struct PillGuidelineTool: Tool {
 
     // MARK: - Tool Implementation
 
-    func call(arguments: Arguments) async throws -> ToolOutput {
+    func call(arguments: Arguments) async throws -> String {
         var guideline: String
 
         switch arguments.guidanceType {
@@ -87,7 +87,7 @@ struct PillGuidelineTool: Tool {
             본 정보는 교육 목적이며, 개인 맞춤 조언은 의료 전문가와 상담하세요.
             """
 
-        return ToolOutput(output)
+        return output
     }
 
     // MARK: - Private Helper
