@@ -140,6 +140,104 @@ final class SharedCoreDataManager {
 }
 ```
 
+### 3. 국제화 (Localization)
+
+**문제 인식**
+
+초기 버전은 한국어로만 개발되어 해외 사용자 접근이 불가능했습니다. 글로벌 시장 진출을 위해서는 다국어 지원이 필수적입니다.
+
+**해결 방법**
+
+- 모든 하드코딩된 문자열을 `NSLocalizedString` 기반으로 전환
+- 한국어/영어 Localizable.strings 파일 구성
+- 위젯 포함 전체 앱에 로컬라이제이션 적용
+- 사용자 디바이스 언어 설정에 따라 자동 표시
+
+**효과**
+
+- 영어권 사용자 확보 가능
+- 추가 언어 확장 기반 마련
+- 국제 시장 진출 준비 완료
+
+### 4. 성능 최적화
+
+**문제 인식**
+
+DateFormatter는 생성 비용이 매우 높은 객체인데, 위젯과 메인 앱에서 반복적으로 생성되어 성능 저하가 발생했습니다.
+
+**해결 방법**
+
+DateFormatter 싱글톤 캐싱 전략을 구현했습니다.
+
+```swift
+final class DateFormatterCache {
+    static let shared = DateFormatterCache()
+
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale.current
+        formatter.timeZone = TimeZone.current
+        return formatter
+    }()
+
+    private let lock = NSLock()
+
+    func string(from date: Date) -> String {
+        lock.lock()
+        defer { lock.unlock() }
+        return dateFormatter.string(from: date)
+    }
+}
+```
+
+**효과**
+
+- DateFormatter 재사용으로 객체 생성 비용 제거
+- NSLock을 통한 스레드 안전성 확보
+- 위젯 타임라인 업데이트 성능 개선
+
+### 5. 의존성 주입 (DI)
+
+**문제 인식**
+
+ViewModel과 UseCase가 구체 클래스에 직접 의존하면 테스트가 어렵고, 계층 간 결합도가 높아집니다.
+
+**해결 방법**
+
+Protocol 기반 의존성 주입과 DIContainer를 구현했습니다.
+
+```swift
+// Protocol 정의
+protocol PillRepositoryProtocol {
+    func fetchPills() -> Observable<[Pill]>
+    func savePill(_ pill: Pill) -> Completable
+}
+
+// DIContainer
+final class DIContainer {
+    static let shared = DIContainer()
+
+    lazy var pillRepository: PillRepositoryProtocol = {
+        return PillRepository(coreDataManager: SharedCoreDataManager.shared)
+    }()
+
+    func makePillListViewModel() -> PillListViewModel {
+        return PillListViewModel(
+            fetchPillsUseCase: FetchPillsUseCase(repository: pillRepository),
+            updatePillStatusUseCase: UpdatePillStatusUseCase(repository: pillRepository)
+        )
+    }
+}
+```
+
+**효과**
+
+- Mock 객체를 통한 단위 테스트 가능
+- 계층 간 명확한 의존성 분리
+- 코드 재사용성 및 유지보수성 향상
+- 테스트 커버리지 60% 이상 달성
+
 ---
 
 ## 리팩토링 성과

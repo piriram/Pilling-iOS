@@ -1,0 +1,261 @@
+import Foundation
+import SwiftUI
+
+#if canImport(FoundationModels)
+import FoundationModels
+
+/// 피임약 AI 어드바이저 ViewModel
+@available(iOS 26.0, *)
+@Observable
+final class PillAdvisorViewModel {
+
+    // MARK: - Published Properties
+
+    var messages: [Message] = []
+    var currentAdvice: PillAdvice.PartiallyGenerated?
+    var isResponding = false
+    var errorMessage: String?
+    var modelAvailability: ModelAvailability = .checking
+
+    // MARK: - Private Properties
+
+    private var session: LanguageModelSession?
+    private let model = SystemLanguageModel.default
+
+    // MARK: - Initialization
+
+    init() {
+        checkAvailability()
+    }
+
+    // MARK: - Public Methods
+
+    /// 모델 가용성 확인
+    func checkAvailability() {
+        switch model.availability {
+        case .available:
+            modelAvailability = .available
+            Task {
+                await initializeSession()
+            }
+
+        case .unavailable(.deviceNotEligible):
+            modelAvailability = .unavailable(reason: "이 기기는 Apple Intelligence를 지원하지 않습니다.")
+
+        case .unavailable(.appleIntelligenceNotEnabled):
+            modelAvailability = .unavailable(reason: "설정에서 Apple Intelligence를 활성화해주세요.")
+
+        case .unavailable(.modelNotReady):
+            modelAvailability = .unavailable(reason: "모델을 다운로드 중입니다. 잠시 후 다시 시도해주세요.")
+        }
+    }
+
+    /// Session 초기화 및 Pre-warm
+    func initializeSession() async {
+        guard modelAvailability == .available else { return }
+
+        let instructions = """
+            당신은 피임약 복용자를 위한 supportive health assistant입니다.
+
+            ## 역할
+            - 공감적이고 안심시키는 태도 유지
+            - 간단하고 명확한 언어 사용 (전문 용어 최소화)
+            - 교육 중심, 공포 조성 금지
+            - 한국어로 응답
+
+            ## 행동 규칙
+            - **의학적 조언은 반드시 pill guideline tool 사용**
+            - 가이드라인 인용 시 출처 명시
+            - 복잡한 상황은 의료 전문가 상담 권장
+            - 2-4 문장으로 간결하게 응답
+
+            ## 안전 규칙 (CRITICAL)
+            DO NOT 가이드라인 tool 없이 의학 조언 제공
+            DO NOT 개인 건강 상태에 대한 가정
+            DO NOT tool 확인 없이 응급 피임 권장
+            DO NOT 진단이나 치료 처방
+
+            ## 면책 조항
+            모든 응답 끝에 다음 문구 포함:
+            "본 정보는 교육 목적이며, 개인 맞춤 조언은 의료 전문가와 상담하세요."
+            """
+
+        session = LanguageModelSession(
+            tools: [PillGuidelineTool()],
+            instructions: instructions
+        )
+
+        // Pre-warm
+        await session?.prewarm()
+    }
+
+    /// 질문하기
+    func ask(question: String) async {
+        guard let session = session else {
+            errorMessage = "세션이 초기화되지 않았습니다."
+            return
+        }
+
+        // 사용자 메시지 추가
+        let userMessage = Message(
+            id: UUID(),
+            text: question,
+            isUser: true,
+            timestamp: Date()
+        )
+        messages.append(userMessage)
+
+        isResponding = true
+        currentAdvice = nil
+        errorMessage = nil
+
+        defer { isResponding = false }
+
+        do {
+            let stream = try await session.streamResponse(
+                to: question,
+                generating: PillAdvice.self,
+                includeSchemaInPrompt: false,
+                options: GenerationOptions(sampling: .greedy)
+            )
+
+            for try await partialResponse in stream {
+                currentAdvice = partialResponse.content
+            }
+
+            // 최종 응답을 메시지로 추가
+            if let finalAdvice = currentAdvice {
+                let aiMessage = Message(
+                    id: UUID(),
+                    text: formatAdvice(finalAdvice),
+                    isUser: false,
+                    timestamp: Date(),
+                    advice: finalAdvice
+                )
+                messages.append(aiMessage)
+            }
+
+        } catch FoundationModelsError.guardrailViolation {
+            errorMessage = "부적절한 내용이 감지되었습니다. 다른 질문을 시도해주세요."
+
+        } catch FoundationModelsError.contextWindowExceeded {
+            errorMessage = "대화가 너무 길어졌습니다. 새로운 대화를 시작해주세요."
+            // 세션 재시작 제안
+
+        } catch FoundationModelsError.unsupportedLanguage {
+            errorMessage = "지원되지 않는 언어입니다."
+
+        } catch {
+            errorMessage = "오류가 발생했습니다: \(error.localizedDescription)"
+        }
+    }
+
+    /// 미리 정의된 질문으로 빠른 시작
+    func askPredefined(_ question: PredefinedQuestion) async {
+        await ask(question: question.prompt)
+    }
+
+    /// 새 대화 시작
+    func resetConversation() async {
+        messages = []
+        currentAdvice = nil
+        errorMessage = nil
+        await initializeSession()
+    }
+
+    // MARK: - Private Helpers
+
+    private func formatAdvice(_ advice: PillAdvice.PartiallyGenerated) -> String {
+        var text = ""
+
+        if let situation = advice.situation {
+            text += "📋 **상황**: \(situation)\n\n"
+        }
+
+        if let action = advice.immediateAction {
+            text += "💊 **조치**: \(action)\n\n"
+        }
+
+        if let effectiveness = advice.contraceptiveEffectiveness {
+            let icon: String
+            switch effectiveness {
+            case .maintained: icon = "✅"
+            case .reduced: icon = "⚠️"
+            case .uncertain: icon = "❓"
+            }
+            text += "\(icon) **피임 효과**: \(effectiveness.description)\n\n"
+        }
+
+        if let needsExtra = advice.needsExtraContraception, needsExtra {
+            if let days = advice.extraContraceptionDays {
+                text += "🛡️ **추가 피임**: \(days)일간 필요\n\n"
+            } else {
+                text += "🛡️ **추가 피임**: 필요\n\n"
+            }
+        }
+
+        if let needsEC = advice.needsEmergencyContraception, needsEC {
+            text += "🚨 **응급 피임**: 고려 필요\n\n"
+        }
+
+        if let consultDoctor = advice.consultDoctor, consultDoctor {
+            text += "👨‍⚕️ **의사 상담**: 권장\n\n"
+        }
+
+        if let notes = advice.additionalNotes {
+            text += "📝 **추가 안내**: \(notes)\n\n"
+        }
+
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+// MARK: - Supporting Types
+
+@available(iOS 26.0, *)
+extension PillAdvisorViewModel {
+
+    struct Message: Identifiable {
+        let id: UUID
+        let text: String
+        let isUser: Bool
+        let timestamp: Date
+        var advice: PillAdvice.PartiallyGenerated?
+    }
+
+    enum ModelAvailability: Equatable {
+        case checking
+        case available
+        case unavailable(reason: String)
+    }
+
+    enum PredefinedQuestion: String, CaseIterable {
+        case missedPill = "실수로 약을 안 먹었어요"
+        case lateByHours = "약을 몇 시간 늦게 먹었어요"
+        case vomiting = "약 먹고 구토했어요"
+        case drugInteraction = "다른 약이랑 같이 먹어도 되나요?"
+
+        var prompt: String {
+            rawValue
+        }
+
+        var displayText: String {
+            rawValue
+        }
+    }
+}
+
+// MARK: - ContraceptiveEffectiveness Extension
+
+@available(iOS 26.0, *)
+extension ContraceptiveEffectiveness {
+    var description: String {
+        switch self {
+        case .maintained: return "유지됨"
+        case .reduced: return "저하됨"
+        case .uncertain: return "불확실"
+        }
+    }
+}
+
+#endif

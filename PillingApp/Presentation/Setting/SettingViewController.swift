@@ -2,6 +2,7 @@ import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
+import SwiftUI
 
 final class SettingViewController: UIViewController {
     
@@ -104,16 +105,16 @@ final class SettingViewController: UIViewController {
         button.backgroundColor = .systemGray6
         button.layer.cornerRadius = 12
         button.contentHorizontalAlignment = .left
-        
+
         let iconImageView = UIImageView(image: UIImage(systemName: "text.bubble.fill"))
         iconImageView.tintColor = AppColor.textGray
         iconImageView.contentMode = .scaleAspectFit
-        
+
         let titleLabel = UILabel()
         titleLabel.text = str.messageSettingTitle
         titleLabel.font = Typography.body2(.medium)
         titleLabel.textColor = AppColor.textGray
-        
+
         let messageLabel = UILabel()
         messageLabel.tag = 101
         messageLabel.text = str.messageSettingDefault
@@ -121,39 +122,103 @@ final class SettingViewController: UIViewController {
         messageLabel.textColor = AppColor.textBlack
         messageLabel.textAlignment = .right
         messageLabel.lineBreakMode = .byTruncatingTail
-        
+
         let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
         chevronImageView.tintColor = .systemGray3
         chevronImageView.contentMode = .scaleAspectFit
-        
+
         button.addSubview(iconImageView)
         button.addSubview(titleLabel)
         button.addSubview(messageLabel)
         button.addSubview(chevronImageView)
-        
+
         iconImageView.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(16)
             $0.centerY.equalToSuperview()
             $0.size.equalTo(20)
         }
-        
+
         titleLabel.snp.makeConstraints {
             $0.leading.equalTo(iconImageView.snp.trailing).offset(10)
             $0.centerY.equalToSuperview()
         }
-        
+
         chevronImageView.snp.makeConstraints {
             $0.trailing.equalToSuperview().offset(-16)
             $0.centerY.equalToSuperview()
             $0.size.equalTo(20)
         }
-        
+
         messageLabel.snp.makeConstraints {
             $0.leading.equalTo(titleLabel.snp.trailing).offset(8)
             $0.trailing.equalTo(chevronImageView.snp.leading).offset(-8)
             $0.centerY.equalToSuperview()
         }
-        
+
+        return button
+    }()
+
+    // AI Advisor Button (iOS 26+)
+    private lazy var aiAdvisorButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = AppColor.pillGreen100
+        button.layer.cornerRadius = 12
+        button.contentHorizontalAlignment = .left
+
+        let iconImageView = UIImageView(image: UIImage(systemName: "brain.head.profile"))
+        iconImageView.tintColor = AppColor.pillGreen600
+        iconImageView.contentMode = .scaleAspectFit
+
+        let titleLabel = UILabel()
+        titleLabel.text = "AI 복용 어드바이저"
+        titleLabel.font = Typography.body2(.bold)
+        titleLabel.textColor = AppColor.pillGreen600
+
+        let badgeLabel = UILabel()
+        badgeLabel.text = "NEW"
+        badgeLabel.font = Typography.caption(.bold)
+        badgeLabel.textColor = .white
+        badgeLabel.backgroundColor = AppColor.pillGreen600
+        badgeLabel.layer.cornerRadius = 8
+        badgeLabel.clipsToBounds = true
+        badgeLabel.textAlignment = .center
+        badgeLabel.layer.masksToBounds = true
+
+        let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
+        chevronImageView.tintColor = AppColor.pillGreen600
+        chevronImageView.contentMode = .scaleAspectFit
+
+        button.addSubview(iconImageView)
+        button.addSubview(titleLabel)
+        button.addSubview(badgeLabel)
+        button.addSubview(chevronImageView)
+
+        iconImageView.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(16)
+            $0.centerY.equalToSuperview()
+            $0.size.equalTo(24)
+        }
+
+        titleLabel.snp.makeConstraints {
+            $0.leading.equalTo(iconImageView.snp.trailing).offset(10)
+            $0.centerY.equalToSuperview()
+        }
+
+        badgeLabel.snp.makeConstraints {
+            $0.leading.equalTo(titleLabel.snp.trailing).offset(8)
+            $0.centerY.equalToSuperview()
+            $0.width.equalTo(40)
+            $0.height.equalTo(18)
+        }
+
+        chevronImageView.snp.makeConstraints {
+            $0.trailing.equalToSuperview().offset(-16)
+            $0.centerY.equalToSuperview()
+            $0.size.equalTo(20)
+        }
+
+        button.addTarget(self, action: #selector(aiAdvisorButtonTapped), for: .touchUpInside)
+
         return button
     }()
     
@@ -224,6 +289,11 @@ final class SettingViewController: UIViewController {
         [pillSectionLabel, newPillCycleButton, alarmSectionLabel, timeSettingButton, messageSettingButton].forEach {
             contentView.addSubview($0)
         }
+
+        // Add AI Advisor button (iOS 26+)
+        if #available(iOS 26.0, *) {
+            contentView.addSubview(aiAdvisorButton)
+        }
         
         scrollView.snp.makeConstraints {
             $0.edges.equalTo(view.safeAreaLayoutGuide)
@@ -251,11 +321,24 @@ final class SettingViewController: UIViewController {
             $0.leading.trailing.equalToSuperview().inset(contentInset)
             $0.height.equalTo(60)
         }
-        
-        // Move pill section below alarm section
-        pillSectionLabel.snp.makeConstraints {
-            $0.top.equalTo(messageSettingButton.snp.bottom).offset(32)
-            $0.leading.trailing.equalToSuperview().inset(contentInset)
+
+        // AI Advisor button (iOS 26+)
+        if #available(iOS 26.0, *) {
+            aiAdvisorButton.snp.makeConstraints {
+                $0.top.equalTo(messageSettingButton.snp.bottom).offset(12)
+                $0.leading.trailing.equalToSuperview().inset(contentInset)
+                $0.height.equalTo(60)
+            }
+
+            pillSectionLabel.snp.makeConstraints {
+                $0.top.equalTo(aiAdvisorButton.snp.bottom).offset(32)
+                $0.leading.trailing.equalToSuperview().inset(contentInset)
+            }
+        } else {
+            pillSectionLabel.snp.makeConstraints {
+                $0.top.equalTo(messageSettingButton.snp.bottom).offset(32)
+                $0.leading.trailing.equalToSuperview().inset(contentInset)
+            }
         }
         
         newPillCycleButton.snp.makeConstraints {
@@ -458,11 +541,34 @@ final class SettingViewController: UIViewController {
         let pillSettingVC = PillSettingViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: pillSettingVC)
         navigationController.modalPresentationStyle = .fullScreen
-        
+
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             window.rootViewController = navigationController
             window.makeKeyAndVisible()
         }
+    }
+
+    // MARK: - AI Advisor
+
+    @available(iOS 26.0, *)
+    @objc private func aiAdvisorButtonTapped() {
+        #if canImport(FoundationModels)
+        analytics.logEvent(.custom(name: "ai_advisor_opened", parameters: [:]))
+
+        let advisorView = PillAdvisorView()
+        let hostingController = UIHostingController(rootView: advisorView)
+        hostingController.title = "AI 복용 어드바이저"
+
+        let navController = UINavigationController(rootViewController: hostingController)
+        navController.modalPresentationStyle = .pageSheet
+
+        if let sheet = navController.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+        }
+
+        present(navController, animated: true)
+        #endif
     }
 }
