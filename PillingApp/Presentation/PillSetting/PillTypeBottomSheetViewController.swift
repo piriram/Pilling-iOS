@@ -292,7 +292,6 @@ final class PillTypeBottomSheetViewController: UIViewController {
         confirmButton.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(24)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
-            $0.height.equalTo(56)
         }
         
         pickerContainerView.snp.makeConstraints {
@@ -405,6 +404,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
                         return Observable.just([])
                     }
             }
+            .observe(on: MainScheduler.instance)
             .bind(to: searchResultsRelay)
             .disposed(by: disposeBag)
 
