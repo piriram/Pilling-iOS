@@ -105,51 +105,90 @@ final class MedicationRepository: MedicationRepositoryProtocol {
     }
 
     private func getFallbackData(keyword: String) -> Observable<[MedicationInfo]> {
-        #if canImport(FoundationModels)
-        if #available(iOS 26.0, *) {
-            let normalizedKeyword = keyword.lowercased()
+        let normalizedKeyword = keyword.lowercased()
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "정", with: "")
+
+        let fallbackPills = Self.getHardcodedPills()
+
+        let matchedPills = fallbackPills.filter { pill in
+            let pillName = pill.name.lowercased()
                 .replacingOccurrences(of: " ", with: "")
                 .replacingOccurrences(of: "정", with: "")
-
-            let matchedPills = PillDatabase.pills.filter { pill in
-                let pillName = pill.name.lowercased()
-                    .replacingOccurrences(of: " ", with: "")
-                    .replacingOccurrences(of: "정", with: "")
-                return pillName.contains(normalizedKeyword)
-            }
-
-            let medications = matchedPills.map { pill -> MedicationInfo in
-                let dosageText = PillDatabase.packTypeDescription(pill.packType)
-                return MedicationInfo(
-                    id: pill.name,
-                    name: pill.name,
-                    manufacturer: "하드코딩 데이터",
-                    mainIngredient: pill.progestin + (pill.estrogen.map { ", \($0)" } ?? ""),
-                    materialName: "",
-                    dosageInstructions: dosageText,
-                    packUnit: "",
-                    storageMethod: "",
-                    permitDate: ""
-                )
-            }
-
-            return Observable.just(medications)
+            return pillName.contains(normalizedKeyword)
         }
-        #endif
 
-        return Observable.just([])
+        return Observable.just(matchedPills)
+    }
+
+    private static func getHardcodedPills() -> [MedicationInfo] {
+        return [
+            MedicationInfo(
+                id: "머시론",
+                name: "머시론",
+                manufacturer: "바이엘코리아",
+                mainIngredient: "에티닐에스트라디올, 데소게스트렐",
+                materialName: "",
+                dosageInstructions: "21일 복용 + 7일 휴약",
+                packUnit: "",
+                storageMethod: "",
+                permitDate: ""
+            ),
+            MedicationInfo(
+                id: "야즈",
+                name: "야즈",
+                manufacturer: "바이엘코리아",
+                mainIngredient: "에티닐에스트라디올, 드로스피레논",
+                materialName: "",
+                dosageInstructions: "24일 복용 + 4일 휴약",
+                packUnit: "",
+                storageMethod: "",
+                permitDate: ""
+            ),
+            MedicationInfo(
+                id: "야스민",
+                name: "야스민",
+                manufacturer: "바이엘코리아",
+                mainIngredient: "에티닐에스트라디올, 드로스피레논",
+                materialName: "",
+                dosageInstructions: "21일 복용 + 7일 휴약",
+                packUnit: "",
+                storageMethod: "",
+                permitDate: ""
+            ),
+            MedicationInfo(
+                id: "센스리베",
+                name: "센스리베",
+                manufacturer: "한국오가논",
+                mainIngredient: "에티닐에스트라디올, 드로스피레논",
+                materialName: "",
+                dosageInstructions: "21일 복용 + 7일 휴약",
+                packUnit: "",
+                storageMethod: "",
+                permitDate: ""
+            ),
+            MedicationInfo(
+                id: "마이보라",
+                name: "마이보라",
+                manufacturer: "바이엘코리아",
+                mainIngredient: "에티닐에스트라디올, 레보노르게스트렐",
+                materialName: "",
+                dosageInstructions: "21일 복용 + 7일 휴약",
+                packUnit: "",
+                storageMethod: "",
+                permitDate: ""
+            ),
+            MedicationInfo(
+                id: "멜리안",
+                name: "멜리안",
+                manufacturer: "한국오가논",
+                mainIngredient: "에티닐에스트라디올, 데소게스트렐",
+                materialName: "",
+                dosageInstructions: "21일 복용 + 7일 휴약",
+                packUnit: "",
+                storageMethod: "",
+                permitDate: ""
+            )
+        ]
     }
 }
-
-#if canImport(FoundationModels)
-@available(iOS 26.0, *)
-extension PillDatabase {
-    static func packTypeDescription(_ type: PackType) -> String {
-        switch type {
-        case .standard21: return "21일 복용 + 7일 휴약"
-        case .extended24: return "24일 복용 + 4일 휴약"
-        case .continuous28: return "28일 연속 복용"
-        }
-    }
-}
-#endif

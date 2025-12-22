@@ -1,6 +1,6 @@
 import Foundation
 
-struct MedicationInfo {
+struct MedicationInfo: Codable {
     let id: String
     let name: String
     let manufacturer: String
