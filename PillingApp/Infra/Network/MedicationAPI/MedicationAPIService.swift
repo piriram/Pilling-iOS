@@ -21,20 +21,10 @@ final class MedicationAPIService: MedicationAPIServiceProtocol {
                 return Disposables.create()
             }
 
-            guard var components = URLComponents(string: self.baseURL) else {
-                observer.onError(MedicationAPIError.invalidURL)
-                return Disposables.create()
-            }
+            let encodedKeyword = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? keyword
+            let urlString = "\(self.baseURL)?serviceKey=\(self.apiKey)&item_name=\(encodedKeyword)&type=json&pageNo=1&numOfRows=100"
 
-            components.queryItems = [
-                URLQueryItem(name: "serviceKey", value: self.apiKey),
-                URLQueryItem(name: "item_name", value: keyword),
-                URLQueryItem(name: "type", value: "json"),
-                URLQueryItem(name: "pageNo", value: "1"),
-                URLQueryItem(name: "numOfRows", value: "100")
-            ]
-
-            guard let url = components.url else {
+            guard let url = URL(string: urlString) else {
                 observer.onError(MedicationAPIError.invalidURL)
                 return Disposables.create()
             }
