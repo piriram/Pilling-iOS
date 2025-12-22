@@ -11,6 +11,7 @@ struct MedicationInfo: Codable {
     let storageMethod: String
     let permitDate: String
     let imageURL: String
+    let productType: String
 }
 
 extension MedicationInfo {
@@ -42,5 +43,20 @@ extension MedicationInfo {
             dosageInstructions: dosageInstructions,
             itemSeq: id
         )
+    }
+
+    var dosagePatternText: String {
+        let dosage = DosageParser.parse(dosageText: dosageInstructions)
+        return "\(dosage.takingDays)일 복용 · \(dosage.breakDays)일 휴약"
+    }
+
+    var productTypeDisplay: String {
+        let trimmed = productType.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "" }
+        if let endIndex = trimmed.firstIndex(of: "]") {
+            let startIndex = trimmed.index(after: endIndex)
+            return String(trimmed[startIndex...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return trimmed
     }
 }

@@ -30,6 +30,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
     private let searchResultsRelay = BehaviorRelay<[MedicationInfo]>(value: [])
     private let initialMedicationsRelay = BehaviorRelay<[MedicationInfo]>(value: [])
     private let initialSearchKeywords = ["머시론", "야즈", "야스민"]
+    private let contraceptiveTypeKeyword = "피임제"
     
     // MARK: - UI Components
     
@@ -416,6 +417,10 @@ final class PillTypeBottomSheetViewController: UIViewController {
                         return Observable.just([])
                     }
             }
+            .map { [weak self] results -> [MedicationInfo] in
+                guard let self = self else { return results }
+                return results.filter { $0.productTypeDisplay.contains(self.contraceptiveTypeKeyword) }
+            }
             .observe(on: MainScheduler.instance)
             .bind(to: searchResultsRelay)
             .disposed(by: disposeBag)
@@ -474,7 +479,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
             .map { resultsByKeyword -> [MedicationInfo] in
                 var uniqueById: [String: MedicationInfo] = [:]
                 for medications in resultsByKeyword {
-                    for medication in medications {
+                    for medication in medications where medication.productTypeDisplay.contains(self.contraceptiveTypeKeyword) {
                         let key = medication.id.isEmpty ? medication.name : medication.id
                         if uniqueById[key] == nil {
                             uniqueById[key] = medication

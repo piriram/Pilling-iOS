@@ -133,7 +133,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 packUnit: "",
                 storageMethod: "",
                 permitDate: "",
-                imageURL: ""
+                imageURL: "",
+                productType: "피임제"
             ),
             MedicationInfo(
                 id: "야즈",
@@ -145,7 +146,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 packUnit: "",
                 storageMethod: "",
                 permitDate: "",
-                imageURL: ""
+                imageURL: "",
+                productType: "피임제"
             ),
             MedicationInfo(
                 id: "야스민",
@@ -157,7 +159,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 packUnit: "",
                 storageMethod: "",
                 permitDate: "",
-                imageURL: ""
+                imageURL: "",
+                productType: "피임제"
             ),
             MedicationInfo(
                 id: "센스리베",
@@ -169,7 +172,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 packUnit: "",
                 storageMethod: "",
                 permitDate: "",
-                imageURL: ""
+                imageURL: "",
+                productType: "피임제"
             ),
             MedicationInfo(
                 id: "마이보라",
@@ -181,7 +185,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 packUnit: "",
                 storageMethod: "",
                 permitDate: "",
-                imageURL: ""
+                imageURL: "",
+                productType: "피임제"
             ),
             MedicationInfo(
                 id: "멜리안",
@@ -193,7 +198,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 packUnit: "",
                 storageMethod: "",
                 permitDate: "",
-                imageURL: ""
+                imageURL: "",
+                productType: "피임제"
             )
         ]
     }

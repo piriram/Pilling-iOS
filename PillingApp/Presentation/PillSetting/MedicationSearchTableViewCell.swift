@@ -87,7 +87,13 @@ final class MedicationSearchTableViewCell: UITableViewCell {
 
     func configure(with medication: MedicationInfo) {
         nameLabel.text = medication.name
-        manufacturerLabel.text = medication.manufacturer
+        let typeText = medication.productTypeDisplay
+        let dosageText = medication.dosagePatternText
+        if !typeText.isEmpty {
+            manufacturerLabel.text = "\(dosageText) · \(typeText)"
+        } else {
+            manufacturerLabel.text = dosageText
+        }
         ingredientLabel.text = medication.mainIngredient
         setImage(urlString: medication.imageURL)
     }
