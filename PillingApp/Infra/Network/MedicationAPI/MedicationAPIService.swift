@@ -24,6 +24,9 @@ final class MedicationAPIService: MedicationAPIServiceProtocol {
             let encodedKeyword = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? keyword
             let urlString = "\(self.baseURL)?serviceKey=\(self.apiKey)&item_name=\(encodedKeyword)&type=json&pageNo=1&numOfRows=100"
 
+            print("🔍 [API] Request URL: \(urlString)")
+            print("🔍 [API] API Key length: \(self.apiKey.count)")
+
             guard let url = URL(string: urlString) else {
                 observer.onError(MedicationAPIError.invalidURL)
                 return Disposables.create()
@@ -50,8 +53,15 @@ final class MedicationAPIService: MedicationAPIServiceProtocol {
                     return
                 }
 
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("🔍 [API] Response: \(responseString.prefix(500))")
+                }
+
                 do {
                     let apiResponse = try JSONDecoder().decode(MedicationAPIResponse.self, from: data)
+
+                    print("🔍 [API] Result Code: \(apiResponse.header.resultCode)")
+                    print("🔍 [API] Result Message: \(apiResponse.header.resultMsg)")
 
                     if apiResponse.header.resultCode != "00" {
                         observer.onError(MedicationAPIError.apiError(
