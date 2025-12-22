@@ -1,0 +1,90 @@
+import Foundation
+import RxSwift
+
+protocol MedicationAPIServiceProtocol {
+    func fetchMedications(keyword: String) -> Observable<[MedicationInfo]>
+}
+
+final class MedicationAPIService: MedicationAPIServiceProtocol {
+
+    private let baseURL = "https://apis.data.go.kr/1471000/DrugPrdtPrmsnInfoService07/getDrugPrdtPrmsnInq07"
+    private let apiKey: String
+
+    init(apiKey: String) {
+        self.apiKey = apiKey
+    }
+
+    func fetchMedications(keyword: String) -> Observable<[MedicationInfo]> {
+        return Observable.create { [weak self] observer in
+            guard let self = self else {
+                observer.onError(MedicationAPIError.invalidURL)
+                return Disposables.create()
+            }
+
+            guard var components = URLComponents(string: self.baseURL) else {
+                observer.onError(MedicationAPIError.invalidURL)
+                return Disposables.create()
+            }
+
+            components.queryItems = [
+                URLQueryItem(name: "serviceKey", value: self.apiKey),
+                URLQueryItem(name: "item_name", value: keyword),
+                URLQueryItem(name: "type", value: "json"),
+                URLQueryItem(name: "pageNo", value: "1"),
+                URLQueryItem(name: "numOfRows", value: "100")
+            ]
+
+            guard let url = components.url else {
+                observer.onError(MedicationAPIError.invalidURL)
+                return Disposables.create()
+            }
+
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    observer.onError(MedicationAPIError.networkError(error))
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    observer.onError(MedicationAPIError.invalidResponse)
+                    return
+                }
+
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    observer.onError(MedicationAPIError.httpError(statusCode: httpResponse.statusCode))
+                    return
+                }
+
+                guard let data = data else {
+                    observer.onError(MedicationAPIError.invalidResponse)
+                    return
+                }
+
+                do {
+                    let apiResponse = try JSONDecoder().decode(MedicationAPIResponse.self, from: data)
+
+                    if apiResponse.header.resultCode != "00" {
+                        observer.onError(MedicationAPIError.apiError(
+                            code: apiResponse.header.resultCode,
+                            message: apiResponse.header.resultMsg
+                        ))
+                        return
+                    }
+
+                    let medications = apiResponse.body.items.map { $0.toDomainModel() }
+                    observer.onNext(medications)
+                    observer.onCompleted()
+
+                } catch {
+                    observer.onError(MedicationAPIError.decodingError(error))
+                }
+            }
+
+            task.resume()
+
+            return Disposables.create {
+                task.cancel()
+            }
+        }
+    }
+}

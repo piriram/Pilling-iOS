@@ -1,0 +1,155 @@
+import Foundation
+import RxSwift
+
+final class MedicationRepository: MedicationRepositoryProtocol {
+
+    private let apiService: MedicationAPIServiceProtocol
+    private let cacheKeyPrefix = "medication_cache_"
+    private let timestampKeyPrefix = "medication_timestamp_"
+    private let cacheTTL: TimeInterval = 7 * 24 * 60 * 60
+    private let maxCacheEntries = 10
+    private let isKoreanRegion: Bool
+
+    init(apiService: MedicationAPIServiceProtocol) {
+        self.apiService = apiService
+        self.isKoreanRegion = Locale.current.region?.identifier == "KR"
+    }
+
+    func fetchContraceptivePills() -> Observable<[MedicationInfo]> {
+        return searchMedication(keyword: "경구피임")
+            .map { medications in
+                medications.filter { $0.isContraceptivePill }
+            }
+    }
+
+    func searchMedication(keyword: String) -> Observable<[MedicationInfo]> {
+        let cacheKey = cacheKeyPrefix + keyword
+        let timestampKey = timestampKeyPrefix + keyword
+
+        if let cachedData = loadFromCache(key: cacheKey, timestampKey: timestampKey) {
+            return Observable.just(cachedData)
+        }
+
+        guard isKoreanRegion else {
+            return getFallbackData(keyword: keyword)
+        }
+
+        return apiService.fetchMedications(keyword: keyword)
+            .do(onNext: { [weak self] medications in
+                self?.saveToCache(medications, key: cacheKey, timestampKey: timestampKey)
+            })
+            .catch { [weak self] error in
+                guard let self = self else {
+                    return Observable.error(error)
+                }
+                print("API Error: \(error.localizedDescription). Falling back to local data.")
+                return self.getFallbackData(keyword: keyword)
+            }
+    }
+
+    func refreshCache() -> Observable<Void> {
+        return Observable.create { observer in
+            self.clearAllCache()
+            observer.onNext(())
+            observer.onCompleted()
+            return Disposables.create()
+        }
+    }
+
+    private func loadFromCache(key: String, timestampKey: String) -> [MedicationInfo]? {
+        guard let timestamp = UserDefaults.standard.object(forKey: timestampKey) as? Date,
+              Date().timeIntervalSince(timestamp) < cacheTTL,
+              let data = UserDefaults.standard.data(forKey: key),
+              let medications = try? JSONDecoder().decode([MedicationInfo].self, from: data) else {
+            return nil
+        }
+        return medications
+    }
+
+    private func saveToCache(_ medications: [MedicationInfo], key: String, timestampKey: String) {
+        guard let data = try? JSONEncoder().encode(medications) else { return }
+        UserDefaults.standard.set(data, forKey: key)
+        UserDefaults.standard.set(Date(), forKey: timestampKey)
+        cleanupOldCacheEntries()
+    }
+
+    private func cleanupOldCacheEntries() {
+        let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
+        let timestampKeys = allKeys.filter { $0.hasPrefix(timestampKeyPrefix) }
+
+        var cacheEntries: [(key: String, timestamp: Date)] = []
+        for timestampKey in timestampKeys {
+            if let timestamp = UserDefaults.standard.object(forKey: timestampKey) as? Date {
+                cacheEntries.append((key: timestampKey, timestamp: timestamp))
+            }
+        }
+
+        cacheEntries.sort { $0.timestamp > $1.timestamp }
+
+        if cacheEntries.count > maxCacheEntries {
+            let entriesToRemove = cacheEntries.dropFirst(maxCacheEntries)
+            for entry in entriesToRemove {
+                let cacheKey = entry.key.replacingOccurrences(of: timestampKeyPrefix, with: cacheKeyPrefix)
+                UserDefaults.standard.removeObject(forKey: entry.key)
+                UserDefaults.standard.removeObject(forKey: cacheKey)
+            }
+        }
+    }
+
+    private func clearAllCache() {
+        let allKeys = UserDefaults.standard.dictionaryRepresentation().keys
+        let cacheKeys = allKeys.filter { $0.hasPrefix(cacheKeyPrefix) || $0.hasPrefix(timestampKeyPrefix) }
+        for key in cacheKeys {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
+    private func getFallbackData(keyword: String) -> Observable<[MedicationInfo]> {
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, *) {
+            let normalizedKeyword = keyword.lowercased()
+                .replacingOccurrences(of: " ", with: "")
+                .replacingOccurrences(of: "정", with: "")
+
+            let matchedPills = PillDatabase.pills.filter { pill in
+                let pillName = pill.name.lowercased()
+                    .replacingOccurrences(of: " ", with: "")
+                    .replacingOccurrences(of: "정", with: "")
+                return pillName.contains(normalizedKeyword)
+            }
+
+            let medications = matchedPills.map { pill -> MedicationInfo in
+                let dosageText = PillDatabase.packTypeDescription(pill.packType)
+                return MedicationInfo(
+                    id: pill.name,
+                    name: pill.name,
+                    manufacturer: "하드코딩 데이터",
+                    mainIngredient: pill.progestin + (pill.estrogen.map { ", \($0)" } ?? ""),
+                    materialName: "",
+                    dosageInstructions: dosageText,
+                    packUnit: "",
+                    storageMethod: "",
+                    permitDate: ""
+                )
+            }
+
+            return Observable.just(medications)
+        }
+        #endif
+
+        return Observable.just([])
+    }
+}
+
+#if canImport(FoundationModels)
+@available(iOS 26.0, *)
+extension PillDatabase {
+    static func packTypeDescription(_ type: PackType) -> String {
+        switch type {
+        case .standard21: return "21일 복용 + 7일 휴약"
+        case .extended24: return "24일 복용 + 4일 휴약"
+        case .continuous28: return "28일 연속 복용"
+        }
+    }
+}
+#endif
