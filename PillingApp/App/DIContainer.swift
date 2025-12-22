@@ -65,6 +65,12 @@ final class DIContainer {
         return CycleHistoryRepository(context: coreDataManager.viewContext)
     }()
 
+    private lazy var medicationRepository: MedicationRepositoryProtocol = {
+        let apiKey = Bundle.main.object(forInfoDictionaryKey: "MFDS_API_KEY") as? String ?? ""
+        let apiService = MedicationAPIService(apiKey: apiKey)
+        return MedicationRepository(apiService: apiService)
+    }()
+
     // MARK: - UseCases
     
     func makeFetchDashboardDataUseCase() -> FetchDashboardDataUseCaseProtocol {
@@ -177,6 +183,10 @@ final class DIContainer {
     
     func getUserDefaultsManager() -> UserDefaultsManagerProtocol {
         return userDefaultsManager
+    }
+
+    func getMedicationRepository() -> MedicationRepositoryProtocol {
+        return medicationRepository
     }
 
     func getAnalyticsService() -> AnalyticsServiceProtocol {

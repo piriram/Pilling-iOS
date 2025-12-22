@@ -9,22 +9,25 @@ import IQKeyboardManagerSwift
 final class PillTypeBottomSheetViewController: UIViewController {
     
     // MARK: - Properties
-    
+
     private let disposeBag = DisposeBag()
     private let selectedPillInfo = PublishSubject<PillInfo>()
     private typealias str = AppStrings.PillSetting
     var pillInfoSelected: Observable<PillInfo> {
         return selectedPillInfo.asObservable()
     }
-    
+
     private let takingDaysOptions = Array(1...31)
     private let breakDaysOptions = Array(0...14)
-    
+
     private var selectedTakingDays = 24
     private var selectedBreakDays = 4
-    
+
     private let selectedTakingDaysRelay = BehaviorRelay<Int>(value: 24)
     private let selectedBreakDaysRelay = BehaviorRelay<Int>(value: 4)
+
+    private let medicationRepository: MedicationRepositoryProtocol
+    private let searchResultsRelay = BehaviorRelay<[MedicationInfo]>(value: [])
     
     // MARK: - UI Components
     
@@ -142,7 +145,20 @@ final class PillTypeBottomSheetViewController: UIViewController {
     }()
     
     private let confirmButton = PrimaryActionButton()
-    
+
+    private let searchResultsTableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = .white
+        tableView.layer.cornerRadius = 12
+        tableView.layer.borderWidth = 1
+        tableView.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
+        tableView.isHidden = true
+        tableView.register(MedicationSearchTableViewCell.self, forCellReuseIdentifier: MedicationSearchTableViewCell.identifier)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 80
+        return tableView
+    }()
+
     private var containerViewBottomConstraint: Constraint?
     private var currentPickerType: PickerType = .takingDays
     
@@ -152,8 +168,9 @@ final class PillTypeBottomSheetViewController: UIViewController {
     }
     
     // MARK: - Initialization
-    
-    init() {
+
+    init(medicationRepository: MedicationRepositoryProtocol = DIContainer.shared.getMedicationRepository()) {
+        self.medicationRepository = medicationRepository
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
         modalTransitionStyle = .crossDissolve
@@ -197,11 +214,12 @@ final class PillTypeBottomSheetViewController: UIViewController {
         containerView.addSubview(breakDaysButton)
         containerView.addSubview(warningLabel)
         containerView.addSubview(confirmButton)
+        containerView.addSubview(searchResultsTableView)
         confirmButton.setTitle(str.settingComplete, for: .normal)
-        
+
         selectedTakingDaysRelay.accept(selectedTakingDays)
         selectedBreakDaysRelay.accept(selectedBreakDays)
-        
+
         view.addSubview(pickerContainerView)
         pickerContainerView.addSubview(pickerToolbar)
         pickerContainerView.addSubview(pickerView)
@@ -235,7 +253,13 @@ final class PillTypeBottomSheetViewController: UIViewController {
             $0.leading.trailing.equalToSuperview().inset(24)
             $0.height.equalTo(52)
         }
-        
+
+        searchResultsTableView.snp.makeConstraints {
+            $0.top.equalTo(pillNameTextField.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.height.equalTo(0)
+        }
+
         takingDaysLabel.snp.makeConstraints {
             $0.top.equalTo(pillNameTextField.snp.bottom).offset(24)
             $0.leading.equalToSuperview().offset(24)
@@ -362,10 +386,67 @@ final class PillTypeBottomSheetViewController: UIViewController {
             }
             .subscribe(onNext: { [weak self] pillInfo in
                 guard let self = self else { return }
-                // Emit selected pill info
                 self.selectedPillInfo.onNext(pillInfo)
-                // Only dismiss the bottom sheet; do not navigate
                 self.dismissBottomSheet()
+            })
+            .disposed(by: disposeBag)
+
+        pillNameTextField.rx.text
+            .orEmpty
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .flatMapLatest { [weak self] keyword -> Observable<[MedicationInfo]> in
+                guard let self = self, !keyword.isEmpty, keyword.count >= 2 else {
+                    return Observable.just([])
+                }
+                return self.medicationRepository.searchMedication(keyword: keyword)
+                    .catch { error in
+                        print("검색 에러: \(error.localizedDescription)")
+                        return Observable.just([])
+                    }
+            }
+            .bind(to: searchResultsRelay)
+            .disposed(by: disposeBag)
+
+        searchResultsRelay
+            .subscribe(onNext: { [weak self] results in
+                guard let self = self else { return }
+                let hasResults = !results.isEmpty
+                self.searchResultsTableView.isHidden = !hasResults
+                self.searchResultsTableView.snp.updateConstraints {
+                    $0.height.equalTo(hasResults ? min(CGFloat(results.count) * 80, 240) : 0)
+                }
+                UIView.animate(withDuration: 0.2) {
+                    self.view.layoutIfNeeded()
+                }
+            })
+            .disposed(by: disposeBag)
+
+        searchResultsRelay
+            .bind(to: searchResultsTableView.rx.items(
+                cellIdentifier: MedicationSearchTableViewCell.identifier,
+                cellType: MedicationSearchTableViewCell.self
+            )) { index, medication, cell in
+                cell.configure(with: medication)
+            }
+            .disposed(by: disposeBag)
+
+        searchResultsTableView.rx.modelSelected(MedicationInfo.self)
+            .subscribe(onNext: { [weak self] medication in
+                guard let self = self else { return }
+                let pillInfo = medication.toPillInfo()
+                self.pillNameTextField.text = pillInfo.name
+                self.selectedTakingDays = pillInfo.takingDays
+                self.selectedBreakDays = pillInfo.breakDays
+                self.selectedTakingDaysRelay.accept(pillInfo.takingDays)
+                self.selectedBreakDaysRelay.accept(pillInfo.breakDays)
+                self.takingDaysButton.setTitle(AppStrings.PillSetting.daysFormat(pillInfo.takingDays), for: .normal)
+                self.breakDaysButton.setTitle(AppStrings.PillSetting.daysFormat(pillInfo.breakDays), for: .normal)
+                self.searchResultsTableView.isHidden = true
+                self.searchResultsTableView.snp.updateConstraints {
+                    $0.height.equalTo(0)
+                }
+                self.view.endEditing(true)
             })
             .disposed(by: disposeBag)
     }
