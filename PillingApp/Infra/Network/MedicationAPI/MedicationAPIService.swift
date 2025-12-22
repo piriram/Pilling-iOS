@@ -21,16 +21,39 @@ final class MedicationAPIService: MedicationAPIServiceProtocol {
                 return Disposables.create()
             }
 
+            let normalizedApiKey = (self.apiKey.removingPercentEncoding ?? self.apiKey)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !normalizedApiKey.isEmpty else {
+                observer.onError(MedicationAPIError.apiError(code: "NO_API_KEY", message: "서비스 키가 비어있습니다"))
+                return Disposables.create()
+            }
+
+            let serviceKey: String
+            if self.apiKey.contains("%") {
+                serviceKey = self.apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            } else {
+                var allowed = CharacterSet.urlQueryAllowed
+                allowed.remove(charactersIn: "+=")
+                serviceKey = normalizedApiKey.addingPercentEncoding(withAllowedCharacters: allowed) ?? normalizedApiKey
+            }
+
             let encodedKeyword = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? keyword
-            let urlString = "\(self.baseURL)?serviceKey=\(self.apiKey)&item_name=\(encodedKeyword)&type=json&pageNo=1&numOfRows=100"
+            var components = URLComponents(string: self.baseURL)
+            components?.percentEncodedQueryItems = [
+                URLQueryItem(name: "serviceKey", value: serviceKey),
+                URLQueryItem(name: "item_name", value: encodedKeyword),
+                URLQueryItem(name: "type", value: "json"),
+                URLQueryItem(name: "pageNo", value: "1"),
+                URLQueryItem(name: "numOfRows", value: "100"),
+            ]
 
-            print("🔍 [API] Request URL: \(urlString)")
-            print("🔍 [API] API Key length: \(self.apiKey.count)")
-
-            guard let url = URL(string: urlString) else {
+            guard let url = components?.url else {
                 observer.onError(MedicationAPIError.invalidURL)
                 return Disposables.create()
             }
+
+            print("🔍 [API] Request URL: \(url.absoluteString)")
+            print("🔍 [API] API Key length: \(normalizedApiKey.count)")
 
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 if let error = error {
@@ -54,7 +77,7 @@ final class MedicationAPIService: MedicationAPIServiceProtocol {
                 }
 
                 if let responseString = String(data: data, encoding: .utf8) {
-                    print("🔍 [API] Response: \(responseString.prefix(500))")
+                    print("🔍 [API] Full Response: \(responseString)")
                 }
 
                 do {

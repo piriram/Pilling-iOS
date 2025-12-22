@@ -28,6 +28,8 @@ final class PillTypeBottomSheetViewController: UIViewController {
 
     private let medicationRepository: MedicationRepositoryProtocol
     private let searchResultsRelay = BehaviorRelay<[MedicationInfo]>(value: [])
+    private let initialMedicationsRelay = BehaviorRelay<[MedicationInfo]>(value: [])
+    private let initialSearchKeywords = ["머시론", "야즈", "야스민"]
     
     // MARK: - UI Components
     
@@ -190,6 +192,7 @@ final class PillTypeBottomSheetViewController: UIViewController {
         setupPickerView()
         bind()
         setupGestures()
+        fetchInitialMedications()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -395,10 +398,19 @@ final class PillTypeBottomSheetViewController: UIViewController {
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
             .distinctUntilChanged()
             .flatMapLatest { [weak self] keyword -> Observable<[MedicationInfo]> in
-                guard let self = self, !keyword.isEmpty, keyword.count >= 2 else {
+                guard let self = self else {
                     return Observable.just([])
                 }
-                return self.medicationRepository.searchMedication(keyword: keyword)
+
+                let trimmedKeyword = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmedKeyword.isEmpty {
+                    return self.initialMedicationsRelay.asObservable()
+                }
+
+                guard trimmedKeyword.count >= 2 else {
+                    return Observable.just([])
+                }
+                return self.medicationRepository.searchMedication(keyword: trimmedKeyword)
                     .catch { error in
                         print("검색 에러: \(error.localizedDescription)")
                         return Observable.just([])
@@ -447,6 +459,40 @@ final class PillTypeBottomSheetViewController: UIViewController {
                     $0.height.equalTo(0)
                 }
                 self.view.endEditing(true)
+            })
+            .disposed(by: disposeBag)
+    }
+
+    private func fetchInitialMedications() {
+        Observable.from(initialSearchKeywords)
+            .concatMap { [weak self] keyword -> Observable<[MedicationInfo]> in
+                guard let self = self else { return Observable.just([]) }
+                return self.medicationRepository.searchMedication(keyword: keyword)
+                    .catch { _ in Observable.just([]) }
+            }
+            .toArray()
+            .map { resultsByKeyword -> [MedicationInfo] in
+                var uniqueById: [String: MedicationInfo] = [:]
+                for medications in resultsByKeyword {
+                    for medication in medications {
+                        let key = medication.id.isEmpty ? medication.name : medication.id
+                        if uniqueById[key] == nil {
+                            uniqueById[key] = medication
+                        }
+                    }
+                }
+                return Array(uniqueById.values).sorted { $0.name < $1.name }
+            }
+            .asObservable()
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] results in
+                guard let self = self else { return }
+                self.initialMedicationsRelay.accept(results)
+                if self.pillNameTextField.text?.isEmpty ?? true {
+                    self.searchResultsRelay.accept(results)
+                }
+            }, onError: { error in
+                print("초기 목록 에러: \(error.localizedDescription)")
             })
             .disposed(by: disposeBag)
     }

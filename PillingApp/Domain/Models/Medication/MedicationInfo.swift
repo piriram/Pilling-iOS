@@ -10,6 +10,7 @@ struct MedicationInfo: Codable {
     let packUnit: String
     let storageMethod: String
     let permitDate: String
+    let imageURL: String
 }
 
 extension MedicationInfo {

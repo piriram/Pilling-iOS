@@ -9,6 +9,8 @@ final class PillSettingViewController: UIViewController {
     private typealias str = AppStrings.PillSetting
     private let viewModel: PillSettingViewModel
     private let disposeBag = DisposeBag()
+    private let medicationRepository: MedicationRepositoryProtocol
+    private let prefetchKeywords = ["머시론", "야즈", "야스민"]
     
     // MARK: - UI Components
     
@@ -58,8 +60,9 @@ final class PillSettingViewController: UIViewController {
     
     // MARK: - Initialization
     
-    init(viewModel: PillSettingViewModel) {
+    init(viewModel: PillSettingViewModel, medicationRepository: MedicationRepositoryProtocol = DIContainer.shared.getMedicationRepository()) {
         self.viewModel = viewModel
+        self.medicationRepository = medicationRepository
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -73,6 +76,7 @@ final class PillSettingViewController: UIViewController {
         setupConstraints()
         configureNavigationBar()
         bind()
+        prefetchMedicationList()
     }
     
     // MARK: - Setup
@@ -189,6 +193,17 @@ final class PillSettingViewController: UIViewController {
             .emit(onNext: { [weak self] message in
                 self?.presentNotification(message: message)
             })
+            .disposed(by: disposeBag)
+    }
+
+    private func prefetchMedicationList() {
+        Observable.from(prefetchKeywords)
+            .concatMap { [weak self] keyword -> Observable<[MedicationInfo]> in
+                guard let self = self else { return Observable.just([]) }
+                return self.medicationRepository.searchMedication(keyword: keyword)
+                    .catch { _ in Observable.just([]) }
+            }
+            .subscribe(onNext: { _ in })
             .disposed(by: disposeBag)
     }
     

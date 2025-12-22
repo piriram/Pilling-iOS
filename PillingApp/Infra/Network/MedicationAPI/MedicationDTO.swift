@@ -27,6 +27,7 @@ struct MedicationItem: Codable {
     let packUnit: String?
     let storageMethod: String?
     let itemPermitDate: String?
+    let bigPrdtImgUrl: String?
 
     enum CodingKeys: String, CodingKey {
         case itemSeq = "ITEM_SEQ"
@@ -38,6 +39,7 @@ struct MedicationItem: Codable {
         case packUnit = "PACK_UNIT"
         case storageMethod = "STORAGE_METHOD"
         case itemPermitDate = "ITEM_PERMIT_DATE"
+        case bigPrdtImgUrl = "BIG_PRDT_IMG_URL"
     }
 }
 
@@ -52,7 +54,8 @@ extension MedicationItem {
             dosageInstructions: udDocData ?? "",
             packUnit: packUnit ?? "",
             storageMethod: storageMethod ?? "",
-            permitDate: itemPermitDate ?? ""
+            permitDate: itemPermitDate ?? "",
+            imageURL: bigPrdtImgUrl ?? ""
         )
     }
 }

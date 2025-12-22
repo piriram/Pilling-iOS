@@ -132,7 +132,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 dosageInstructions: "21일 복용 + 7일 휴약",
                 packUnit: "",
                 storageMethod: "",
-                permitDate: ""
+                permitDate: "",
+                imageURL: ""
             ),
             MedicationInfo(
                 id: "야즈",
@@ -143,7 +144,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 dosageInstructions: "24일 복용 + 4일 휴약",
                 packUnit: "",
                 storageMethod: "",
-                permitDate: ""
+                permitDate: "",
+                imageURL: ""
             ),
             MedicationInfo(
                 id: "야스민",
@@ -154,7 +156,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 dosageInstructions: "21일 복용 + 7일 휴약",
                 packUnit: "",
                 storageMethod: "",
-                permitDate: ""
+                permitDate: "",
+                imageURL: ""
             ),
             MedicationInfo(
                 id: "센스리베",
@@ -165,7 +168,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 dosageInstructions: "21일 복용 + 7일 휴약",
                 packUnit: "",
                 storageMethod: "",
-                permitDate: ""
+                permitDate: "",
+                imageURL: ""
             ),
             MedicationInfo(
                 id: "마이보라",
@@ -176,7 +180,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 dosageInstructions: "21일 복용 + 7일 휴약",
                 packUnit: "",
                 storageMethod: "",
-                permitDate: ""
+                permitDate: "",
+                imageURL: ""
             ),
             MedicationInfo(
                 id: "멜리안",
@@ -187,7 +192,8 @@ final class MedicationRepository: MedicationRepositoryProtocol {
                 dosageInstructions: "21일 복용 + 7일 휴약",
                 packUnit: "",
                 storageMethod: "",
-                permitDate: ""
+                permitDate: "",
+                imageURL: ""
             )
         ]
     }
